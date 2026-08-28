@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Origination">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Origination</title>
+<style>
+:root{
+  --bg:#faf9f7; --fg:#1a1a1a; --card:#fff; --bd:#e6e2dc; --mut:#8b8578;
+  --dim:#b3ada2; --acc:#1f3864; --acc-fg:#fff; --hair:#f2efe9;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#16151a; --fg:#e8e6e3; --card:#1f1e24; --bd:#33313a; --mut:#8f8a83;
+  --dim:#6b665f; --acc:#4a6da8; --acc-fg:#fff; --hair:#26252c;
+}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0 auto;max-width:880px;padding:0 13px calc(40px + env(safe-area-inset-bottom));
+  background:var(--bg);color:var(--fg);
+  font:15px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+h1{font-size:17px;margin:16px 0 1px;letter-spacing:-.2px}
+.sub{color:var(--mut);font-size:11.5px}
+.kpi{display:flex;gap:6px;margin:12px 0 4px}
+.kpi div{flex:1;background:var(--card);border:1px solid var(--bd);border-radius:9px;
+  padding:8px 4px;text-align:center}
+.kpi b{display:block;font-size:17px;line-height:1.25;font-variant-numeric:tabular-nums}
+.kpi i{font-style:normal;font-size:9.5px;color:var(--mut)}
+.stick{position:sticky;top:0;z-index:30;background:var(--bg);
+  padding:9px 0 7px;border-bottom:1px solid var(--bd)}
+.tabs{display:flex;gap:4px;margin-bottom:8px}
+.tb{flex:1;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--card);
+  color:var(--mut);font-size:12.5px;text-align:center;cursor:pointer;font-weight:500}
+.tb.on{background:var(--acc);color:var(--acc-fg);border-color:var(--acc)}
+#q{width:100%;padding:9px 11px;border:1px solid var(--bd);border-radius:8px;
+  background:var(--card);color:var(--fg);font:13px inherit;margin-bottom:7px}
+.chips{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;padding:5px 11px;border:1px solid var(--bd);border-radius:13px;
+  background:var(--card);color:var(--mut);font-size:11px;cursor:pointer;white-space:nowrap}
+.chip.on{background:var(--acc);color:var(--acc-fg);border-color:var(--acc)}
+.cnt{font-size:11px;color:var(--mut);margin:11px 0 7px}
+.row{background:var(--card);border:1px solid var(--bd);border-radius:10px;margin-bottom:6px}
+.row>summary{padding:10px 11px;cursor:pointer;display:flex;gap:7px;align-items:center;
+  list-style:none;flex-wrap:wrap}
+.row>summary::-webkit-details-marker{display:none}
+.row>summary::before{content:'\25b8';color:var(--dim);font-size:11px}
+.row[open]>summary::before{content:'\25be'}
+.nm{font-weight:600;font-size:13.5px}
+.cd{color:var(--dim);font-size:10.5px;font-variant-numeric:tabular-nums}
+.spk{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--acc);
+  letter-spacing:-1px;font-size:13px}
+.sz{color:var(--mut);font-size:10.5px;margin-left:auto;font-variant-numeric:tabular-nums}
+.st{font-size:9.5px;padding:2px 7px;border-radius:9px;font-weight:600}
+.st-new{background:#dbeafe;color:#1e40af}.st-watch{background:#fef3c7;color:#92400e}
+.st-seen{background:#eeece8;color:#7a746a}.st-drop{background:#f4f2ef;color:#b3ada2}
+@media(prefers-color-scheme:dark){
+.st-new{background:#1e3a6b;color:#bfd4ff}.st-watch{background:#4a3a12;color:#f0d089}
+.st-seen{background:#2e2c33;color:#a8a29a}.st-drop{background:#26252c;color:#6b665f}}
+.evn{background:#eef2ff;color:#3730a3;font-size:9.5px;padding:2px 7px;border-radius:9px}
+@media(prefers-color-scheme:dark){.evn{background:#1e3a6b;color:#bfd4ff}}
+.bd{padding:0 11px 11px;border-top:1px solid var(--hair)}
+.tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:10px}
+.tag{font-size:9.5px;padding:2px 7px;border-radius:9px;background:#fdecec;color:#9b2c2c}
+@media(prefers-color-scheme:dark){.tag{background:#3a2020;color:#e89a9a}}
+.lbl{font-size:10.5px;color:var(--mut);font-weight:600;margin:13px 0 5px}
+.lbl em{font-style:normal;color:var(--dim);font-weight:400}
+.wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:10.5px;min-width:420px;
+  font-variant-numeric:tabular-nums}
+th,td{padding:3px 6px;border-bottom:1px solid var(--hair);text-align:right;white-space:nowrap}
+thead th{color:var(--dim);font-weight:600;background:var(--bg);position:sticky;top:0}
+tbody th{text-align:left;color:var(--mut);font-weight:500}
+.ev{display:flex;gap:6px;align-items:baseline;font-size:11px;padding:4px 0;
+  border-bottom:1px solid var(--hair);flex-wrap:wrap}
+.evd{color:var(--dim);font-family:ui-monospace,monospace;font-size:10px}
+.cat{font-size:9px;padding:1px 6px;border-radius:4px;background:#e0e7ff;color:#3730a3}
+@media(prefers-color-scheme:dark){.cat{background:#1e3a6b;color:#bfd4ff}}
+.ev a{color:var(--acc);text-decoration:none}
+.vs{margin-top:5px}
+.vs b{font-size:10.5px;display:block;margin:8px 0 3px;color:var(--mut)}
+.vi{font-size:11px;padding:2px 0;color:var(--fg);display:flex;gap:6px}
+.vi span{color:var(--dim);font-family:ui-monospace,monospace;font-size:9.5px;flex:0 0 auto}
+.ovr{font-size:10.5px;color:var(--mut);display:flex;gap:9px;flex-wrap:wrap;margin-bottom:4px}
+.acts{display:flex;gap:5px;flex-wrap:wrap;margin-top:12px;padding-top:10px;
+  border-top:1px solid var(--hair)}
+.ab{font-size:11px;padding:6px 11px;border-radius:7px;border:1px solid var(--bd);
+  background:var(--card);color:var(--mut);cursor:pointer;font-family:inherit}
+.ab.on{background:var(--acc);color:var(--acc-fg);border-color:var(--acc)}
+.memo{width:100%;margin-top:7px;padding:7px 9px;border:1px solid var(--bd);border-radius:7px;
+  background:var(--bg);color:var(--fg);font:11.5px inherit;min-height:40px;resize:vertical}
+.empty{font-size:11.5px;color:var(--dim);padding:18px 0;text-align:center}
+.more{width:100%;padding:11px;margin:8px 0 0;border:1px dashed var(--bd);border-radius:9px;
+  background:none;color:var(--mut);font:12px inherit;cursor:pointer}
+.ft{color:var(--dim);font-size:10px;margin-top:22px;padding-top:11px;
+  border-top:1px solid var(--bd);line-height:1.7}
+.load{text-align:center;padding:60px 0;color:var(--mut);font-size:12.5px}
+</style>
+</head>
+<body>
+
+<h1>Origination</h1>
+<div class="sub" id="hd">불러오는 중…</div>
+
+<div class="kpi" id="kpi"></div>
+
+<div class="stick">
+  <div class="tabs">
+    <div class="tb on" data-t="scan">스캔</div>
+    <div class="tb" data-t="watch">관심</div>
+  </div>
+  <input id="q" placeholder="회사명 · 종목코드" autocomplete="off">
+  <div class="chips" id="sorts"></div>
+  <div class="chips" id="filts" style="margin-top:5px"></div>
+</div>
+
+<div class="cnt" id="cnt"></div>
+<div id="list"><div class="load">데이터를 받는 중…</div></div>
+<button class="more" id="more" style="display:none">더 보기</button>
+
+<div class="ft" id="ft"></div>
+
+<script>
+'use strict';
+const BUILD = '20260828_0932';
+const PAGE = 80;
+const SKEY = 'orig_state_v1';
+
+let DATA = null, STATE = {}, TAB = 'scan', SORT = 'ev', FILT = 'all', shown = 0, view = [];
+
+// ── 상태 (지금은 기기별. Firestore 동기화는 v2) ──
+try { STATE = JSON.parse(localStorage.getItem(SKEY) || '{}'); } catch (e) { STATE = {}; }
+function saveState() {
+  try { localStorage.setItem(SKEY, JSON.stringify(STATE)); } catch (e) {}
+}
+const stOf = c => (STATE[c] && STATE[c].st) || 'new';
+const SLBL = { new: '신규', watch: '관심', seen: '검토', drop: '제외' };
+
+// ── 포맷 ──
+const F = {
+  eok: v => v == null ? '' : v.toLocaleString('ko-KR', { maximumFractionDigits: 0 }),
+  pct: v => v == null ? '' : (v * 100).toFixed(1) + '%',
+  x:   v => v == null ? '' : v.toFixed(1) + 'x',
+  d:   v => v == null ? '' : v.toLocaleString('ko-KR') + 'd',
+};
+const esc = s => String(s == null ? '' : s)
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+function spark(vals) {
+  const v = vals.filter(x => x != null);
+  if (v.length < 2) return '';
+  const lo = Math.min(...v), hi = Math.max(...v), r = (hi - lo) || 1;
+  const b = '▁▂▃▄▅▆▇';
+  return vals.map(x => x == null ? '·' : b[Math.min(Math.floor((x - lo) / r * 6), 6)]).join('');
+}
+
+// ── 정렬·필터 ──
+const SORTS = [
+  ['ev', '공시 많은순', (a, b) => b.nev - a.nev || a.n.localeCompare(b.n)],
+  ['debt', '차입금 증가', (a, b) => (b.dg == null ? -9 : b.dg) - (a.dg == null ? -9 : a.dg)],
+  ['fcf', 'FCF 낮은순', (a, b) => (a.fc == null ? 9e15 : a.fc) - (b.fc == null ? 9e15 : b.fc)],
+  ['margin', '마진 악화', (a, b) => (a.mg == null ? 9 : a.mg) - (b.mg == null ? 9 : b.mg)],
+  ['rev', '매출 역성장', (a, b) => (a.rg == null ? 9 : a.rg) - (b.rg == null ? 9 : b.rg)],
+  ['score', '스코어', (a, b) => b.sc - a.sc],
+];
+const FILTS = [
+  ['all', '전체'], ['new', '미검토'], ['watch', '관심'],
+  ['seen', '검토'], ['nodrop', '제외 숨김'],
+];
+
+function rebuild() {
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  let rows = DATA.companies;
+  if (TAB === 'watch') rows = rows.filter(r => stOf(r.c) === 'watch');
+  else if (FILT === 'nodrop') rows = rows.filter(r => stOf(r.c) !== 'drop');
+  else if (FILT !== 'all') rows = rows.filter(r => stOf(r.c) === FILT);
+  if (q) rows = rows.filter(r => r.n.toLowerCase().includes(q) || (r.s || '').includes(q));
+  const cmp = SORTS.find(s => s[0] === SORT)[2];
+  view = rows.slice().sort(cmp);
+  shown = 0;
+  document.getElementById('list').innerHTML = '';
+  document.getElementById('cnt').textContent =
+    view.length.toLocaleString() + '사' + (q ? ' · "' + q + '"' : '');
+  page();
+}
+
+function page() {
+  const list = document.getElementById('list');
+  const frag = document.createDocumentFragment();
+  const end = Math.min(shown + PAGE, view.length);
+  for (let i = shown; i < end; i++) frag.appendChild(rowEl(view[i]));
+  list.appendChild(frag);
+  shown = end;
+  const m = document.getElementById('more');
+  if (shown < view.length) {
+    m.style.display = '';
+    m.textContent = '더 보기 (' + (view.length - shown).toLocaleString() + '사 남음)';
+  } else {
+    m.style.display = 'none';
+  }
+  if (!view.length) list.innerHTML = '<div class="empty">해당하는 회사가 없습니다</div>';
+}
+
+function rowEl(r) {
+  const d = document.createElement('details');
+  d.className = 'row';
+  const st = stOf(r.c);
+  const rev = r.y.map(y => (r.A[y] || {}).revenue);
+  d.innerHTML =
+    '<summary>' +
+      '<span class="nm">' + esc(r.n) + '</span>' +
+      (r.s ? '<span class="cd">' + r.s + '</span>' : '') +
+      '<span class="spk">' + spark(rev) + '</span>' +
+      '<span class="st st-' + st + '">' + SLBL[st] + '</span>' +
+      (r.nev ? '<span class="evn">공시 ' + r.nev + '</span>' : '') +
+      (r.as ? '<span class="sz">' + r.as.toLocaleString() + '억</span>' : '') +
+    '</summary>';
+  d.addEventListener('toggle', function () {
+    if (d.open && !d.dataset.built) { d.insertAdjacentHTML('beforeend', body(r)); d.dataset.built = '1'; }
+  }, { once: false });
+  return d;
+}
+
+function table(periods, src, lab) {
+  if (!periods.length) return '';
+  let h = '<div class="wrap"><table><thead><tr><th></th>';
+  h += periods.map(p => '<th>' + lab(p) + '</th>').join('') + '</tr></thead><tbody>';
+  for (const k of DATA.keys) {
+    const cells = periods.map(p => (src[p] || {})[k.k]);
+    if (cells.every(v => v == null)) continue;
+    h += '<tr><th>' + esc(k.l) + '</th>' +
+         cells.map(v => '<td>' + (v == null ? '<span style="color:var(--dim)">·</span>' : F[k.f](v)) + '</td>').join('') +
+         '</tr>';
+  }
+  return h + '</tbody></table></div>';
+}
+
+function body(r) {
+  const st = stOf(r.c);
+  let h = '<div class="bd">';
+  if (r.tg.length) h += '<div class="tags">' + r.tg.map(t => '<span class="tag">' + esc(t) + '</span>').join('') + '</div>';
+
+  h += '<div class="lbl">연간 <em>' + r.y[0] + '-' + r.y[r.y.length - 1] + '</em></div>';
+  h += table(r.y, r.A, p => p.slice(2));
+
+  if (r.q.length) {
+    h += '<div class="lbl">분기 <em>최근 ' + r.q.length + '개</em></div>';
+    h += table(r.q, r.Q, p => p.slice(2, 4) + '.' + p.slice(4));
+  }
+
+  h += '<div class="lbl">자본활동 공시</div>';
+  if (r.ev.length) {
+    h += r.ev.map(e => '<div class="ev"><span class="evd">' +
+      e[0].slice(2, 4) + '.' + e[0].slice(4, 6) + '.' + e[0].slice(6, 8) + '</span>' +
+      '<span class="cat">' + esc(e[1]) + '</span>' +
+      '<a href="https://dart.fss.or.kr/dsaf001/main.do?rcpNo=' + e[3] + '" target="_blank" rel="noopener">' +
+      esc(e[2]) + '</a>' + (e[4] ? '<span style="color:#9b2c2c;font-size:9px">정정</span>' : '') +
+      '</div>').join('');
+  } else {
+    h += '<div class="empty" style="padding:6px 0;text-align:left">전량 수집 전 구간 — 비어 있을 수 있음</div>';
+  }
+
+  const vb = r.s && DATA.vault[r.s];
+  if (vb) {
+    h += '<div class="lbl">vault <em>' + esc(vb.note) + ' · 링크 ' + vb.tot + '건 · ' + BUILD.slice(0, 8) + ' 스냅샷</em></div>';
+    h += '<div class="vs">';
+    const ovk = { parent_group: '그룹', sector: '섹터', sub_industry: '세부', status: '상태', my_role: 'role' };
+    const ov = Object.keys(ovk).filter(k => vb.ov[k]);
+    if (ov.length) h += '<div class="ovr">' + ov.map(k => '<span>' + ovk[k] + ' <b style="display:inline;color:var(--fg);font-weight:500">' + esc(vb.ov[k]) + '</b></span>').join('') + '</div>';
+    for (const s of vb.sec) {
+      h += '<b>' + esc(s.l) + ' <span style="color:var(--dim);font-weight:400">' + s.n + '</span></b>';
+      h += s.i.map(x => '<div class="vi">' + (x.d ? '<span>' + x.d.slice(2) + '</span>' : '<span>·</span>') + esc(x.t) + '</div>').join('');
+    }
+    h += '</div>';
+  }
+
+  h += '<div class="acts">' +
+    ['watch', 'seen', 'drop'].map(k =>
+      '<button class="ab' + (st === k ? ' on' : '') + '" data-c="' + r.c + '" data-st="' + k + '">' + SLBL[k] + '</button>').join('') +
+    '<a class="ab" href="https://dart.fss.or.kr/dsab007/main.do?textCrpNm=' + encodeURIComponent(r.n) + '" target="_blank" rel="noopener">DART →</a>' +
+    '</div>' +
+    '<textarea class="memo" data-memo="' + r.c + '" placeholder="메모">' + esc((STATE[r.c] || {}).memo || '') + '</textarea>';
+  return h + '</div>';
+}
+
+// ── 이벤트 (위임) ──
+document.addEventListener('click', e => {
+  const b = e.target.closest('.ab[data-st]');
+  if (b) {
+    const c = b.dataset.c, k = b.dataset.st;
+    STATE[c] = STATE[c] || {};
+    STATE[c].st = (STATE[c].st === k) ? 'new' : k;
+    saveState();
+    const box = b.closest('details');
+    box.querySelectorAll('.ab[data-st]').forEach(x =>
+      x.classList.toggle('on', x.dataset.st === STATE[c].st));
+    const s = box.querySelector('.st');
+    s.className = 'st st-' + stOf(c); s.textContent = SLBL[stOf(c)];
+    kpi();
+    return;
+  }
+  const tb = e.target.closest('.tb');
+  if (tb) {
+    document.querySelectorAll('.tb').forEach(x => x.classList.toggle('on', x === tb));
+    TAB = tb.dataset.t; rebuild(); window.scrollTo(0, 0); return;
+  }
+  const ch = e.target.closest('.chip');
+  if (ch) {
+    const g = ch.parentElement;
+    g.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === ch));
+    if (g.id === 'sorts') SORT = ch.dataset.v; else FILT = ch.dataset.v;
+    rebuild(); return;
+  }
+});
+document.addEventListener('input', e => {
+  if (e.target.matches('.memo')) {
+    const c = e.target.dataset.memo;
+    STATE[c] = STATE[c] || {}; STATE[c].memo = e.target.value; saveState();
+  }
+});
+document.getElementById('q').addEventListener('input', () => { clearTimeout(window._t); window._t = setTimeout(rebuild, 180); });
+document.getElementById('more').addEventListener('click', page);
+
+function kpi() {
+  const n = { new: 0, watch: 0, seen: 0, drop: 0 };
+  for (const r of DATA.companies) n[stOf(r.c)]++;
+  document.getElementById('kpi').innerHTML =
+    '<div><b>' + DATA.companies.length.toLocaleString() + '</b><i>전체</i></div>' +
+    '<div><b>' + n.new.toLocaleString() + '</b><i>미검토</i></div>' +
+    '<div><b>' + n.watch + '</b><i>관심</i></div>' +
+    '<div><b>' + n.seen + '</b><i>검토</i></div>' +
+    '<div><b>' + n.drop + '</b><i>제외</i></div>';
+}
+
+fetch('data.json?v=' + BUILD).then(r => r.json()).then(d => {
+  DATA = d;
+  const nv = Object.keys(d.vault).length;
+  document.getElementById('hd').textContent =
+    d.generated.slice(0, 16).replace('T', ' ') + ' · ' +
+    d.companies.length.toLocaleString() + '사 · vault 연결 ' + nv + '사';
+  document.getElementById('sorts').innerHTML = SORTS.map((s, i) =>
+    '<div class="chip' + (i === 0 ? ' on' : '') + '" data-v="' + s[0] + '">' + s[1] + '</div>').join('');
+  document.getElementById('filts').innerHTML = FILTS.map((f, i) =>
+    '<div class="chip' + (i === 0 ? ' on' : '') + '" data-v="' + f[0] + '">' + f[1] + '</div>').join('');
+  document.getElementById('ft').innerHTML =
+    'build ' + BUILD + ' · 상태는 이 기기에만 저장됩니다 (Firestore 동기화 예정)<br>' +
+    '지표·공시는 DART 원문에서 규칙으로 산출한 값입니다. 판정이 아니라 판단 재료입니다.';
+  kpi(); rebuild();
+}).catch(e => {
+  document.getElementById('list').innerHTML =
+    '<div class="empty">데이터를 불러오지 못했습니다<br>' + esc(e.message) + '</div>';
+});
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+</script>
+</body>
+</html>
