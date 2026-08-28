@@ -164,6 +164,20 @@ pre.out{background:var(--bg);border:1px solid var(--bd);border-radius:9px;paddin
 .callg i{width:11px;height:11px;border-radius:2px;display:block}
 .lg{display:flex;gap:13px;flex-wrap:wrap;font-size:11px;color:var(--mut);margin-top:9px}
 .lg b{color:var(--fg)}
+.combo{position:relative}
+.combo input{width:100%}
+.combo ul{list-style:none;margin:5px 0 0;padding:0;max-height:230px;overflow-y:auto;
+  border:1px solid var(--bd);border-radius:8px;background:var(--card);display:none;
+  -webkit-overflow-scrolling:touch}
+.combo ul.on{display:block}
+.combo li{padding:9px 11px;font-size:12.5px;cursor:pointer;
+  border-bottom:1px solid var(--hair)}
+.combo li:last-child{border-bottom:none}
+.combo li b{font-weight:600}
+.combo li i{font-style:normal;color:var(--dim);font-size:10px;margin-left:6px}
+.combo li.hd{color:var(--dim);font-size:10px;font-weight:600;background:var(--bg);
+  cursor:default;letter-spacing:.4px}
+.combo li.new{color:var(--acc);font-weight:600}
 .gate{text-align:center;padding:50px 14px}
 .gate p{font-size:12px;color:var(--mut);margin:10px 0 18px;line-height:1.7}
 </style>
@@ -178,11 +192,10 @@ pre.out{background:var(--bg);border:1px solid var(--bd);border-radius:9px;paddin
 
 <div class="stick">
   <div class="tabs">
-    <div class="tb on" data-t="scan">스캔</div>
-    <div class="tb" data-t="watch">관심</div>
-    <div class="tb" data-t="idea">Idea</div>
+    <div class="tb on" data-t="scan">Screening</div>
+    <div class="tb" data-t="watch">Watchlist</div>
+    <div class="tb" data-t="idea">Ideas</div>
     <div class="tb" data-t="field">Field Notes</div>
-    <div class="tb" data-t="word">Wordsmith</div>
   </div>
   <div id="scanctl">
     <input id="q" placeholder="회사명 · 종목코드" autocomplete="off">
@@ -209,7 +222,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, onSnapshot, query,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20260828_1051';
+const BUILD = '20260828_1605';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -330,7 +343,7 @@ function rowEl(r){
     '<span class="spk">'+spark(r.y.map(y=>(r.A[y]||{}).revenue))+'</span>'+
     '<span class="st st-'+st+'">'+SLBL[st]+'</span>'+
     (r.nev?'<span class="evn">공시 '+r.nev+'</span>':'')+
-    (r.as?'<span class="sz">'+r.as.toLocaleString()+'억</span>':'')+'</summary>';
+    (r.as?'<span class="sz">자산 '+r.as.toLocaleString()+'억</span>':'')+'</summary>';
   d.addEventListener('toggle',()=>{ if(d.open&&!d.dataset.b){
     d.insertAdjacentHTML('beforeend', body(r)); d.dataset.b='1'; }});
   return d;
@@ -387,40 +400,77 @@ function body(r){
   return h+'</div>';
 }
 
-/* ── 상대 드롭다운 ─────────────────────────────── */
-function entOptions(sel){
-  if(!ENT) return '<option>불러오는 중…</option>';
-  let h = '<option value="">— 선택 —</option>';
-  for(const g of ENT.groups){
-    const rows = ENT.items.filter(x=>x.g===g.k);
-    if(!rows.length) continue;
-    h += '<optgroup label="'+esc(g.l)+' ('+rows.length.toLocaleString()+')">';
-    h += rows.map(x=>'<option'+(x.n===sel?' selected':'')+'>'+esc(x.n)+'</option>').join('');
-    h += '</optgroup>';
+/* ── 검색되는 선택기 ───────────────────────────────
+   1,660곳을 <select> 로 두면 폰에서 못 쓴다. 타이핑하면 걸러지고
+   목록에 없으면 적은 그대로 쓴다(로펌·컨설팅처럼 등록이 없는 곳). */
+const COMBO = {};   // id -> 확정된 값
+
+function comboHTML(id, ph){
+  return '<div class="combo" data-combo="'+id+'">'+
+    '<input id="'+id+'" placeholder="'+ph+'" autocomplete="off">'+
+    '<ul id="'+id+'-l"></ul></div>';
+}
+function comboFill(id, q){
+  const ul=$(id+'-l'); if(!ul||!ENT) return;
+  const s=(q||'').trim().toLowerCase();
+  let rows=ENT.items;
+  if(s) rows=rows.filter(x=>x.n.toLowerCase().includes(s));
+  const cap=rows.slice(0,60);
+  let h='';
+  let lastG='';
+  for(const x of cap){
+    if(x.g!==lastG){
+      const gl=(ENT.groups.find(g=>g.k===x.g)||{}).l||x.g;
+      h+='<li class="hd">'+esc(gl)+'</li>'; lastG=x.g;
+    }
+    h+='<li data-v="'+esc(x.n)+'"><b>'+esc(x.n)+'</b>'+
+       (x.p?'<i>vault</i>':'')+'</li>';
   }
-  return h + '<option value="__new__">＋ 직접 입력…</option>';
+  if(s && !cap.some(x=>x.n===q))
+    h='<li class="new" data-v="'+esc(q)+'">＋ "'+esc(q)+'" 그대로 쓰기</li>'+h;
+  if(!h) h='<li class="hd">일치하는 곳이 없습니다</li>';
+  if(rows.length>cap.length)
+    h+='<li class="hd">+'+(rows.length-cap.length).toLocaleString()+'곳 더 — 더 적어보세요</li>';
+  ul.innerHTML=h; ul.classList.add('on');
 }
-function pickHandler(selId, inpId){
-  const s=$(selId), i=$(inpId);
-  if(!s||!i) return;
-  s.onchange = () => {
-    const nw = s.value==='__new__';
-    i.style.display = nw ? '' : 'none';
-    if(nw){ i.value=''; i.focus(); }
-  };
-}
+function comboVal(id){ return (COMBO[id]!=null?COMBO[id]:($(id)?$(id).value:'')).trim(); }
+
+document.addEventListener('input', e=>{
+  const box=e.target.closest('.combo');
+  if(box && e.target.tagName==='INPUT'){
+    COMBO[box.dataset.combo]=e.target.value;
+    comboFill(box.dataset.combo, e.target.value);
+  }
+});
+document.addEventListener('focusin', e=>{
+  const box=e.target.closest('.combo');
+  if(box && e.target.tagName==='INPUT') comboFill(box.dataset.combo, e.target.value);
+});
+document.addEventListener('click', e=>{
+  const li=e.target.closest('.combo li[data-v]');
+  if(li){
+    const box=li.closest('.combo'), id=box.dataset.combo;
+    $(id).value=li.dataset.v; COMBO[id]=li.dataset.v;
+    $(id+'-l').classList.remove('on');
+    return;
+  }
+  if(!e.target.closest('.combo'))
+    document.querySelectorAll('.combo ul').forEach(u=>u.classList.remove('on'));
+});
 
 /* ── 큐 표시 ───────────────────────────────────── */
 const QLBL = {pending:['대기','q-wait'],running:['처리중','q-run'],
               done:['완료','q-ok'],error:['실패','q-err']};
+const qWhen = q => (q.at&&q.at.toDate)
+  ? q.at.toDate().toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',
+      hour:'2-digit',minute:'2-digit'}) : '방금';
+
 function queueRows(kind){
   const rows = QUEUE.filter(q=>q.kind===kind);
   if(!rows.length) return '<div class="empty" style="padding:10px 0">담은 항목이 없습니다</div>';
   return rows.map(q=>{
     const [lb,cls] = QLBL[q.status]||QLBL.pending;
-    const when = q.at&&q.at.toDate ? q.at.toDate().toLocaleString('ko-KR',
-      {month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '방금';
-    return '<div class="qrow"><span class="evd">'+esc(when)+'</span>'+
+    return '<div class="qrow"><span class="evd">'+esc(qWhen(q))+'</span>'+
       '<span style="flex:1;min-width:120px">'+esc(q.title||q.target||q.company||'—')+'</span>'+
       '<span class="qs '+cls+'">'+lb+'</span>'+
       (q.result_path?'<a class="ab" style="padding:3px 9px" href="'+obs(q.result_path)+'">노트 →</a>':'')+
@@ -429,13 +479,16 @@ function queueRows(kind){
   }).join('');
 }
 
-/* ── Idea 탭 ──────────────────────────────────── */
+const needLogin = () => { alert('담기에는 로그인이 필요합니다. 상단의 Google 로그인을 눌러주세요.'); };
+
+/* ── Ideas 탭 ─────────────────────────────────── */
 let ideaPrefill = '';
 function paneIdea(){
+  if(ideaPrefill){ COMBO['id-t']=ideaPrefill; }
   return '<div class="card">'+
-    '<div class="fr"><label>대상</label>'+
-      '<select id="id-t">'+entOptions(ideaPrefill)+'</select>'+
-      '<input id="id-tn" placeholder="직접 입력" style="display:none;margin-top:7px"></div>'+
+    '<div class="fr"><label>대상 <em>타이핑하면 '+
+      (ENT?ENT.items.length.toLocaleString():'—')+'곳에서 걸러집니다</em></label>'+
+      comboHTML('id-t','회사·기관 이름')+'</div>'+
     '<div class="fr"><label>각 · 아이디어 <em>메모 수준이어도 됩니다 — PC가 다듬습니다</em></label>'+
       '<textarea id="id-a" placeholder="왜 지금 이 회사인가"></textarea></div>'+
     '<div class="row2">'+
@@ -454,16 +507,15 @@ function paneIdea(){
 }
 
 /* ── Field Notes 탭 ───────────────────────────── */
-let fnMode = 'rec', fnFile = null;
+let fnMode = 'txt', fnFile = null;
 const ZKEY = ['YBD','CBD','GBD','ETC'];
 const ZNAME = {YBD:'여의도',CBD:'광화문',GBD:'강남',ETC:'기타'};
 
 function paneField(){
   return '<div class="card">'+
-    '<div class="fr"><label>상대 <em>통합 목록 '+
-      (ENT?ENT.items.length.toLocaleString():'—')+'곳</em></label>'+
-      '<select id="fn-c">'+entOptions('')+'</select>'+
-      '<input id="fn-cn" placeholder="직접 입력" style="display:none;margin-top:7px"></div>'+
+    '<div class="fr"><label>상대 <em>타이핑하면 '+
+      (ENT?ENT.items.length.toLocaleString():'—')+'곳에서 걸러집니다</em></label>'+
+      comboHTML('fn-c','회사·기관 이름')+'</div>'+
     '<div class="row2">'+
       '<div class="fr"><label>일자 <em>자동</em></label>'+
         '<input id="fn-d" type="date" value="'+todayStr()+'"></div>'+
@@ -478,28 +530,55 @@ function paneField(){
         .map(k=>'<option>'+esc(k)+'</option>').join(''):'')+'</datalist></div>'+
     '<div class="fr"><label>기록 방식</label>'+
       '<div class="seg" id="fn-seg">'+
-        '<div data-m="rec" class="'+(fnMode==='rec'?'on':'')+'">🎙 녹음</div>'+
         '<div data-m="txt" class="'+(fnMode==='txt'?'on':'')+'">✍️ 직접 입력</div>'+
+        '<div data-m="rec" class="'+(fnMode==='rec'?'on':'')+'">🎙 녹음</div>'+
         '<div data-m="both" class="'+(fnMode==='both'?'on':'')+'">둘 다</div></div>'+
-      '<div id="fn-rec" style="display:'+(fnMode==='txt'?'none':'')+'">'+
-        '<label class="drop'+(fnFile?' has':'')+'" id="fn-drop">'+
+      '<textarea id="fn-t" style="display:'+(fnMode==='rec'?'none':'')+'" '+
+        'placeholder="오간 말을 그대로 적으면 됩니다. 메모 수준이어도 되고, 문장으로 다듬는 건 PC가 합니다."></textarea>'+
+      '<div id="fn-rec" style="margin-top:9px;display:'+(fnMode==='txt'?'none':'')+'">'+
+        '<label class="drop'+(fnFile?' has':'')+'">'+
           '<b>🎙</b>'+(fnFile?esc(fnFile.name):'탭해서 녹음 파일 선택')+'<br>'+
           '<span style="font-size:10.5px;color:var(--dim)">m4a · mp3 · wav — PC가 전사합니다</span>'+
           '<input id="fn-f" type="file" accept="audio/*" style="display:none"></label></div>'+
-      '<textarea id="fn-t" style="margin-top:9px;display:'+(fnMode==='rec'?'none':'')+'" '+
-        'placeholder="녹음이 없으면 여기에 적습니다. 메모 수준이어도 됩니다 — 문장으로 다듬는 건 PC가 합니다."></textarea>'+
     '</div>'+
-    '<div class="acts" style="border:none;padding:0"><button class="btn p" id="fn-go">기록 담기</button>'+
+    '<div class="acts" style="border:none;padding:0">'+
+      '<button class="btn p" id="fn-go">기록 담기</button>'+
+      '<button class="btn" id="fn-brief">✉️ 보고 초안만</button>'+
       '<span id="fn-msg" style="font-size:11px;color:var(--mut);align-self:center"></span></div>'+
   '</div>'+
+  briefCards()+
   heatmap()+
   '<div class="lbl">담은 기록</div><div class="card">'+queueRows('field')+'</div>';
 }
 
+/* ── 보고 초안 — 국문이 나오면 그 자리에서 영문으로 ── */
+function briefCards(){
+  const rows = QUEUE.filter(q=>(q.kind==='field'||q.kind==='brief')
+                               && q.status==='done' && q.output).slice(0,3);
+  if(!rows.length) return '';
+  return rows.map(q=>{
+    const en = QUEUE.find(w=>w.kind==='word' && w.parent===q.id);
+    let h = '<div class="lbl">보고 초안 · 국문 <em>'+esc(q.company||q.title||'')+
+      ' · '+esc(qWhen(q))+'</em></div><div class="card">'+
+      '<pre class="out">'+esc(q.output)+'</pre>'+
+      '<div class="acts"><button class="btn" data-copy="'+q.id+'">📋 복사</button>'+
+      (en ? '' : '<button class="btn p" data-en="'+q.id+'">✉️ 영문으로 (Wordsmith)</button>')+
+      '</div>';
+    if(en){
+      const [lb,cls]=QLBL[en.status]||QLBL.pending;
+      h += '<div class="lbl" style="margin-top:14px">영문 <em>'+
+        '<span class="qs '+cls+'">'+lb+'</span></em></div>';
+      h += en.output
+        ? '<pre class="out">'+esc(en.output)+'</pre>'+
+          '<div class="acts"><button class="btn" data-copy="'+en.id+'">📋 복사</button></div>'
+        : '<div class="empty" style="padding:8px 0">PC가 처리하면 여기 뜹니다</div>';
+    }
+    return h+'</div>';
+  }).join('');
+}
+
 /* ── 좌표 해석 ─────────────────────────────────
-   장소 텍스트 → SVG 좌표. 앞이 이기고 없으면 뒤로 떨어진다.
-     landmark → dong → gu → 권역 안 고정 지터(회사명 해시)
-   해석 근거를 src 로 같이 남겨 나중에 정확도를 되짚을 수 있게 한다. */
+   landmark → dong → gu → 권역 안 고정 지터(회사명 해시). 근거는 src 로 남긴다. */
 function hash32(s){ let h=2166136261;
   for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); }
   return h>>>0; }
@@ -515,7 +594,6 @@ function resolveXY(place, zone, company){
     for(const k of Object.keys(GEO.gu))
       if(p.includes(k)) return [...GEO.gu[k],'gu'];
   }
-  // 권역 대표 구 안에서 회사명 해시로 고정 — 같은 회사는 늘 같은 자리
   const rep={YBD:'영등포구',CBD:'중구',GBD:'강남구'}[zone];
   if(!rep||!GEO.gu[rep]) return [null,null,''];
   const c=GEO.gu[rep], h=hash32(company||'');
@@ -526,60 +604,52 @@ function resolveXY(place, zone, company){
 /* ── 서울 히트맵 (입체 다크) ──────────────────── */
 function heatmap(){
   if(!MAP) return '';
-  const cnt = {CBD:0,YBD:0,GBD:0};
-  const days = {};
+  const cnt={CBD:0,YBD:0,GBD:0}, days={};
   for(const l of LOGS){
     if(cnt[l.zone]!=null) cnt[l.zone]++;
-    days[l.date] = (days[l.date]||0)+1;
+    days[l.date]=(days[l.date]||0)+1;
   }
-  const mx = Math.max(1,...Object.values(cnt));
-  const EXT = 13;
-  let g = '';
-  // 압출 — 전체를 아래로 깔면 위층이 내부 경계를 덮어 바깥 옆면만 남는다
-  for(let i=EXT;i>0;i--){
-    g += '<g transform="translate(0,'+i+')">' +
-      Object.values(MAP.gu).map(d=>'<path d="'+d+'" fill="var(--map-ext)"/>').join('') + '</g>';
-  }
-  g += Object.values(MAP.gu).map(d=>'<path d="'+d+
+  const mx=Math.max(1,...Object.values(cnt));
+  let g='';
+  for(let i=13;i>0;i--)
+    g+='<g transform="translate(0,'+i+')">'+
+       Object.values(MAP.gu).map(d=>'<path d="'+d+'" fill="var(--map-ext)"/>').join('')+'</g>';
+  g+=Object.values(MAP.gu).map(d=>'<path d="'+d+
     '" fill="var(--map-land)" stroke="var(--map-bd)" stroke-width="1.1" stroke-linejoin="round"/>').join('');
   for(const z of ['CBD','YBD','GBD']){
-    const zo = MAP.zones[z], ratio = cnt[z]/mx;
+    const zo=MAP.zones[z], ratio=cnt[z]/mx;
     for(const gu of zo.gu){
-      g += '<g filter="url(#glow)" opacity="'+(0.22+0.5*ratio).toFixed(2)+'"><path d="'+
-        MAP.gu[gu]+'" fill="var(--map-heat)"/></g>';
-      g += '<path d="'+MAP.gu[gu]+'" fill="var(--map-heat)" fill-opacity="'+
-        (0.14+0.62*ratio).toFixed(2)+'" stroke="var(--map-heat)" stroke-width="1.8" '+
-        'stroke-linejoin="round"/>';
+      g+='<g filter="url(#glow)" opacity="'+(0.22+0.5*ratio).toFixed(2)+'"><path d="'+
+         MAP.gu[gu]+'" fill="var(--map-heat)"/></g>';
+      g+='<path d="'+MAP.gu[gu]+'" fill="var(--map-heat)" fill-opacity="'+
+         (0.14+0.62*ratio).toFixed(2)+'" stroke="var(--map-heat)" stroke-width="1.8" '+
+         'stroke-linejoin="round"/>';
     }
-    const c = zo.c;
-    g += '<text x="'+c[0]+'" y="'+(c[1]-4)+'" text-anchor="middle" font-size="30" '+
-      'font-weight="700" fill="var(--map-ink)" opacity="0.9">'+cnt[z]+'</text>'+
-      '<text x="'+c[0]+'" y="'+(c[1]+15)+'" text-anchor="middle" font-size="12" '+
-      'font-weight="600" letter-spacing="1.6" fill="var(--map-sub)">'+z+'</text>'+
-      '<text x="'+c[0]+'" y="'+(c[1]+30)+'" text-anchor="middle" font-size="11" '+
-      'fill="var(--map-sub)" opacity="0.8">'+zo.ko+'</text>';
+    const c=zo.c;
+    g+='<text x="'+c[0]+'" y="'+(c[1]-4)+'" text-anchor="middle" font-size="30" '+
+       'font-weight="700" fill="var(--map-ink)" opacity="0.9">'+cnt[z]+'</text>'+
+       '<text x="'+c[0]+'" y="'+(c[1]+15)+'" text-anchor="middle" font-size="12" '+
+       'font-weight="600" letter-spacing="1.6" fill="var(--map-sub)">'+z+'</text>'+
+       '<text x="'+c[0]+'" y="'+(c[1]+30)+'" text-anchor="middle" font-size="11" '+
+       'fill="var(--map-sub)" opacity="0.8">'+zo.ko+'</text>';
   }
   // 방문 도트 — 한 건에 하나. 같은 자리에 쌓이면 투명도가 겹쳐 저절로 진해진다
   const spot={};
   for(const l of LOGS){
-    let x=l.x, y=l.y;
+    let x=l.x,y=l.y;
     if(x==null||y==null){ const r=resolveXY(l.place,l.zone,l.company); x=r[0]; y=r[1]; }
     if(x==null) continue;
-    const k=x+','+y; spot[k]=spot[k]||[]; spot[k].push(l);
+    const k=x+','+y; (spot[k]=spot[k]||[]).push(l);
   }
-  let dots='';
   for(const k in spot){
     const [x,y]=k.split(',').map(Number);
     spot[k].forEach((l,i)=>{
       const a=i*2.399963, r=3.6*Math.sqrt(i);
-      dots+='<circle cx="'+(x+r*Math.cos(a)).toFixed(1)+'" cy="'+(y+r*Math.sin(a)).toFixed(1)+
-        '" r="4.6" fill="#9fc4f0" fill-opacity="0.34"><title>'+
-        esc(l.company+' · '+l.date+(l.place?' · '+l.place:''))+'</title></circle>';
+      g+='<circle cx="'+(x+r*Math.cos(a)).toFixed(1)+'" cy="'+(y+r*Math.sin(a)).toFixed(1)+
+         '" r="4.6" fill="#9fc4f0" fill-opacity="0.34"><title>'+
+         esc(l.company+' · '+l.date+(l.place?' · '+l.place:''))+'</title></circle>';
     });
   }
-  g += dots;
-
-  // 최근 9주 캘린더
   const cells=[]; const d0=new Date(); d0.setDate(d0.getDate()-62);
   for(let i=0;i<63;i++){
     const d=new Date(d0); d.setDate(d0.getDate()+i);
@@ -600,31 +670,6 @@ function heatmap(){
       [0,1,2,3,4].map(i=>'<i class="cel l'+i+'"></i>').join('')+'<span>많음</span></div>';
 }
 
-/* ── Wordsmith 탭 ─────────────────────────────── */
-let wsPrefill = '';
-function paneWord(){
-  const done = QUEUE.filter(q=>q.kind==='word'&&q.status==='done'&&q.output);
-  return '<div class="card">'+
-    '<div class="row2">'+
-      '<div class="fr"><label>tone</label><select id="ws-t">'+
-        '<option value="formal">Formal (공식·정중)</option>'+
-        '<option value="friendly">Friendly (따뜻·전문)</option>'+
-        '<option value="concise">Concise (간결·직설)</option></select></div>'+
-      '<div class="fr"><label>recipient</label>'+
-        '<input id="ws-r" placeholder="PE managing partner"></div></div>'+
-    '<div class="fr"><label>context</label>'+
-      '<input id="ws-c" value="follow-up after meeting"></div>'+
-    '<div class="fr"><label>본문 <em>국문 그대로 넣으면 됩니다</em></label>'+
-      '<textarea id="ws-b" style="min-height:120px">'+esc(wsPrefill)+'</textarea></div>'+
-    '<div class="acts" style="border:none;padding:0"><button class="btn p" id="ws-go">✏️ 윤문 요청</button>'+
-      '<span id="ws-msg" style="font-size:11px;color:var(--mut);align-self:center"></span></div>'+
-  '</div>'+
-  (done.length ? '<div class="lbl">최근 결과</div><div class="card">'+
-    '<pre class="out">'+esc(done[0].output)+'</pre>'+
-    '<div class="acts"><button class="btn" data-copy="'+esc(done[0].id)+'">📋 복사</button></div></div>' : '')+
-  '<div class="lbl">담은 항목</div><div class="card">'+queueRows('word')+'</div>';
-}
-
 /* ── 렌더 ─────────────────────────────────────── */
 function render(){
   const scan = (TAB==='scan'||TAB==='watch');
@@ -634,16 +679,15 @@ function render(){
   $('more').style.display = (scan&&shown<view.length)?'':'none';
   $('panes').innerHTML = '';
   if(scan){ if(DATA) rebuild(); return; }
-  if(!USER){
-    $('panes').innerHTML = '<div class="gate"><div style="font-size:30px">🔒</div>'+
-      '<p>담기·동기화에는 로그인이 필요합니다.<br>Workout과 같은 계정을 씁니다.</p>'+
-      '<button class="btn p" id="in">Google 로그인</button></div>';
-    return;
+  // 폼은 로그인 없이도 보인다. 막는 건 담을 때뿐이다.
+  $('panes').innerHTML =
+    (USER?'':'<div class="note" style="background:none;border:1px solid var(--bd);'+
+      'border-radius:9px;padding:9px 11px;font-size:11px;color:var(--mut);margin-bottom:11px">'+
+      '로그인하지 않았습니다 — 폼은 볼 수 있지만 담기는 되지 않습니다.</div>')+
+    (TAB==='idea'?paneIdea():paneField());
+  if(TAB==='field'){
+    const f=$('fn-f'); if(f) f.onchange=e=>{ fnFile=e.target.files[0]||null; render(); };
   }
-  $('panes').innerHTML = TAB==='idea'?paneIdea():TAB==='field'?paneField():paneWord();
-  if(TAB==='idea') pickHandler('id-t','id-tn');
-  if(TAB==='field'){ pickHandler('fn-c','fn-cn');
-    const f=$('fn-f'); if(f) f.onchange=e=>{ fnFile=e.target.files[0]||null; render(); }; }
 }
 
 function kpi(){
@@ -665,7 +709,8 @@ document.addEventListener('click', async e => {
     TAB=tb.dataset.t; render(); window.scrollTo(0,0); return; }
 
   const ab=e.target.closest('.ab[data-st]');
-  if(ab){ const c=ab.dataset.c,k=ab.dataset.st;
+  if(ab){ if(!USER) return needLogin();
+    const c=ab.dataset.c,k=ab.dataset.st;
     STATE[c]=STATE[c]||{}; STATE[c].st=(STATE[c].st===k)?'new':k; saveState();
     const box=ab.closest('details');
     box.querySelectorAll('.ab[data-st]').forEach(x=>x.classList.toggle('on',x.dataset.st===STATE[c].st));
@@ -676,7 +721,7 @@ document.addEventListener('click', async e => {
   if(ie){ const r=DATA.companies.find(x=>x.c===ie.dataset.idea);
     ideaPrefill=r?r.n:''; TAB='idea';
     document.querySelectorAll('.tb').forEach(x=>x.classList.toggle('on',x.dataset.t==='idea'));
-    render(); window.scrollTo(0,0); return; }
+    render(); if($('id-t')) $('id-t').value=ideaPrefill; window.scrollTo(0,0); return; }
 
   const ch=e.target.closest('.chip');
   if(ch){ const g=ch.parentElement;
@@ -685,8 +730,8 @@ document.addEventListener('click', async e => {
     rebuild(); return; }
 
   if(e.target.id==='id-go'){
-    const t=$('id-t').value==='__new__'?$('id-tn').value.trim():$('id-t').value;
-    const a=$('id-a').value.trim(), d=$('id-d').value;
+    if(!USER) return needLogin();
+    const t=comboVal('id-t'), a=$('id-a').value.trim(), d=$('id-d').value;
     if(!t||!a||!d){ $('id-msg').textContent='대상·아이디어·due 는 필수입니다'; return; }
     $('id-go').disabled=true; $('id-msg').textContent='담는 중…';
     try{ await enqueue('idea',{target:t,title:t,angle:a,stage:$('id-s').value,due:d});
@@ -698,53 +743,70 @@ document.addEventListener('click', async e => {
   const seg=e.target.closest('#fn-seg div');
   if(seg){ fnMode=seg.dataset.m; render(); return; }
 
-  if(e.target.id==='fn-go'){
-    const c=$('fn-c').value==='__new__'?$('fn-cn').value.trim():$('fn-c').value;
-    const txt=$('fn-t').value.trim();
+  if(e.target.id==='fn-go' || e.target.id==='fn-brief'){
+    if(!USER) return needLogin();
+    const briefOnly = e.target.id==='fn-brief';
+    const c=comboVal('fn-c'), txt=$('fn-t').value.trim();
     if(!c){ $('fn-msg').textContent='상대를 고르세요'; return; }
-    if(fnMode!=='rec' && !txt){ $('fn-msg').textContent='내용을 적어주세요'; return; }
-    if(fnMode!=='txt' && !fnFile){ $('fn-msg').textContent='녹음 파일을 고르세요'; return; }
-    $('fn-go').disabled=true; $('fn-msg').textContent='담는 중…';
+    if(briefOnly && !txt){ $('fn-msg').textContent='보고 초안은 적은 내용이 있어야 합니다'; return; }
+    if(!briefOnly){
+      if(fnMode!=='rec' && !txt){ $('fn-msg').textContent='내용을 적어주세요'; return; }
+      if(fnMode!=='txt' && !fnFile){ $('fn-msg').textContent='녹음 파일을 고르세요'; return; }
+    }
+    e.target.disabled=true; $('fn-msg').textContent='담는 중…';
     try{
-      let audio='';
-      if(fnFile){
-        $('fn-msg').textContent='업로드 중…';
-        const path='users/'+USER.uid+'/field_notes/'+Date.now()+'_'+fnFile.name;
-        await uploadBytes(sref(storage,path),fnFile);
-        audio=path;
-      }
       const place=$('fn-l').value.trim();
       const xy=resolveXY(place, $('fn-z').value, c);
       const rec={company:c,title:c,date:$('fn-d').value,zone:$('fn-z').value,
-                 attendees:$('fn-p').value.trim(),note:txt,audio,mode:fnMode,
+                 attendees:$('fn-p').value.trim(),note:txt,mode:fnMode,
                  place, x:xy[0], y:xy[1], src:xy[2]};
-      await enqueue('field',rec);
-      await addDoc(collection(db,'users',USER.uid,'field_notes'),
-                   {...rec,at:serverTimestamp()});
-      fnFile=null; $('fn-msg').textContent='✓ 담았습니다'; render();
-    }catch(x){ $('fn-msg').textContent='✗ '+x.message; $('fn-go').disabled=false; }
+      if(briefOnly){
+        await enqueue('brief', rec);
+        $('fn-msg').textContent='✓ 보고 초안을 요청했습니다';
+      }else{
+        let audio='';
+        if(fnFile){
+          $('fn-msg').textContent='업로드 중…';
+          const path='users/'+USER.uid+'/field_notes/'+Date.now()+'_'+fnFile.name;
+          await uploadBytes(sref(storage,path),fnFile);
+          audio=path;
+        }
+        await enqueue('field',{...rec,audio});
+        await addDoc(collection(db,'users',USER.uid,'field_notes'),
+                     {...rec,audio,at:serverTimestamp()});
+        fnFile=null; $('fn-msg').textContent='✓ 담았습니다'; render();
+      }
+    }catch(x){ $('fn-msg').textContent='✗ '+x.message; }
+    if($('fn-go')) $('fn-go').disabled=false;
+    if($('fn-brief')) $('fn-brief').disabled=false;
     return;
   }
 
-  if(e.target.id==='ws-go'){
-    const b=$('ws-b').value.trim();
-    if(!b){ $('ws-msg').textContent='본문이 비었습니다'; return; }
-    $('ws-go').disabled=true; $('ws-msg').textContent='담는 중…';
-    try{ await enqueue('word',{text:b,tone:$('ws-t').value,recipient:$('ws-r').value,
-           context:$('ws-c').value,title:b.slice(0,30)});
-      $('ws-msg').textContent='✓ 담았습니다 — PC가 처리하면 여기 뜹니다'; }
-    catch(x){ $('ws-msg').textContent='✗ '+x.message; }
-    $('ws-go').disabled=false; return;
+  const en=e.target.closest('[data-en]');
+  if(en){
+    if(!USER) return needLogin();
+    const q=QUEUE.find(x=>x.id===en.dataset.en);
+    if(!q||!q.output) return;
+    en.disabled=true; en.textContent='담는 중…';
+    try{ await enqueue('word',{text:q.output,tone:'formal',
+           context:'internal report after client meeting',
+           recipient:'colleagues', parent:q.id,
+           title:(q.company||'')+' 영문'});
+      en.textContent='✓ 요청함'; }
+    catch(x){ en.textContent='✗ '+x.message; en.disabled=false; }
+    return;
   }
 
   const cp=e.target.closest('[data-copy]');
   if(cp){ const q=QUEUE.find(x=>x.id===cp.dataset.copy);
     if(q&&q.output){ navigator.clipboard.writeText(q.output);
-      cp.textContent='✓ 복사됨'; setTimeout(()=>cp.textContent='📋 복사',1500); } }
+      const t=cp.textContent; cp.textContent='✓ 복사됨';
+      setTimeout(()=>cp.textContent=t,1500); } }
 });
 
 document.addEventListener('input', e => {
   if(e.target.matches('.memo')){
+    if(!USER) return;
     const c=e.target.dataset.memo;
     STATE[c]=STATE[c]||{}; STATE[c].memo=e.target.value;
     clearTimeout(window._ms); window._ms=setTimeout(saveState,600);

@@ -1,6 +1,6 @@
 // Origination PWA — 빌드 단위 캐시.
 // 주간 갱신이라 부분 무효화가 필요 없다. 새 빌드면 이전 캐시를 통째로 버린다.
-const V = '20260828_1051';
+const V = '20260828_1605';
 const CACHE = 'orig-' + V;
 const ASSETS = ['./', './index.html', './data.json', './entities.json', './seoul.json', './geo.json',
                 './manifest.json', './icon-192.png', './icon-512.png'];
