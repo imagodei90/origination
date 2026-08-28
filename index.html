@@ -222,7 +222,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, onSnapshot, query,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20260828_1605';
+const BUILD = '20260828_1608';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -837,8 +837,18 @@ Promise.all([
   $('list').innerHTML='<div class="empty">데이터를 불러오지 못했습니다<br>'+esc(e.message)+'</div>';
 });
 
-if('serviceWorker' in navigator)
-  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+// 새 서비스워커가 들어오면 한 번만 새로고침한다. 배포해도 옛 화면이 남는 걸 막는다.
+if('serviceWorker' in navigator){
+  let reloaded=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{
+    if(reloaded) return; reloaded=true; location.reload();
+  });
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js')
+      .then(r=>{ r.update(); setInterval(()=>r.update(), 60*60*1000); })
+      .catch(()=>{});
+  });
+}
 
 </script>
 </body>

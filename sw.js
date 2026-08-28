@@ -1,9 +1,12 @@
 // Origination PWA — 빌드 단위 캐시.
-// 주간 갱신이라 부분 무효화가 필요 없다. 새 빌드면 이전 캐시를 통째로 버린다.
-const V = '20260828_1605';
+// 껍데기(index.html)는 네트워크 우선이다. 캐시 우선으로 두면 배포해도 폰이
+// 계속 옛 화면을 보여준다 — 실제로 그렇게 물렸다.
+// 데이터는 URL 에 ?v=BUILD 가 붙어 새 빌드면 자동으로 새 주소가 되므로
+// 캐시 우선이어도 안전하고, 오프라인에서는 마지막 것이 그대로 뜬다.
+const V = '20260828_1608';
 const CACHE = 'orig-' + V;
-const ASSETS = ['./', './index.html', './data.json', './entities.json', './seoul.json', './geo.json',
-                './manifest.json', './icon-192.png', './icon-512.png'];
+const ASSETS = ['./', './index.html', './data.json', './entities.json', './seoul.json',
+                './geo.json', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
@@ -15,17 +18,29 @@ self.addEventListener('activate', e => {
     .then(() => self.clients.claim()));
 });
 
-// 캐시 우선 — 오프라인에서 열려야 한다. 네트워크가 되면 뒤에서 갱신한다.
+const isShell = u => u.mode === 'navigate' ||
+  /\/(index\.html)?(\?|$)/.test(new URL(u.url).pathname + new URL(u.url).search);
+
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
-  e.respondWith(caches.match(e.request).then(hit => {
-    const net = fetch(e.request).then(res => {
-      if (res && res.status === 200 && res.type === 'basic') {
+  const url = new URL(e.request.url);
+  if (url.origin !== location.origin) return;   // firebase CDN 등은 건드리지 않는다
+
+  if (isShell(e.request)) {                     // 껍데기 — 네트워크 우선
+    e.respondWith(
+      fetch(e.request).then(res => {
         const copy = res.clone();
         caches.open(CACHE).then(c => c.put(e.request, copy));
-      }
-      return res;
-    }).catch(() => hit);
-    return hit || net;
-  }));
+        return res;
+      }).catch(() => caches.match(e.request).then(h => h || caches.match('./index.html')))
+    );
+    return;
+  }
+  e.respondWith(caches.match(e.request).then(hit => hit || fetch(e.request).then(res => {
+    if (res && res.status === 200 && res.type === 'basic') {
+      const copy = res.clone();
+      caches.open(CACHE).then(c => c.put(e.request, copy));
+    }
+    return res;
+  })));
 });
