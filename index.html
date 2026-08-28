@@ -222,7 +222,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, onSnapshot, query,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20260828_1610';
+const BUILD = '20260828_1618';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -507,7 +507,7 @@ function paneIdea(){
 }
 
 /* ── Field Notes 탭 ───────────────────────────── */
-let fnMode = 'txt', fnFile = null;
+let fnMode = 'both', fnFile = null;   // 기본은 '둘 다' — 녹음도 메모도 받는다
 const ZKEY = ['YBD','CBD','GBD','ETC'];
 const ZNAME = {YBD:'여의도',CBD:'광화문',GBD:'강남',ETC:'기타'};
 
@@ -544,7 +544,12 @@ function paneField(){
     '<div class="acts" style="border:none;padding:0">'+
       '<button class="btn p" id="fn-go">기록 담기</button>'+
       '<button class="btn" id="fn-brief">✉️ 보고 초안만</button>'+
+      '<button class="btn" id="fn-full">🌐 영문 보고까지</button>'+
       '<span id="fn-msg" style="font-size:11px;color:var(--mut);align-self:center"></span></div>'+
+    '<div style="font-size:10px;color:var(--dim);line-height:1.7;margin-top:8px">'+
+      '<b style="font-weight:600">기록 담기</b> 노트만 · '+
+      '<b style="font-weight:600">보고 초안만</b> 국문 보고만 (노트 저장 안 함) · '+
+      '<b style="font-weight:600">영문 보고까지</b> 노트 + 국문 + 영문 한 번에</div>'+
   '</div>'+
   briefCards()+
   heatmap()+
@@ -553,25 +558,32 @@ function paneField(){
 
 /* ── 보고 초안 — 국문이 나오면 그 자리에서 영문으로 ── */
 function briefCards(){
-  const rows = QUEUE.filter(q=>(q.kind==='field'||q.kind==='brief')
-                               && q.status==='done' && q.output).slice(0,3);
+  const KIND = ['field','brief','full'];
+  const rows = QUEUE.filter(q=>KIND.includes(q.kind) && q.status==='done' && q.output)
+                    .slice(0,3);
   if(!rows.length) return '';
   return rows.map(q=>{
-    const en = QUEUE.find(w=>w.kind==='word' && w.parent===q.id);
+    // full 은 영문까지 한 번에 만들어 output_en 에 담겨 온다.
+    // 그 외에는 별도로 담은 word 큐가 붙는다.
+    const wq = QUEUE.find(w=>w.kind==='word' && w.parent===q.id);
+    const enText = q.output_en || (wq && wq.output) || '';
     let h = '<div class="lbl">보고 초안 · 국문 <em>'+esc(q.company||q.title||'')+
       ' · '+esc(qWhen(q))+'</em></div><div class="card">'+
       '<pre class="out">'+esc(q.output)+'</pre>'+
       '<div class="acts"><button class="btn" data-copy="'+q.id+'">📋 복사</button>'+
-      (en ? '' : '<button class="btn p" data-en="'+q.id+'">✉️ 영문으로 (Wordsmith)</button>')+
+      (enText||wq ? '' : '<button class="btn p" data-en="'+q.id+'">✉️ 영문으로</button>')+
+      (q.result_path ? '<a class="btn" href="'+obs(q.result_path)+'">노트 →</a>' : '')+
       '</div>';
-    if(en){
-      const [lb,cls]=QLBL[en.status]||QLBL.pending;
-      h += '<div class="lbl" style="margin-top:14px">영문 <em>'+
-        '<span class="qs '+cls+'">'+lb+'</span></em></div>';
-      h += en.output
-        ? '<pre class="out">'+esc(en.output)+'</pre>'+
-          '<div class="acts"><button class="btn" data-copy="'+en.id+'">📋 복사</button></div>'
-        : '<div class="empty" style="padding:8px 0">PC가 처리하면 여기 뜹니다</div>';
+    if(enText){
+      h += '<div class="lbl" style="margin-top:14px">영문</div>';
+      h += '<pre class="out">'+esc(enText)+'</pre>'+
+        '<div class="acts"><button class="btn" data-copy="'+
+        (q.output_en?q.id+':en':wq.id)+'">📋 복사</button></div>';
+    }else if(wq){
+      const [lb,cls]=QLBL[wq.status]||QLBL.pending;
+      h += '<div class="lbl" style="margin-top:14px">영문 <em><span class="qs '+cls+'">'+
+        lb+'</span></em></div>'+
+        '<div class="empty" style="padding:8px 0">PC가 처리하면 여기 뜹니다</div>';
     }
     return h+'</div>';
   }).join('');
@@ -743,15 +755,20 @@ document.addEventListener('click', async e => {
   const seg=e.target.closest('#fn-seg div');
   if(seg){ fnMode=seg.dataset.m; render(); return; }
 
-  if(e.target.id==='fn-go' || e.target.id==='fn-brief'){
+  if(e.target.id==='fn-go' || e.target.id==='fn-brief' || e.target.id==='fn-full'){
     if(!USER) return needLogin();
     const briefOnly = e.target.id==='fn-brief';
+    const full = e.target.id==='fn-full';
     const c=comboVal('fn-c'), txt=$('fn-t').value.trim();
     if(!c){ $('fn-msg').textContent='상대를 고르세요'; return; }
     if(briefOnly && !txt){ $('fn-msg').textContent='보고 초안은 적은 내용이 있어야 합니다'; return; }
     if(!briefOnly){
-      if(fnMode!=='rec' && !txt){ $('fn-msg').textContent='내용을 적어주세요'; return; }
-      if(fnMode!=='txt' && !fnFile){ $('fn-msg').textContent='녹음 파일을 고르세요'; return; }
+      // '둘 다'는 둘 다 강요하는 게 아니라 둘 다 받을 수 있다는 뜻이다.
+      // 녹음만 있어도, 메모만 있어도 넘어간다.
+      if(fnMode==='txt' && !txt){ $('fn-msg').textContent='내용을 적어주세요'; return; }
+      if(fnMode==='rec' && !fnFile){ $('fn-msg').textContent='녹음 파일을 고르세요'; return; }
+      if(fnMode==='both' && !txt && !fnFile){
+        $('fn-msg').textContent='녹음이나 메모 중 하나는 있어야 합니다'; return; }
     }
     e.target.disabled=true; $('fn-msg').textContent='담는 중…';
     try{
@@ -771,14 +788,17 @@ document.addEventListener('click', async e => {
           await uploadBytes(sref(storage,path),fnFile);
           audio=path;
         }
-        await enqueue('field',{...rec,audio});
+        await enqueue(full?'full':'field',{...rec,audio});
         await addDoc(collection(db,'users',USER.uid,'field_notes'),
                      {...rec,audio,at:serverTimestamp()});
-        fnFile=null; $('fn-msg').textContent='✓ 담았습니다'; render();
+        fnFile=null;
+        $('fn-msg').textContent = full
+          ? '✓ 담았습니다 — 노트·국문·영문까지 만듭니다'
+          : '✓ 담았습니다';
+        render();
       }
     }catch(x){ $('fn-msg').textContent='✗ '+x.message; }
-    if($('fn-go')) $('fn-go').disabled=false;
-    if($('fn-brief')) $('fn-brief').disabled=false;
+    for(const id of ['fn-go','fn-brief','fn-full']) if($(id)) $(id).disabled=false;
     return;
   }
 
@@ -798,8 +818,11 @@ document.addEventListener('click', async e => {
   }
 
   const cp=e.target.closest('[data-copy]');
-  if(cp){ const q=QUEUE.find(x=>x.id===cp.dataset.copy);
-    if(q&&q.output){ navigator.clipboard.writeText(q.output);
+  if(cp){
+    const [id,which]=cp.dataset.copy.split(':');
+    const q=QUEUE.find(x=>x.id===id);
+    const txt=q && (which==='en' ? q.output_en : q.output);
+    if(txt){ navigator.clipboard.writeText(txt);
       const t=cp.textContent; cp.textContent='✓ 복사됨';
       setTimeout(()=>cp.textContent=t,1500); } }
 });
