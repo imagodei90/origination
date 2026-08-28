@@ -84,8 +84,16 @@ tbody th{text-align:left;color:var(--mut);font-weight:500}
 .ev a{color:var(--acc);text-decoration:none}
 .vs{margin-top:5px}
 .vs b{font-size:10.5px;display:block;margin:8px 0 3px;color:var(--mut)}
-.vi{font-size:11px;padding:2px 0;color:var(--fg);display:flex;gap:6px}
-.vi span{color:var(--dim);font-family:ui-monospace,monospace;font-size:9.5px;flex:0 0 auto}
+.vi{font-size:11px;padding:5px 0;color:var(--fg);display:flex;gap:7px;
+  text-decoration:none;border-bottom:1px solid var(--hair)}
+.vi:last-child{border-bottom:none}
+.vi span{color:var(--dim);font-family:ui-monospace,monospace;font-size:9.5px;
+  flex:0 0 auto;padding-top:1px}
+.vi i{font-style:normal;display:block}
+.vi em{font-style:normal;display:block;color:var(--mut);font-size:10px;line-height:1.5;
+  margin-top:2px}
+.unit{font-size:9.5px;color:var(--dim);text-align:right;margin-bottom:3px}
+.unit em{font-style:normal}
 .ovr{font-size:10.5px;color:var(--mut);display:flex;gap:9px;flex-wrap:wrap;margin-bottom:4px}
 .acts{display:flex;gap:5px;flex-wrap:wrap;margin-top:12px;padding-top:10px;
   border-top:1px solid var(--hair)}
@@ -127,7 +135,7 @@ tbody th{text-align:left;color:var(--mut);font-weight:500}
 
 <script>
 'use strict';
-const BUILD = '20260828_0932';
+const BUILD = '20260828_1003';
 const PAGE = 80;
 const SKEY = 'orig_state_v1';
 
@@ -148,6 +156,10 @@ const F = {
   x:   v => v == null ? '' : v.toFixed(1) + 'x',
   d:   v => v == null ? '' : v.toLocaleString('ko-KR') + 'd',
 };
+const VAULT = 'Obsidian BU - Shawn';
+// Obsidian 모바일이 깔려 있고 vault가 동기화돼 있으면 그 노트로 바로 연다.
+const obs = p => 'obsidian://open?vault=' + encodeURIComponent(VAULT) +
+                 '&file=' + encodeURIComponent(String(p).replace(/\.md$/, ''));
 const esc = s => String(s == null ? '' : s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -228,7 +240,8 @@ function rowEl(r) {
 
 function table(periods, src, lab) {
   if (!periods.length) return '';
-  let h = '<div class="wrap"><table><thead><tr><th></th>';
+  let h = '<div class="unit">단위: 억원 <em>(%·x·일수는 행별 표기)</em></div>';
+  h += '<div class="wrap"><table><thead><tr><th></th>';
   h += periods.map(p => '<th>' + lab(p) + '</th>').join('') + '</tr></thead><tbody>';
   for (const k of DATA.keys) {
     const cells = periods.map(p => (src[p] || {})[k.k]);
@@ -262,19 +275,26 @@ function body(r) {
       esc(e[2]) + '</a>' + (e[4] ? '<span style="color:#9b2c2c;font-size:9px">정정</span>' : '') +
       '</div>').join('');
   } else {
-    h += '<div class="empty" style="padding:6px 0;text-align:left">전량 수집 전 구간 — 비어 있을 수 있음</div>';
+    h += '<div class="empty" style="padding:6px 0;text-align:left">' +
+      '아직 수집하지 않았습니다 <em style="font-style:normal;color:var(--dim)">' +
+      '(events.py 미실행 — 3,031사 중 ' + (DATA.ev_done || 0) + '사만 수집됨. 없다는 뜻이 아닙니다)</em></div>';
   }
 
   const vb = r.s && DATA.vault[r.s];
   if (vb) {
-    h += '<div class="lbl">vault <em>' + esc(vb.note) + ' · 링크 ' + vb.tot + '건 · ' + BUILD.slice(0, 8) + ' 스냅샷</em></div>';
+    h += '<div class="lbl">vault <em><a href="' + obs(vb.p) + '" style="color:var(--acc)">' +
+      esc(vb.note) + ' →</a> · 링크 ' + vb.tot + '건 · ' + BUILD.slice(0, 8) + ' 스냅샷</em></div>';
     h += '<div class="vs">';
-    const ovk = { parent_group: '그룹', sector: '섹터', sub_industry: '세부', status: '상태', my_role: 'role' };
+    const ovk = { parent_group: '그룹', sector: '섹터', sub_industry: '세부' };
     const ov = Object.keys(ovk).filter(k => vb.ov[k]);
     if (ov.length) h += '<div class="ovr">' + ov.map(k => '<span>' + ovk[k] + ' <b style="display:inline;color:var(--fg);font-weight:500">' + esc(vb.ov[k]) + '</b></span>').join('') + '</div>';
     for (const s of vb.sec) {
       h += '<b>' + esc(s.l) + ' <span style="color:var(--dim);font-weight:400">' + s.n + '</span></b>';
-      h += s.i.map(x => '<div class="vi">' + (x.d ? '<span>' + x.d.slice(2) + '</span>' : '<span>·</span>') + esc(x.t) + '</div>').join('');
+      h += s.i.map(x =>
+        '<a class="vi" href="' + obs(x.p) + '">' +
+          (x.d ? '<span>' + x.d.slice(2) + '</span>' : '<span>·</span>') +
+          '<i>' + esc(x.t) + (x.x ? '<em>' + esc(x.x) + '</em>' : '') + '</i>' +
+        '</a>').join('');
     }
     h += '</div>';
   }
