@@ -1,9 +1,9 @@
 // Origination PWA — 빌드 단위 캐시.
 // 주간 갱신이라 부분 무효화가 필요 없다. 새 빌드면 이전 캐시를 통째로 버린다.
-const V = '20260828_1003';
+const V = '20260828_1051';
 const CACHE = 'orig-' + V;
-const ASSETS = ['./', './index.html', './data.json', './manifest.json',
-                './icon-192.png', './icon-512.png'];
+const ASSETS = ['./', './index.html', './data.json', './entities.json', './seoul.json', './geo.json',
+                './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));

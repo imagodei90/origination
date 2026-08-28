@@ -14,7 +14,9 @@
 <style>
 :root{
   --bg:#faf9f7; --fg:#1a1a1a; --card:#fff; --bd:#e6e2dc; --mut:#8b8578;
-  --dim:#b3ada2; --acc:#1f3864; --acc-fg:#fff; --hair:#f2efe9;
+  --dim:#b3ada2; --acc:#1f3864; --acc-fg:#fff; --hair:#f2efe9; --ok:#2a7; --warn:#b8860b;
+  --map-bg:#111016; --map-land:#23222a; --map-bd:#35333e; --map-heat:#6f9ada;
+  --map-ext:#0b0a0f; --map-ink:#e8e6e3; --map-sub:#8f8a83;
 }
 @media(prefers-color-scheme:dark){:root{
   --bg:#16151a; --fg:#e8e6e3; --card:#1f1e24; --bd:#33313a; --mut:#8f8a83;
@@ -26,19 +28,25 @@ body{margin:0 auto;max-width:880px;padding:0 13px calc(40px + env(safe-area-inse
   font:15px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
 h1{font-size:17px;margin:16px 0 1px;letter-spacing:-.2px}
 .sub{color:var(--mut);font-size:11.5px}
+.who{display:flex;align-items:center;gap:7px;font-size:10.5px;color:var(--mut);
+  margin-top:7px}
+.who button{font:10.5px inherit;padding:3px 9px;border-radius:7px;border:1px solid var(--bd);
+  background:var(--card);color:var(--mut);cursor:pointer}
 .kpi{display:flex;gap:6px;margin:12px 0 4px}
 .kpi div{flex:1;background:var(--card);border:1px solid var(--bd);border-radius:9px;
   padding:8px 4px;text-align:center}
 .kpi b{display:block;font-size:17px;line-height:1.25;font-variant-numeric:tabular-nums}
 .kpi i{font-style:normal;font-size:9.5px;color:var(--mut)}
-.stick{position:sticky;top:0;z-index:30;background:var(--bg);
-  padding:9px 0 7px;border-bottom:1px solid var(--bd)}
-.tabs{display:flex;gap:4px;margin-bottom:8px}
-.tb{flex:1;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--card);
-  color:var(--mut);font-size:12.5px;text-align:center;cursor:pointer;font-weight:500}
+.stick{position:sticky;top:0;z-index:30;background:var(--bg);padding:9px 0 7px;
+  border-bottom:1px solid var(--bd)}
+.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tb{flex:0 0 auto;padding:8px 13px;border:1px solid var(--bd);border-radius:8px;
+  background:var(--card);color:var(--mut);font-size:12.5px;cursor:pointer;font-weight:500;
+  white-space:nowrap}
 .tb.on{background:var(--acc);color:var(--acc-fg);border-color:var(--acc)}
 #q{width:100%;padding:9px 11px;border:1px solid var(--bd);border-radius:8px;
-  background:var(--card);color:var(--fg);font:13px inherit;margin-bottom:7px}
+  background:var(--card);color:var(--fg);font:13px inherit;margin:7px 0}
 .chips{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
 .chip{flex:0 0 auto;padding:5px 11px;border:1px solid var(--bd);border-radius:13px;
@@ -70,20 +78,22 @@ h1{font-size:17px;margin:16px 0 1px;letter-spacing:-.2px}
 @media(prefers-color-scheme:dark){.tag{background:#3a2020;color:#e89a9a}}
 .lbl{font-size:10.5px;color:var(--mut);font-weight:600;margin:13px 0 5px}
 .lbl em{font-style:normal;color:var(--dim);font-weight:400}
+.unit{font-size:9.5px;color:var(--dim);text-align:right;margin-bottom:3px}
+.unit em{font-style:normal}
 .wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-table{width:100%;border-collapse:collapse;font-size:10.5px;min-width:420px;
+table.tt{width:100%;border-collapse:collapse;font-size:10.5px;min-width:420px;
   font-variant-numeric:tabular-nums}
-th,td{padding:3px 6px;border-bottom:1px solid var(--hair);text-align:right;white-space:nowrap}
-thead th{color:var(--dim);font-weight:600;background:var(--bg);position:sticky;top:0}
-tbody th{text-align:left;color:var(--mut);font-weight:500}
+table.tt th,table.tt td{padding:3px 6px;border-bottom:1px solid var(--hair);
+  text-align:right;white-space:nowrap}
+table.tt thead th{color:var(--dim);font-weight:600;background:var(--bg)}
+table.tt tbody th{text-align:left;color:var(--mut);font-weight:500}
 .ev{display:flex;gap:6px;align-items:baseline;font-size:11px;padding:4px 0;
   border-bottom:1px solid var(--hair);flex-wrap:wrap}
 .evd{color:var(--dim);font-family:ui-monospace,monospace;font-size:10px}
 .cat{font-size:9px;padding:1px 6px;border-radius:4px;background:#e0e7ff;color:#3730a3}
 @media(prefers-color-scheme:dark){.cat{background:#1e3a6b;color:#bfd4ff}}
 .ev a{color:var(--acc);text-decoration:none}
-.vs{margin-top:5px}
-.vs b{font-size:10.5px;display:block;margin:8px 0 3px;color:var(--mut)}
+.vs b{font-size:10.5px;display:block;margin:9px 0 3px;color:var(--mut)}
 .vi{font-size:11px;padding:5px 0;color:var(--fg);display:flex;gap:7px;
   text-decoration:none;border-bottom:1px solid var(--hair)}
 .vi:last-child{border-bottom:none}
@@ -92,13 +102,12 @@ tbody th{text-align:left;color:var(--mut);font-weight:500}
 .vi i{font-style:normal;display:block}
 .vi em{font-style:normal;display:block;color:var(--mut);font-size:10px;line-height:1.5;
   margin-top:2px}
-.unit{font-size:9.5px;color:var(--dim);text-align:right;margin-bottom:3px}
-.unit em{font-style:normal}
 .ovr{font-size:10.5px;color:var(--mut);display:flex;gap:9px;flex-wrap:wrap;margin-bottom:4px}
 .acts{display:flex;gap:5px;flex-wrap:wrap;margin-top:12px;padding-top:10px;
   border-top:1px solid var(--hair)}
 .ab{font-size:11px;padding:6px 11px;border-radius:7px;border:1px solid var(--bd);
-  background:var(--card);color:var(--mut);cursor:pointer;font-family:inherit}
+  background:var(--card);color:var(--mut);cursor:pointer;font-family:inherit;
+  text-decoration:none;display:inline-block}
 .ab.on{background:var(--acc);color:var(--acc-fg);border-color:var(--acc)}
 .memo{width:100%;margin-top:7px;padding:7px 9px;border:1px solid var(--bd);border-radius:7px;
   background:var(--bg);color:var(--fg);font:11.5px inherit;min-height:40px;resize:vertical}
@@ -108,12 +117,62 @@ tbody th{text-align:left;color:var(--mut);font-weight:500}
 .ft{color:var(--dim);font-size:10px;margin-top:22px;padding-top:11px;
   border-top:1px solid var(--bd);line-height:1.7}
 .load{text-align:center;padding:60px 0;color:var(--mut);font-size:12.5px}
+.pane{display:none}.pane.on{display:block}
+/* ── 폼 ── */
+.card{background:var(--card);border:1px solid var(--bd);border-radius:11px;padding:14px;
+  margin-bottom:11px}
+.fr{margin-bottom:10px}
+.fr label{display:block;font-size:10.5px;color:var(--mut);margin-bottom:4px;font-weight:600}
+.fr label em{font-style:normal;color:var(--dim);font-weight:400}
+.fr input,.fr select,.fr textarea{width:100%;padding:9px 11px;border:1px solid var(--bd);
+  border-radius:8px;font:13px -apple-system,'Segoe UI',sans-serif;background:var(--bg);
+  color:var(--fg)}
+.fr textarea{min-height:76px;resize:vertical}
+.row2{display:flex;gap:8px}.row2>*{flex:1}
+.seg{display:flex;border:1px solid var(--bd);border-radius:9px;overflow:hidden;
+  margin-bottom:10px}
+.seg div{flex:1;text-align:center;padding:9px;font-size:12px;color:var(--mut);
+  background:var(--card);cursor:pointer}
+.seg div.on{background:var(--acc);color:var(--acc-fg)}
+.drop{border:2px dashed var(--bd);border-radius:10px;padding:20px;text-align:center;
+  color:var(--mut);font-size:12px;background:var(--bg);cursor:pointer}
+.drop b{display:block;font-size:21px;margin-bottom:5px}
+.drop.has{border-style:solid;border-color:var(--acc);color:var(--acc)}
+.btn{font-size:12px;padding:9px 16px;border-radius:8px;border:1px solid var(--bd);
+  background:var(--card);color:var(--mut);font-family:inherit;cursor:pointer}
+.btn.p{background:var(--acc);color:var(--acc-fg);border-color:var(--acc)}
+.btn:disabled{opacity:.45}
+.qrow{display:flex;gap:8px;align-items:center;font-size:11.5px;padding:8px 0;
+  border-bottom:1px solid var(--hair);flex-wrap:wrap}
+.qs{font-size:9.5px;padding:2px 8px;border-radius:9px}
+.q-wait{background:#eeece8;color:#7a746a}.q-run{background:#fef3c7;color:#92400e}
+.q-ok{background:#dcfce7;color:#166534}.q-err{background:#fee2e2;color:#991b1b}
+@media(prefers-color-scheme:dark){
+.q-wait{background:#26252c;color:#a8a29a}.q-run{background:#4a3a12;color:#f0d089}
+.q-ok{background:#14371f;color:#8fdca8}.q-err{background:#3a2020;color:#e89a9a}}
+pre.out{background:var(--bg);border:1px solid var(--bd);border-radius:9px;padding:11px 12px;
+  font:11.5px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;
+  color:var(--fg);margin:0;max-height:400px;overflow:auto}
+/* ── 지도 ── */
+.mapbox{background:var(--map-bg);border-radius:12px;padding:6px;overflow:hidden}
+.cal{display:grid;grid-template-columns:repeat(21,1fr);gap:3px;margin:6px 0}
+.cel{aspect-ratio:1;border-radius:2px;background:var(--hair)}
+.cel.l1{background:var(--acc);opacity:.28}.cel.l2{background:var(--acc);opacity:.5}
+.cel.l3{background:var(--acc);opacity:.72}.cel.l4{background:var(--acc);opacity:.95}
+.callg{display:flex;align-items:center;gap:4px;font-size:9.5px;color:var(--dim);
+  justify-content:flex-end}
+.callg i{width:11px;height:11px;border-radius:2px;display:block}
+.lg{display:flex;gap:13px;flex-wrap:wrap;font-size:11px;color:var(--mut);margin-top:9px}
+.lg b{color:var(--fg)}
+.gate{text-align:center;padding:50px 14px}
+.gate p{font-size:12px;color:var(--mut);margin:10px 0 18px;line-height:1.7}
 </style>
 </head>
 <body>
 
 <h1>Origination</h1>
 <div class="sub" id="hd">불러오는 중…</div>
+<div class="who" id="who"></div>
 
 <div class="kpi" id="kpi"></div>
 
@@ -121,264 +180,604 @@ tbody th{text-align:left;color:var(--mut);font-weight:500}
   <div class="tabs">
     <div class="tb on" data-t="scan">스캔</div>
     <div class="tb" data-t="watch">관심</div>
+    <div class="tb" data-t="idea">Idea</div>
+    <div class="tb" data-t="field">Field Notes</div>
+    <div class="tb" data-t="word">Wordsmith</div>
   </div>
-  <input id="q" placeholder="회사명 · 종목코드" autocomplete="off">
-  <div class="chips" id="sorts"></div>
-  <div class="chips" id="filts" style="margin-top:5px"></div>
+  <div id="scanctl">
+    <input id="q" placeholder="회사명 · 종목코드" autocomplete="off">
+    <div class="chips" id="sorts"></div>
+    <div class="chips" id="filts" style="margin-top:5px"></div>
+  </div>
 </div>
 
 <div class="cnt" id="cnt"></div>
 <div id="list"><div class="load">데이터를 받는 중…</div></div>
 <button class="more" id="more" style="display:none">더 보기</button>
+<div id="panes"></div>
 
 <div class="ft" id="ft"></div>
 
-<script>
-'use strict';
-const BUILD = '20260828_1003';
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
+         setPersistence, browserLocalPersistence }
+  from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+import { getFirestore, collection, doc, addDoc, setDoc, onSnapshot, query,
+         orderBy, limit, serverTimestamp, enableIndexedDbPersistence }
+  from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+import { getStorage, ref as sref, uploadBytes, getDownloadURL }
+  from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
+
+const BUILD = '20260828_1051';
 const PAGE = 80;
-const SKEY = 'orig_state_v1';
 
-let DATA = null, STATE = {}, TAB = 'scan', SORT = 'ev', FILT = 'all', shown = 0, view = [];
+// Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
+const app = initializeApp({
+  apiKey: "AIzaSyCmo9gyAFNfRaSR0GdyJ2BmamhpzfYuQGE",
+  authDomain: "routine-log-7d91b.firebaseapp.com",
+  projectId: "routine-log-7d91b",
+  storageBucket: "routine-log-7d91b.firebasestorage.app",
+  messagingSenderId: "271884499594",
+  appId: "1:271884499594:web:12217347b04ab2448d8b73"
+});
+const auth = getAuth(app);
+setPersistence(auth, browserLocalPersistence);
+const db = getFirestore(app);
+const storage = getStorage(app);
+// 오프라인에서도 담기가 되게 — 연결되면 SDK 가 알아서 올린다
+enableIndexedDbPersistence(db).catch(() => {});
 
-// ── 상태 (지금은 기기별. Firestore 동기화는 v2) ──
-try { STATE = JSON.parse(localStorage.getItem(SKEY) || '{}'); } catch (e) { STATE = {}; }
-function saveState() {
-  try { localStorage.setItem(SKEY, JSON.stringify(STATE)); } catch (e) {}
-}
-const stOf = c => (STATE[c] && STATE[c].st) || 'new';
-const SLBL = { new: '신규', watch: '관심', seen: '검토', drop: '제외' };
+let DATA = null, ENT = null, MAP = null, USER = null;
+let STATE = {}, LOGS = [], QUEUE = [];
+let TAB = 'scan', SORT = 'ev', FILT = 'all', shown = 0, view = [];
 
-// ── 포맷 ──
-const F = {
-  eok: v => v == null ? '' : v.toLocaleString('ko-KR', { maximumFractionDigits: 0 }),
-  pct: v => v == null ? '' : (v * 100).toFixed(1) + '%',
-  x:   v => v == null ? '' : v.toFixed(1) + 'x',
-  d:   v => v == null ? '' : v.toLocaleString('ko-KR') + 'd',
-};
+const esc = s => String(s == null ? '' : s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const VAULT = 'Obsidian BU - Shawn';
-// Obsidian 모바일이 깔려 있고 vault가 동기화돼 있으면 그 노트로 바로 연다.
 const obs = p => 'obsidian://open?vault=' + encodeURIComponent(VAULT) +
                  '&file=' + encodeURIComponent(String(p).replace(/\.md$/, ''));
-const esc = s => String(s == null ? '' : s)
-  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const F = {
+  eok: v => v==null?'':v.toLocaleString('ko-KR',{maximumFractionDigits:0}),
+  pct: v => v==null?'':(v*100).toFixed(1)+'%',
+  x:   v => v==null?'':v.toFixed(1)+'x',
+  d:   v => v==null?'':v.toLocaleString('ko-KR')+'d',
+};
+const $ = id => document.getElementById(id);
+const todayStr = () => { const d=new Date(); return d.getFullYear()+'-'+
+  String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
 
-function spark(vals) {
-  const v = vals.filter(x => x != null);
-  if (v.length < 2) return '';
-  const lo = Math.min(...v), hi = Math.max(...v), r = (hi - lo) || 1;
-  const b = '▁▂▃▄▅▆▇';
-  return vals.map(x => x == null ? '·' : b[Math.min(Math.floor((x - lo) / r * 6), 6)]).join('');
+function spark(vals){
+  const v = vals.filter(x=>x!=null);
+  if (v.length<2) return '';
+  const lo=Math.min(...v), hi=Math.max(...v), r=(hi-lo)||1, b='▁▂▃▄▅▆▇';
+  return vals.map(x=>x==null?'·':b[Math.min(Math.floor((x-lo)/r*6),6)]).join('');
 }
 
-// ── 정렬·필터 ──
-const SORTS = [
-  ['ev', '공시 많은순', (a, b) => b.nev - a.nev || a.n.localeCompare(b.n)],
-  ['debt', '차입금 증가', (a, b) => (b.dg == null ? -9 : b.dg) - (a.dg == null ? -9 : a.dg)],
-  ['fcf', 'FCF 낮은순', (a, b) => (a.fc == null ? 9e15 : a.fc) - (b.fc == null ? 9e15 : b.fc)],
-  ['margin', '마진 악화', (a, b) => (a.mg == null ? 9 : a.mg) - (b.mg == null ? 9 : b.mg)],
-  ['rev', '매출 역성장', (a, b) => (a.rg == null ? 9 : a.rg) - (b.rg == null ? 9 : b.rg)],
-  ['score', '스코어', (a, b) => b.sc - a.sc],
-];
-const FILTS = [
-  ['all', '전체'], ['new', '미검토'], ['watch', '관심'],
-  ['seen', '검토'], ['nodrop', '제외 숨김'],
-];
+/* ── 인증 ─────────────────────────────────────── */
+onAuthStateChanged(auth, u => {
+  USER = u;
+  $('who').innerHTML = u
+    ? '<span>' + esc(u.email||u.displayName||'') + '</span>' +
+      '<button id="out">로그아웃</button>'
+    : '<button id="in">Google 로그인</button>' +
+      '<span style="color:var(--dim)">로그인해야 담기·동기화가 됩니다</span>';
+  if (u) subscribe(u.uid);
+  render();
+});
+document.addEventListener('click', e => {
+  if (e.target.id === 'in') signInWithPopup(auth, new GoogleAuthProvider()).catch(x=>alert(x.message));
+  if (e.target.id === 'out') signOut(auth);
+});
 
-function rebuild() {
-  const q = document.getElementById('q').value.trim().toLowerCase();
+function subscribe(uid){
+  onSnapshot(doc(db,'users',uid,'origination','state'), s => {
+    STATE = (s.exists() ? s.data().m : null) || {}; kpi(); if(TAB!=='idea'&&TAB!=='word') render();
+  });
+  onSnapshot(query(collection(db,'users',uid,'orig_inbox'),orderBy('at','desc'),limit(40)),
+    s => { QUEUE = s.docs.map(d=>({id:d.id,...d.data()})); if(TAB==='idea'||TAB==='word'||TAB==='field') render(); });
+  onSnapshot(query(collection(db,'users',uid,'field_notes'),orderBy('date','desc'),limit(400)),
+    s => { LOGS = s.docs.map(d=>({id:d.id,...d.data()})); if(TAB==='field') render(); });
+}
+const saveState = () => USER &&
+  setDoc(doc(db,'users',USER.uid,'origination','state'), {m:STATE, at:serverTimestamp()});
+const enqueue = (kind, payload) => USER
+  ? addDoc(collection(db,'users',USER.uid,'orig_inbox'),
+      {kind, ...payload, status:'pending', at:serverTimestamp()})
+  : Promise.reject(new Error('로그인이 필요합니다'));
+
+const stOf = c => (STATE[c] && STATE[c].st) || 'new';
+const SLBL = {new:'신규',watch:'관심',seen:'검토',drop:'제외'};
+
+/* ── 스캔·관심 ─────────────────────────────────── */
+const SORTS = [
+  ['ev','공시 많은순',(a,b)=>b.nev-a.nev||a.n.localeCompare(b.n)],
+  ['debt','차입금 증가',(a,b)=>(b.dg==null?-9:b.dg)-(a.dg==null?-9:a.dg)],
+  ['fcf','FCF 낮은순',(a,b)=>(a.fc==null?9e15:a.fc)-(b.fc==null?9e15:b.fc)],
+  ['margin','마진 악화',(a,b)=>(a.mg==null?9:a.mg)-(b.mg==null?9:b.mg)],
+  ['rev','매출 역성장',(a,b)=>(a.rg==null?9:a.rg)-(b.rg==null?9:b.rg)],
+  ['score','스코어',(a,b)=>b.sc-a.sc],
+];
+const FILTS = [['all','전체'],['new','미검토'],['watch','관심'],['seen','검토'],
+               ['nodrop','제외 숨김']];
+
+function rebuild(){
+  const q = ($('q').value||'').trim().toLowerCase();
   let rows = DATA.companies;
-  if (TAB === 'watch') rows = rows.filter(r => stOf(r.c) === 'watch');
-  else if (FILT === 'nodrop') rows = rows.filter(r => stOf(r.c) !== 'drop');
-  else if (FILT !== 'all') rows = rows.filter(r => stOf(r.c) === FILT);
-  if (q) rows = rows.filter(r => r.n.toLowerCase().includes(q) || (r.s || '').includes(q));
-  const cmp = SORTS.find(s => s[0] === SORT)[2];
-  view = rows.slice().sort(cmp);
-  shown = 0;
-  document.getElementById('list').innerHTML = '';
-  document.getElementById('cnt').textContent =
-    view.length.toLocaleString() + '사' + (q ? ' · "' + q + '"' : '');
+  if (TAB==='watch') rows = rows.filter(r=>stOf(r.c)==='watch');
+  else if (FILT==='nodrop') rows = rows.filter(r=>stOf(r.c)!=='drop');
+  else if (FILT!=='all') rows = rows.filter(r=>stOf(r.c)===FILT);
+  if (q) rows = rows.filter(r=>r.n.toLowerCase().includes(q)||(r.s||'').includes(q));
+  view = rows.slice().sort(SORTS.find(s=>s[0]===SORT)[2]);
+  shown = 0; $('list').innerHTML='';
+  $('cnt').textContent = view.length.toLocaleString()+'사'+(q?' · "'+q+'"':'');
   page();
 }
-
-function page() {
-  const list = document.getElementById('list');
-  const frag = document.createDocumentFragment();
-  const end = Math.min(shown + PAGE, view.length);
-  for (let i = shown; i < end; i++) frag.appendChild(rowEl(view[i]));
-  list.appendChild(frag);
-  shown = end;
-  const m = document.getElementById('more');
-  if (shown < view.length) {
-    m.style.display = '';
-    m.textContent = '더 보기 (' + (view.length - shown).toLocaleString() + '사 남음)';
-  } else {
-    m.style.display = 'none';
-  }
-  if (!view.length) list.innerHTML = '<div class="empty">해당하는 회사가 없습니다</div>';
+function page(){
+  const frag=document.createDocumentFragment(), end=Math.min(shown+PAGE,view.length);
+  for(let i=shown;i<end;i++) frag.appendChild(rowEl(view[i]));
+  $('list').appendChild(frag); shown=end;
+  const m=$('more');
+  if(shown<view.length){m.style.display='';m.textContent='더 보기 ('+(view.length-shown).toLocaleString()+'사 남음)';}
+  else m.style.display='none';
+  if(!view.length) $('list').innerHTML='<div class="empty">해당하는 회사가 없습니다</div>';
 }
-
-function rowEl(r) {
-  const d = document.createElement('details');
-  d.className = 'row';
-  const st = stOf(r.c);
-  const rev = r.y.map(y => (r.A[y] || {}).revenue);
-  d.innerHTML =
-    '<summary>' +
-      '<span class="nm">' + esc(r.n) + '</span>' +
-      (r.s ? '<span class="cd">' + r.s + '</span>' : '') +
-      '<span class="spk">' + spark(rev) + '</span>' +
-      '<span class="st st-' + st + '">' + SLBL[st] + '</span>' +
-      (r.nev ? '<span class="evn">공시 ' + r.nev + '</span>' : '') +
-      (r.as ? '<span class="sz">' + r.as.toLocaleString() + '억</span>' : '') +
-    '</summary>';
-  d.addEventListener('toggle', function () {
-    if (d.open && !d.dataset.built) { d.insertAdjacentHTML('beforeend', body(r)); d.dataset.built = '1'; }
-  }, { once: false });
+function rowEl(r){
+  const d=document.createElement('details'); d.className='row';
+  const st=stOf(r.c);
+  d.innerHTML='<summary><span class="nm">'+esc(r.n)+'</span>'+
+    (r.s?'<span class="cd">'+r.s+'</span>':'')+
+    '<span class="spk">'+spark(r.y.map(y=>(r.A[y]||{}).revenue))+'</span>'+
+    '<span class="st st-'+st+'">'+SLBL[st]+'</span>'+
+    (r.nev?'<span class="evn">공시 '+r.nev+'</span>':'')+
+    (r.as?'<span class="sz">'+r.as.toLocaleString()+'억</span>':'')+'</summary>';
+  d.addEventListener('toggle',()=>{ if(d.open&&!d.dataset.b){
+    d.insertAdjacentHTML('beforeend', body(r)); d.dataset.b='1'; }});
   return d;
 }
-
-function table(periods, src, lab) {
-  if (!periods.length) return '';
-  let h = '<div class="unit">단위: 억원 <em>(%·x·일수는 행별 표기)</em></div>';
-  h += '<div class="wrap"><table><thead><tr><th></th>';
-  h += periods.map(p => '<th>' + lab(p) + '</th>').join('') + '</tr></thead><tbody>';
-  for (const k of DATA.keys) {
-    const cells = periods.map(p => (src[p] || {})[k.k]);
-    if (cells.every(v => v == null)) continue;
-    h += '<tr><th>' + esc(k.l) + '</th>' +
-         cells.map(v => '<td>' + (v == null ? '<span style="color:var(--dim)">·</span>' : F[k.f](v)) + '</td>').join('') +
-         '</tr>';
+function table(periods,src,lab){
+  if(!periods.length) return '';
+  let h='<div class="unit">단위: 억원 <em>(%·x·일수는 행별 표기)</em></div>'+
+    '<div class="wrap"><table class="tt"><thead><tr><th></th>'+
+    periods.map(p=>'<th>'+lab(p)+'</th>').join('')+'</tr></thead><tbody>';
+  for(const k of DATA.keys){
+    const cells=periods.map(p=>(src[p]||{})[k.k]);
+    if(cells.every(v=>v==null)) continue;
+    h+='<tr><th>'+esc(k.l)+'</th>'+cells.map(v=>'<td>'+
+      (v==null?'<span style="color:var(--dim)">·</span>':F[k.f](v))+'</td>').join('')+'</tr>';
   }
-  return h + '</tbody></table></div>';
+  return h+'</tbody></table></div>';
 }
-
-function body(r) {
-  const st = stOf(r.c);
-  let h = '<div class="bd">';
-  if (r.tg.length) h += '<div class="tags">' + r.tg.map(t => '<span class="tag">' + esc(t) + '</span>').join('') + '</div>';
-
-  h += '<div class="lbl">연간 <em>' + r.y[0] + '-' + r.y[r.y.length - 1] + '</em></div>';
-  h += table(r.y, r.A, p => p.slice(2));
-
-  if (r.q.length) {
-    h += '<div class="lbl">분기 <em>최근 ' + r.q.length + '개</em></div>';
-    h += table(r.q, r.Q, p => p.slice(2, 4) + '.' + p.slice(4));
-  }
-
-  h += '<div class="lbl">자본활동 공시</div>';
-  if (r.ev.length) {
-    h += r.ev.map(e => '<div class="ev"><span class="evd">' +
-      e[0].slice(2, 4) + '.' + e[0].slice(4, 6) + '.' + e[0].slice(6, 8) + '</span>' +
-      '<span class="cat">' + esc(e[1]) + '</span>' +
-      '<a href="https://dart.fss.or.kr/dsaf001/main.do?rcpNo=' + e[3] + '" target="_blank" rel="noopener">' +
-      esc(e[2]) + '</a>' + (e[4] ? '<span style="color:#9b2c2c;font-size:9px">정정</span>' : '') +
-      '</div>').join('');
-  } else {
-    h += '<div class="empty" style="padding:6px 0;text-align:left">' +
-      '아직 수집하지 않았습니다 <em style="font-style:normal;color:var(--dim)">' +
-      '(events.py 미실행 — 3,031사 중 ' + (DATA.ev_done || 0) + '사만 수집됨. 없다는 뜻이 아닙니다)</em></div>';
-  }
-
-  const vb = r.s && DATA.vault[r.s];
-  if (vb) {
-    h += '<div class="lbl">vault <em><a href="' + obs(vb.p) + '" style="color:var(--acc)">' +
-      esc(vb.note) + ' →</a> · 링크 ' + vb.tot + '건 · ' + BUILD.slice(0, 8) + ' 스냅샷</em></div>';
-    h += '<div class="vs">';
-    const ovk = { parent_group: '그룹', sector: '섹터', sub_industry: '세부' };
-    const ov = Object.keys(ovk).filter(k => vb.ov[k]);
-    if (ov.length) h += '<div class="ovr">' + ov.map(k => '<span>' + ovk[k] + ' <b style="display:inline;color:var(--fg);font-weight:500">' + esc(vb.ov[k]) + '</b></span>').join('') + '</div>';
-    for (const s of vb.sec) {
-      h += '<b>' + esc(s.l) + ' <span style="color:var(--dim);font-weight:400">' + s.n + '</span></b>';
-      h += s.i.map(x =>
-        '<a class="vi" href="' + obs(x.p) + '">' +
-          (x.d ? '<span>' + x.d.slice(2) + '</span>' : '<span>·</span>') +
-          '<i>' + esc(x.t) + (x.x ? '<em>' + esc(x.x) + '</em>' : '') + '</i>' +
-        '</a>').join('');
+function body(r){
+  const st=stOf(r.c); let h='<div class="bd">';
+  if(r.tg.length) h+='<div class="tags">'+r.tg.map(t=>'<span class="tag">'+esc(t)+'</span>').join('')+'</div>';
+  h+='<div class="lbl">연간 <em>'+r.y[0]+'-'+r.y[r.y.length-1]+'</em></div>'+table(r.y,r.A,p=>p.slice(2));
+  if(r.q.length) h+='<div class="lbl">분기 <em>최근 '+r.q.length+'개</em></div>'+
+    table(r.q,r.Q,p=>p.slice(2,4)+'.'+p.slice(4));
+  else h+='<div class="lbl">분기 <em>미수집</em></div>';
+  h+='<div class="lbl">자본활동 공시</div>';
+  h+= r.ev.length ? r.ev.map(e=>'<div class="ev"><span class="evd">'+
+      e[0].slice(2,4)+'.'+e[0].slice(4,6)+'.'+e[0].slice(6,8)+'</span><span class="cat">'+
+      esc(e[1])+'</span><a href="https://dart.fss.or.kr/dsaf001/main.do?rcpNo='+e[3]+
+      '" target="_blank" rel="noopener">'+esc(e[2])+'</a></div>').join('')
+    : '<div class="empty" style="padding:6px 0;text-align:left">아직 수집하지 않았습니다 '+
+      '<em style="font-style:normal;color:var(--dim)">(3,031사 중 '+(DATA.ev_done||0)+
+      '사만 수집됨. 없다는 뜻이 아닙니다)</em></div>';
+  const vb=r.s&&DATA.vault[r.s];
+  if(vb){
+    h+='<div class="lbl">vault <em><a href="'+obs(vb.p)+'" style="color:var(--acc)">'+
+      esc(vb.note)+' →</a> · 링크 '+vb.tot+'건</em></div><div class="vs">';
+    const ovk={parent_group:'그룹',sector:'섹터',sub_industry:'세부'};
+    const ov=Object.keys(ovk).filter(k=>vb.ov[k]);
+    if(ov.length) h+='<div class="ovr">'+ov.map(k=>'<span>'+ovk[k]+' '+esc(vb.ov[k])+'</span>').join('')+'</div>';
+    for(const s of vb.sec){
+      h+='<b>'+esc(s.l)+' <span style="color:var(--dim);font-weight:400">'+s.n+'</span></b>';
+      h+=s.i.map(x=>'<a class="vi" href="'+obs(x.p)+'">'+(x.d?'<span>'+x.d.slice(2)+'</span>':'<span>·</span>')+
+        '<i>'+esc(x.t)+(x.x?'<em>'+esc(x.x)+'</em>':'')+'</i></a>').join('');
     }
-    h += '</div>';
+    h+='</div>';
   }
-
-  h += '<div class="acts">' +
-    ['watch', 'seen', 'drop'].map(k =>
-      '<button class="ab' + (st === k ? ' on' : '') + '" data-c="' + r.c + '" data-st="' + k + '">' + SLBL[k] + '</button>').join('') +
-    '<a class="ab" href="https://dart.fss.or.kr/dsab007/main.do?textCrpNm=' + encodeURIComponent(r.n) + '" target="_blank" rel="noopener">DART →</a>' +
-    '</div>' +
-    '<textarea class="memo" data-memo="' + r.c + '" placeholder="메모">' + esc((STATE[r.c] || {}).memo || '') + '</textarea>';
-  return h + '</div>';
+  h+='<div class="acts">'+['watch','seen','drop'].map(k=>
+    '<button class="ab'+(st===k?' on':'')+'" data-c="'+r.c+'" data-st="'+k+'">'+SLBL[k]+'</button>').join('')+
+    '<button class="ab" data-idea="'+r.c+'">Idea 등록 →</button>'+
+    '<a class="ab" href="https://dart.fss.or.kr/dsab007/main.do?textCrpNm='+
+      encodeURIComponent(r.n)+'" target="_blank" rel="noopener">DART →</a></div>'+
+    '<textarea class="memo" data-memo="'+r.c+'" placeholder="메모">'+
+      esc((STATE[r.c]||{}).memo||'')+'</textarea>';
+  return h+'</div>';
 }
 
-// ── 이벤트 (위임) ──
-document.addEventListener('click', e => {
-  const b = e.target.closest('.ab[data-st]');
-  if (b) {
-    const c = b.dataset.c, k = b.dataset.st;
-    STATE[c] = STATE[c] || {};
-    STATE[c].st = (STATE[c].st === k) ? 'new' : k;
-    saveState();
-    const box = b.closest('details');
-    box.querySelectorAll('.ab[data-st]').forEach(x =>
-      x.classList.toggle('on', x.dataset.st === STATE[c].st));
-    const s = box.querySelector('.st');
-    s.className = 'st st-' + stOf(c); s.textContent = SLBL[stOf(c)];
-    kpi();
+/* ── 상대 드롭다운 ─────────────────────────────── */
+function entOptions(sel){
+  if(!ENT) return '<option>불러오는 중…</option>';
+  let h = '<option value="">— 선택 —</option>';
+  for(const g of ENT.groups){
+    const rows = ENT.items.filter(x=>x.g===g.k);
+    if(!rows.length) continue;
+    h += '<optgroup label="'+esc(g.l)+' ('+rows.length.toLocaleString()+')">';
+    h += rows.map(x=>'<option'+(x.n===sel?' selected':'')+'>'+esc(x.n)+'</option>').join('');
+    h += '</optgroup>';
+  }
+  return h + '<option value="__new__">＋ 직접 입력…</option>';
+}
+function pickHandler(selId, inpId){
+  const s=$(selId), i=$(inpId);
+  if(!s||!i) return;
+  s.onchange = () => {
+    const nw = s.value==='__new__';
+    i.style.display = nw ? '' : 'none';
+    if(nw){ i.value=''; i.focus(); }
+  };
+}
+
+/* ── 큐 표시 ───────────────────────────────────── */
+const QLBL = {pending:['대기','q-wait'],running:['처리중','q-run'],
+              done:['완료','q-ok'],error:['실패','q-err']};
+function queueRows(kind){
+  const rows = QUEUE.filter(q=>q.kind===kind);
+  if(!rows.length) return '<div class="empty" style="padding:10px 0">담은 항목이 없습니다</div>';
+  return rows.map(q=>{
+    const [lb,cls] = QLBL[q.status]||QLBL.pending;
+    const when = q.at&&q.at.toDate ? q.at.toDate().toLocaleString('ko-KR',
+      {month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '방금';
+    return '<div class="qrow"><span class="evd">'+esc(when)+'</span>'+
+      '<span style="flex:1;min-width:120px">'+esc(q.title||q.target||q.company||'—')+'</span>'+
+      '<span class="qs '+cls+'">'+lb+'</span>'+
+      (q.result_path?'<a class="ab" style="padding:3px 9px" href="'+obs(q.result_path)+'">노트 →</a>':'')+
+      (q.error?'<span style="color:#9b2c2c;font-size:10px;width:100%">'+esc(q.error)+'</span>':'')+
+      '</div>';
+  }).join('');
+}
+
+/* ── Idea 탭 ──────────────────────────────────── */
+let ideaPrefill = '';
+function paneIdea(){
+  return '<div class="card">'+
+    '<div class="fr"><label>대상</label>'+
+      '<select id="id-t">'+entOptions(ideaPrefill)+'</select>'+
+      '<input id="id-tn" placeholder="직접 입력" style="display:none;margin-top:7px"></div>'+
+    '<div class="fr"><label>각 · 아이디어 <em>메모 수준이어도 됩니다 — PC가 다듬습니다</em></label>'+
+      '<textarea id="id-a" placeholder="왜 지금 이 회사인가"></textarea></div>'+
+    '<div class="row2">'+
+      '<div class="fr"><label>stage</label><select id="id-s">'+
+        ['idea','contacted','meeting','proposal','dropped']
+          .map(x=>'<option>'+x+'</option>').join('')+'</select></div>'+
+      '<div class="fr"><label>due <em>필수</em></label>'+
+        '<input id="id-d" type="date" value="'+todayStr()+'"></div></div>'+
+    '<div class="acts" style="border:none;padding:0"><button class="btn p" id="id-go">큐에 담기</button>'+
+      '<span id="id-msg" style="font-size:11px;color:var(--mut);align-self:center"></span></div>'+
+  '</div>'+
+  '<div class="lbl">담은 항목</div><div class="card">'+queueRows('idea')+'</div>'+
+  '<div class="ft" style="margin:0;border:none">담기는 즉시 저장되고, PC의 Toolbox가 '+
+  '<code>origination_idea</code> 로직(중복 검사 · 대상 노트 실존 확인 · due 강제)을 태운 뒤 '+
+  '<code>7. Work/93. Origination/</code> 에 md를 만듭니다.</div>';
+}
+
+/* ── Field Notes 탭 ───────────────────────────── */
+let fnMode = 'rec', fnFile = null;
+const ZKEY = ['YBD','CBD','GBD','ETC'];
+const ZNAME = {YBD:'여의도',CBD:'광화문',GBD:'강남',ETC:'기타'};
+
+function paneField(){
+  return '<div class="card">'+
+    '<div class="fr"><label>상대 <em>통합 목록 '+
+      (ENT?ENT.items.length.toLocaleString():'—')+'곳</em></label>'+
+      '<select id="fn-c">'+entOptions('')+'</select>'+
+      '<input id="fn-cn" placeholder="직접 입력" style="display:none;margin-top:7px"></div>'+
+    '<div class="row2">'+
+      '<div class="fr"><label>일자 <em>자동</em></label>'+
+        '<input id="fn-d" type="date" value="'+todayStr()+'"></div>'+
+      '<div class="fr"><label>권역</label><select id="fn-z">'+
+        ZKEY.map(z=>'<option value="'+z+'">'+z+' '+ZNAME[z]+'</option>').join('')+
+        '</select></div></div>'+
+    '<div class="fr"><label>참석</label>'+
+      '<input id="fn-p" placeholder="김OO 상무, 박OO 부장"></div>'+
+    '<div class="fr"><label>장소 <em>건물명·동·주소 아무거나 — 지도에 찍는 데 씁니다</em></label>'+
+      '<input id="fn-l" list="lmlist" placeholder="예: IFC · 여의도동 · 테헤란로 133">'+
+      '<datalist id="lmlist">'+(GEO?Object.keys(GEO.landmark)
+        .map(k=>'<option>'+esc(k)+'</option>').join(''):'')+'</datalist></div>'+
+    '<div class="fr"><label>기록 방식</label>'+
+      '<div class="seg" id="fn-seg">'+
+        '<div data-m="rec" class="'+(fnMode==='rec'?'on':'')+'">🎙 녹음</div>'+
+        '<div data-m="txt" class="'+(fnMode==='txt'?'on':'')+'">✍️ 직접 입력</div>'+
+        '<div data-m="both" class="'+(fnMode==='both'?'on':'')+'">둘 다</div></div>'+
+      '<div id="fn-rec" style="display:'+(fnMode==='txt'?'none':'')+'">'+
+        '<label class="drop'+(fnFile?' has':'')+'" id="fn-drop">'+
+          '<b>🎙</b>'+(fnFile?esc(fnFile.name):'탭해서 녹음 파일 선택')+'<br>'+
+          '<span style="font-size:10.5px;color:var(--dim)">m4a · mp3 · wav — PC가 전사합니다</span>'+
+          '<input id="fn-f" type="file" accept="audio/*" style="display:none"></label></div>'+
+      '<textarea id="fn-t" style="margin-top:9px;display:'+(fnMode==='rec'?'none':'')+'" '+
+        'placeholder="녹음이 없으면 여기에 적습니다. 메모 수준이어도 됩니다 — 문장으로 다듬는 건 PC가 합니다."></textarea>'+
+    '</div>'+
+    '<div class="acts" style="border:none;padding:0"><button class="btn p" id="fn-go">기록 담기</button>'+
+      '<span id="fn-msg" style="font-size:11px;color:var(--mut);align-self:center"></span></div>'+
+  '</div>'+
+  heatmap()+
+  '<div class="lbl">담은 기록</div><div class="card">'+queueRows('field')+'</div>';
+}
+
+/* ── 좌표 해석 ─────────────────────────────────
+   장소 텍스트 → SVG 좌표. 앞이 이기고 없으면 뒤로 떨어진다.
+     landmark → dong → gu → 권역 안 고정 지터(회사명 해시)
+   해석 근거를 src 로 같이 남겨 나중에 정확도를 되짚을 수 있게 한다. */
+function hash32(s){ let h=2166136261;
+  for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); }
+  return h>>>0; }
+
+function resolveXY(place, zone, company){
+  if(!GEO) return [null,null,''];
+  const p=(place||'').trim();
+  if(p){
+    for(const k of Object.keys(GEO.landmark))
+      if(p.includes(k)) return [...GEO.landmark[k],'landmark'];
+    for(const k of Object.keys(GEO.dong))
+      if(p.includes(k)) return [...GEO.dong[k],'dong'];
+    for(const k of Object.keys(GEO.gu))
+      if(p.includes(k)) return [...GEO.gu[k],'gu'];
+  }
+  // 권역 대표 구 안에서 회사명 해시로 고정 — 같은 회사는 늘 같은 자리
+  const rep={YBD:'영등포구',CBD:'중구',GBD:'강남구'}[zone];
+  if(!rep||!GEO.gu[rep]) return [null,null,''];
+  const c=GEO.gu[rep], h=hash32(company||'');
+  const a=(h%3600)/3600*Math.PI*2, r=14+((h>>12)%26);
+  return [+(c[0]+r*Math.cos(a)).toFixed(1), +(c[1]+r*Math.sin(a)).toFixed(1), 'jitter'];
+}
+
+/* ── 서울 히트맵 (입체 다크) ──────────────────── */
+function heatmap(){
+  if(!MAP) return '';
+  const cnt = {CBD:0,YBD:0,GBD:0};
+  const days = {};
+  for(const l of LOGS){
+    if(cnt[l.zone]!=null) cnt[l.zone]++;
+    days[l.date] = (days[l.date]||0)+1;
+  }
+  const mx = Math.max(1,...Object.values(cnt));
+  const EXT = 13;
+  let g = '';
+  // 압출 — 전체를 아래로 깔면 위층이 내부 경계를 덮어 바깥 옆면만 남는다
+  for(let i=EXT;i>0;i--){
+    g += '<g transform="translate(0,'+i+')">' +
+      Object.values(MAP.gu).map(d=>'<path d="'+d+'" fill="var(--map-ext)"/>').join('') + '</g>';
+  }
+  g += Object.values(MAP.gu).map(d=>'<path d="'+d+
+    '" fill="var(--map-land)" stroke="var(--map-bd)" stroke-width="1.1" stroke-linejoin="round"/>').join('');
+  for(const z of ['CBD','YBD','GBD']){
+    const zo = MAP.zones[z], ratio = cnt[z]/mx;
+    for(const gu of zo.gu){
+      g += '<g filter="url(#glow)" opacity="'+(0.22+0.5*ratio).toFixed(2)+'"><path d="'+
+        MAP.gu[gu]+'" fill="var(--map-heat)"/></g>';
+      g += '<path d="'+MAP.gu[gu]+'" fill="var(--map-heat)" fill-opacity="'+
+        (0.14+0.62*ratio).toFixed(2)+'" stroke="var(--map-heat)" stroke-width="1.8" '+
+        'stroke-linejoin="round"/>';
+    }
+    const c = zo.c;
+    g += '<text x="'+c[0]+'" y="'+(c[1]-4)+'" text-anchor="middle" font-size="30" '+
+      'font-weight="700" fill="var(--map-ink)" opacity="0.9">'+cnt[z]+'</text>'+
+      '<text x="'+c[0]+'" y="'+(c[1]+15)+'" text-anchor="middle" font-size="12" '+
+      'font-weight="600" letter-spacing="1.6" fill="var(--map-sub)">'+z+'</text>'+
+      '<text x="'+c[0]+'" y="'+(c[1]+30)+'" text-anchor="middle" font-size="11" '+
+      'fill="var(--map-sub)" opacity="0.8">'+zo.ko+'</text>';
+  }
+  // 방문 도트 — 한 건에 하나. 같은 자리에 쌓이면 투명도가 겹쳐 저절로 진해진다
+  const spot={};
+  for(const l of LOGS){
+    let x=l.x, y=l.y;
+    if(x==null||y==null){ const r=resolveXY(l.place,l.zone,l.company); x=r[0]; y=r[1]; }
+    if(x==null) continue;
+    const k=x+','+y; spot[k]=spot[k]||[]; spot[k].push(l);
+  }
+  let dots='';
+  for(const k in spot){
+    const [x,y]=k.split(',').map(Number);
+    spot[k].forEach((l,i)=>{
+      const a=i*2.399963, r=3.6*Math.sqrt(i);
+      dots+='<circle cx="'+(x+r*Math.cos(a)).toFixed(1)+'" cy="'+(y+r*Math.sin(a)).toFixed(1)+
+        '" r="4.6" fill="#9fc4f0" fill-opacity="0.34"><title>'+
+        esc(l.company+' · '+l.date+(l.place?' · '+l.place:''))+'</title></circle>';
+    });
+  }
+  g += dots;
+
+  // 최근 9주 캘린더
+  const cells=[]; const d0=new Date(); d0.setDate(d0.getDate()-62);
+  for(let i=0;i<63;i++){
+    const d=new Date(d0); d.setDate(d0.getDate()+i);
+    const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+
+      String(d.getDate()).padStart(2,'0');
+    const v=days[key]||0;
+    cells.push('<div class="cel l'+(v===0?0:Math.min(v,4))+'" title="'+key+' · '+v+'건"></div>');
+  }
+  return '<div class="lbl">권역 방문 <em>기록 '+LOGS.length+'건</em></div>'+
+    '<div class="mapbox"><svg viewBox="'+MAP.vb+'" style="width:100%;display:block">'+
+      '<defs><filter id="glow" x="-30%" y="-30%" width="160%" height="160%">'+
+      '<feGaussianBlur stdDeviation="11"/></filter></defs>'+g+'</svg></div>'+
+    '<div class="lg"><span>여의도 <b>'+cnt.YBD+'</b></span><span>강남 <b>'+cnt.GBD+
+      '</b></span><span>광화문 <b>'+cnt.CBD+'</b></span></div>'+
+    '<div class="lbl" style="margin-top:14px">최근 9주 <em>하루 한 칸</em></div>'+
+    '<div class="cal">'+cells.join('')+'</div>'+
+    '<div class="callg"><span>적음</span>'+
+      [0,1,2,3,4].map(i=>'<i class="cel l'+i+'"></i>').join('')+'<span>많음</span></div>';
+}
+
+/* ── Wordsmith 탭 ─────────────────────────────── */
+let wsPrefill = '';
+function paneWord(){
+  const done = QUEUE.filter(q=>q.kind==='word'&&q.status==='done'&&q.output);
+  return '<div class="card">'+
+    '<div class="row2">'+
+      '<div class="fr"><label>tone</label><select id="ws-t">'+
+        '<option value="formal">Formal (공식·정중)</option>'+
+        '<option value="friendly">Friendly (따뜻·전문)</option>'+
+        '<option value="concise">Concise (간결·직설)</option></select></div>'+
+      '<div class="fr"><label>recipient</label>'+
+        '<input id="ws-r" placeholder="PE managing partner"></div></div>'+
+    '<div class="fr"><label>context</label>'+
+      '<input id="ws-c" value="follow-up after meeting"></div>'+
+    '<div class="fr"><label>본문 <em>국문 그대로 넣으면 됩니다</em></label>'+
+      '<textarea id="ws-b" style="min-height:120px">'+esc(wsPrefill)+'</textarea></div>'+
+    '<div class="acts" style="border:none;padding:0"><button class="btn p" id="ws-go">✏️ 윤문 요청</button>'+
+      '<span id="ws-msg" style="font-size:11px;color:var(--mut);align-self:center"></span></div>'+
+  '</div>'+
+  (done.length ? '<div class="lbl">최근 결과</div><div class="card">'+
+    '<pre class="out">'+esc(done[0].output)+'</pre>'+
+    '<div class="acts"><button class="btn" data-copy="'+esc(done[0].id)+'">📋 복사</button></div></div>' : '')+
+  '<div class="lbl">담은 항목</div><div class="card">'+queueRows('word')+'</div>';
+}
+
+/* ── 렌더 ─────────────────────────────────────── */
+function render(){
+  const scan = (TAB==='scan'||TAB==='watch');
+  $('scanctl').style.display = scan?'':'none';
+  $('cnt').style.display = scan?'':'none';
+  $('list').style.display = scan?'':'none';
+  $('more').style.display = (scan&&shown<view.length)?'':'none';
+  $('panes').innerHTML = '';
+  if(scan){ if(DATA) rebuild(); return; }
+  if(!USER){
+    $('panes').innerHTML = '<div class="gate"><div style="font-size:30px">🔒</div>'+
+      '<p>담기·동기화에는 로그인이 필요합니다.<br>Workout과 같은 계정을 씁니다.</p>'+
+      '<button class="btn p" id="in">Google 로그인</button></div>';
     return;
   }
-  const tb = e.target.closest('.tb');
-  if (tb) {
-    document.querySelectorAll('.tb').forEach(x => x.classList.toggle('on', x === tb));
-    TAB = tb.dataset.t; rebuild(); window.scrollTo(0, 0); return;
+  $('panes').innerHTML = TAB==='idea'?paneIdea():TAB==='field'?paneField():paneWord();
+  if(TAB==='idea') pickHandler('id-t','id-tn');
+  if(TAB==='field'){ pickHandler('fn-c','fn-cn');
+    const f=$('fn-f'); if(f) f.onchange=e=>{ fnFile=e.target.files[0]||null; render(); }; }
+}
+
+function kpi(){
+  if(!DATA) return;
+  const n={new:0,watch:0,seen:0,drop:0};
+  for(const r of DATA.companies) n[stOf(r.c)]++;
+  $('kpi').innerHTML =
+    '<div><b>'+DATA.companies.length.toLocaleString()+'</b><i>전체</i></div>'+
+    '<div><b>'+n.new.toLocaleString()+'</b><i>미검토</i></div>'+
+    '<div><b>'+n.watch+'</b><i>관심</i></div>'+
+    '<div><b>'+n.seen+'</b><i>검토</i></div>'+
+    '<div><b>'+n.drop+'</b><i>제외</i></div>';
+}
+
+/* ── 이벤트 ───────────────────────────────────── */
+document.addEventListener('click', async e => {
+  const tb=e.target.closest('.tb');
+  if(tb){ document.querySelectorAll('.tb').forEach(x=>x.classList.toggle('on',x===tb));
+    TAB=tb.dataset.t; render(); window.scrollTo(0,0); return; }
+
+  const ab=e.target.closest('.ab[data-st]');
+  if(ab){ const c=ab.dataset.c,k=ab.dataset.st;
+    STATE[c]=STATE[c]||{}; STATE[c].st=(STATE[c].st===k)?'new':k; saveState();
+    const box=ab.closest('details');
+    box.querySelectorAll('.ab[data-st]').forEach(x=>x.classList.toggle('on',x.dataset.st===STATE[c].st));
+    const s=box.querySelector('.st'); s.className='st st-'+stOf(c); s.textContent=SLBL[stOf(c)];
+    kpi(); return; }
+
+  const ie=e.target.closest('.ab[data-idea]');
+  if(ie){ const r=DATA.companies.find(x=>x.c===ie.dataset.idea);
+    ideaPrefill=r?r.n:''; TAB='idea';
+    document.querySelectorAll('.tb').forEach(x=>x.classList.toggle('on',x.dataset.t==='idea'));
+    render(); window.scrollTo(0,0); return; }
+
+  const ch=e.target.closest('.chip');
+  if(ch){ const g=ch.parentElement;
+    g.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===ch));
+    if(g.id==='sorts') SORT=ch.dataset.v; else FILT=ch.dataset.v;
+    rebuild(); return; }
+
+  if(e.target.id==='id-go'){
+    const t=$('id-t').value==='__new__'?$('id-tn').value.trim():$('id-t').value;
+    const a=$('id-a').value.trim(), d=$('id-d').value;
+    if(!t||!a||!d){ $('id-msg').textContent='대상·아이디어·due 는 필수입니다'; return; }
+    $('id-go').disabled=true; $('id-msg').textContent='담는 중…';
+    try{ await enqueue('idea',{target:t,title:t,angle:a,stage:$('id-s').value,due:d});
+      $('id-a').value=''; $('id-msg').textContent='✓ 담았습니다'; }
+    catch(x){ $('id-msg').textContent='✗ '+x.message; }
+    $('id-go').disabled=false; return;
   }
-  const ch = e.target.closest('.chip');
-  if (ch) {
-    const g = ch.parentElement;
-    g.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === ch));
-    if (g.id === 'sorts') SORT = ch.dataset.v; else FILT = ch.dataset.v;
-    rebuild(); return;
+
+  const seg=e.target.closest('#fn-seg div');
+  if(seg){ fnMode=seg.dataset.m; render(); return; }
+
+  if(e.target.id==='fn-go'){
+    const c=$('fn-c').value==='__new__'?$('fn-cn').value.trim():$('fn-c').value;
+    const txt=$('fn-t').value.trim();
+    if(!c){ $('fn-msg').textContent='상대를 고르세요'; return; }
+    if(fnMode!=='rec' && !txt){ $('fn-msg').textContent='내용을 적어주세요'; return; }
+    if(fnMode!=='txt' && !fnFile){ $('fn-msg').textContent='녹음 파일을 고르세요'; return; }
+    $('fn-go').disabled=true; $('fn-msg').textContent='담는 중…';
+    try{
+      let audio='';
+      if(fnFile){
+        $('fn-msg').textContent='업로드 중…';
+        const path='users/'+USER.uid+'/field_notes/'+Date.now()+'_'+fnFile.name;
+        await uploadBytes(sref(storage,path),fnFile);
+        audio=path;
+      }
+      const place=$('fn-l').value.trim();
+      const xy=resolveXY(place, $('fn-z').value, c);
+      const rec={company:c,title:c,date:$('fn-d').value,zone:$('fn-z').value,
+                 attendees:$('fn-p').value.trim(),note:txt,audio,mode:fnMode,
+                 place, x:xy[0], y:xy[1], src:xy[2]};
+      await enqueue('field',rec);
+      await addDoc(collection(db,'users',USER.uid,'field_notes'),
+                   {...rec,at:serverTimestamp()});
+      fnFile=null; $('fn-msg').textContent='✓ 담았습니다'; render();
+    }catch(x){ $('fn-msg').textContent='✗ '+x.message; $('fn-go').disabled=false; }
+    return;
   }
+
+  if(e.target.id==='ws-go'){
+    const b=$('ws-b').value.trim();
+    if(!b){ $('ws-msg').textContent='본문이 비었습니다'; return; }
+    $('ws-go').disabled=true; $('ws-msg').textContent='담는 중…';
+    try{ await enqueue('word',{text:b,tone:$('ws-t').value,recipient:$('ws-r').value,
+           context:$('ws-c').value,title:b.slice(0,30)});
+      $('ws-msg').textContent='✓ 담았습니다 — PC가 처리하면 여기 뜹니다'; }
+    catch(x){ $('ws-msg').textContent='✗ '+x.message; }
+    $('ws-go').disabled=false; return;
+  }
+
+  const cp=e.target.closest('[data-copy]');
+  if(cp){ const q=QUEUE.find(x=>x.id===cp.dataset.copy);
+    if(q&&q.output){ navigator.clipboard.writeText(q.output);
+      cp.textContent='✓ 복사됨'; setTimeout(()=>cp.textContent='📋 복사',1500); } }
 });
+
 document.addEventListener('input', e => {
-  if (e.target.matches('.memo')) {
-    const c = e.target.dataset.memo;
-    STATE[c] = STATE[c] || {}; STATE[c].memo = e.target.value; saveState();
+  if(e.target.matches('.memo')){
+    const c=e.target.dataset.memo;
+    STATE[c]=STATE[c]||{}; STATE[c].memo=e.target.value;
+    clearTimeout(window._ms); window._ms=setTimeout(saveState,600);
   }
 });
-document.getElementById('q').addEventListener('input', () => { clearTimeout(window._t); window._t = setTimeout(rebuild, 180); });
-document.getElementById('more').addEventListener('click', page);
+$('q').addEventListener('input',()=>{clearTimeout(window._t);window._t=setTimeout(rebuild,180);});
+$('more').addEventListener('click',page);
 
-function kpi() {
-  const n = { new: 0, watch: 0, seen: 0, drop: 0 };
-  for (const r of DATA.companies) n[stOf(r.c)]++;
-  document.getElementById('kpi').innerHTML =
-    '<div><b>' + DATA.companies.length.toLocaleString() + '</b><i>전체</i></div>' +
-    '<div><b>' + n.new.toLocaleString() + '</b><i>미검토</i></div>' +
-    '<div><b>' + n.watch + '</b><i>관심</i></div>' +
-    '<div><b>' + n.seen + '</b><i>검토</i></div>' +
-    '<div><b>' + n.drop + '</b><i>제외</i></div>';
-}
-
-fetch('data.json?v=' + BUILD).then(r => r.json()).then(d => {
-  DATA = d;
-  const nv = Object.keys(d.vault).length;
-  document.getElementById('hd').textContent =
-    d.generated.slice(0, 16).replace('T', ' ') + ' · ' +
-    d.companies.length.toLocaleString() + '사 · vault 연결 ' + nv + '사';
-  document.getElementById('sorts').innerHTML = SORTS.map((s, i) =>
-    '<div class="chip' + (i === 0 ? ' on' : '') + '" data-v="' + s[0] + '">' + s[1] + '</div>').join('');
-  document.getElementById('filts').innerHTML = FILTS.map((f, i) =>
-    '<div class="chip' + (i === 0 ? ' on' : '') + '" data-v="' + f[0] + '">' + f[1] + '</div>').join('');
-  document.getElementById('ft').innerHTML =
-    'build ' + BUILD + ' · 상태는 이 기기에만 저장됩니다 (Firestore 동기화 예정)<br>' +
+/* ── 부트 ─────────────────────────────────────── */
+Promise.all([
+  fetch('data.json?v='+BUILD).then(r=>r.json()),
+  fetch('entities.json?v='+BUILD).then(r=>r.json()).catch(()=>null),
+  fetch('seoul.json?v='+BUILD).then(r=>r.json()).catch(()=>null),
+  fetch('geo.json?v='+BUILD).then(r=>r.json()).catch(()=>null),
+]).then(([d,ent,map,geo])=>{
+  DATA=d; ENT=ent; MAP=map; GEO=geo;
+  $('hd').textContent = d.generated.slice(0,16).replace('T',' ')+' · '+
+    d.companies.length.toLocaleString()+'사 · vault '+Object.keys(d.vault).length+'사'+
+    (ent?' · 상대 '+ent.items.length.toLocaleString()+'곳':'');
+  $('sorts').innerHTML = SORTS.map((s,i)=>'<div class="chip'+(i===0?' on':'')+
+    '" data-v="'+s[0]+'">'+s[1]+'</div>').join('');
+  $('filts').innerHTML = FILTS.map((f,i)=>'<div class="chip'+(i===0?' on':'')+
+    '" data-v="'+f[0]+'">'+f[1]+'</div>').join('');
+  $('ft').innerHTML = 'build '+BUILD+' · 상태·큐는 Firestore 동기화<br>'+
     '지표·공시는 DART 원문에서 규칙으로 산출한 값입니다. 판정이 아니라 판단 재료입니다.';
-  kpi(); rebuild();
-}).catch(e => {
-  document.getElementById('list').innerHTML =
-    '<div class="empty">데이터를 불러오지 못했습니다<br>' + esc(e.message) + '</div>';
+  kpi(); render();
+}).catch(e=>{
+  $('list').innerHTML='<div class="empty">데이터를 불러오지 못했습니다<br>'+esc(e.message)+'</div>';
 });
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
-}
+if('serviceWorker' in navigator)
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+
 </script>
 </body>
 </html>
