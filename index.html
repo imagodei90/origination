@@ -222,7 +222,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, onSnapshot, query,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20260828_1608';
+const BUILD = '20260828_1610';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -241,7 +241,7 @@ const storage = getStorage(app);
 // 오프라인에서도 담기가 되게 — 연결되면 SDK 가 알아서 올린다
 enableIndexedDbPersistence(db).catch(() => {});
 
-let DATA = null, ENT = null, MAP = null, USER = null;
+let DATA = null, ENT = null, MAP = null, GEO = null, USER = null;
 let STATE = {}, LOGS = [], QUEUE = [];
 let TAB = 'scan', SORT = 'ev', FILT = 'all', shown = 0, view = [];
 
