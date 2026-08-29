@@ -17,10 +17,12 @@
   --dim:#b3ada2; --acc:#1f3864; --acc-fg:#fff; --hair:#f2efe9; --ok:#2a7; --warn:#b8860b;
   --map-bg:#111016; --map-land:#23222a; --map-bd:#35333e; --map-heat:#6f9ada;
   --map-ext:#0b0a0f; --map-ink:#e8e6e3; --map-sub:#8f8a83;
+  --late:#c0392b; --late-bg:#fdeceb; --soon:#b8860b; --soon-bg:#fdf6e3;
 }
 @media(prefers-color-scheme:dark){:root{
   --bg:#16151a; --fg:#e8e6e3; --card:#1f1e24; --bd:#33313a; --mut:#8f8a83;
   --dim:#6b665f; --acc:#4a6da8; --acc-fg:#fff; --hair:#26252c;
+  --late:#ff7b6b; --late-bg:#3a1f1c; --soon:#e0b445; --soon-bg:#332a14;
 }}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0 auto;max-width:880px;padding:0 13px calc(40px + env(safe-area-inset-bottom));
@@ -92,6 +94,52 @@ table.tt tbody th{text-align:left;color:var(--mut);font-weight:500}
 table.tt th:first-child{position:sticky;left:0;z-index:2;background:var(--card);
   box-shadow:1px 0 0 var(--hair)}
 table.tt thead th:first-child{z-index:3}
+/* Cadence */
+.cdsec{font-size:9.5px;color:var(--dim);margin:11px 0 4px;letter-spacing:.3px;
+  display:flex;align-items:baseline}
+.cdsec em{font-style:normal;margin-left:auto}
+.cdr{background:var(--card);border:1px solid var(--bd);border-radius:9px;
+  padding:8px 10px;margin-bottom:5px;cursor:pointer}
+.cdr.op{border-color:var(--acc)}
+.cdr1{display:flex;align-items:baseline;gap:6px}
+.cdr1 b{font-size:12.5px;font-weight:600}
+.cdm{margin-left:auto;font-size:10px;color:var(--mut);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.cdr2{font-size:10px;color:var(--mut);margin-top:3px;font-variant-numeric:tabular-nums}
+.bg{font-size:9px;padding:1px 6px;border-radius:4px;font-weight:600}
+.bg-l{background:var(--late-bg);color:var(--late)}
+.bg-s{background:var(--soon-bg);color:var(--soon)}
+.bg-o{background:var(--hair);color:var(--mut)}
+.t1{font-size:8.5px;font-weight:700;letter-spacing:.4px;background:var(--acc);
+  color:var(--acc-fg);padding:1px 5px;border-radius:4px}
+.pb{height:3px;border-radius:2px;background:var(--hair);margin-top:5px;overflow:hidden}
+.pb i{display:block;height:100%;background:var(--acc)}
+.pb i.l{background:var(--late)} .pb i.s{background:var(--soon)}
+.cdx{margin-top:9px;border-top:1px solid var(--hair);padding-top:8px}
+.pp{display:flex;align-items:baseline;gap:6px;font-size:11px;padding:3px 0}
+.pp b{font-weight:500}
+.hz{font-size:10px;color:var(--mut);padding:2px 0;font-variant-numeric:tabular-nums}
+.kinds{display:flex;gap:5px;flex-wrap:wrap}
+.kb{font:11px inherit;padding:6px 10px;border-radius:8px;border:1px solid var(--bd);
+  background:var(--card);color:var(--fg);cursor:pointer;white-space:nowrap}
+.kb.on{background:var(--acc);color:var(--acc-fg);border-color:var(--acc)}
+.pchip{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;padding:3px 8px;
+  border-radius:12px;background:var(--hair);color:var(--mut);cursor:pointer;margin:3px 3px 0 0}
+.pchip.on{background:var(--acc);color:var(--acc-fg)}
+.pchip.gh{border:1px dashed var(--bd);background:transparent;color:var(--dim)}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:60;background:var(--card);
+  border-top:1px solid var(--bd);border-radius:14px 14px 0 0;padding:14px 15px
+  calc(18px + env(safe-area-inset-bottom));box-shadow:0 -8px 28px rgba(0,0,0,.18);
+  max-width:880px;margin:0 auto}
+.shbg{position:fixed;inset:0;z-index:59;background:rgba(0,0,0,.32)}
+.shh{font-size:13px;font-weight:600;margin-bottom:10px}
+.zrow{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:9px}
+.zc{border-radius:7px;padding:9px 6px;text-align:center;font-size:10px;
+  color:var(--map-ink);position:relative}
+.zc b{display:block;font-size:15px;font-variant-numeric:tabular-nums}
+.zc em{font-style:normal;font-size:8.5px;color:var(--map-sub);display:block;margin-top:2px}
+.zc .zf{position:absolute;top:5px;right:6px;font-size:8.5px;padding:1px 4px;
+  border-radius:3px;background:#4a1f1a;color:#ff7b6b;font-weight:700}
 .ev{display:flex;gap:6px;align-items:baseline;font-size:11px;padding:4px 0;
   border-bottom:1px solid var(--hair);flex-wrap:wrap}
 .evd{color:var(--dim);font-family:ui-monospace,monospace;font-size:10px}
@@ -201,6 +249,7 @@ pre.out{background:var(--bg);border:1px solid var(--bd);border-radius:9px;paddin
     <div class="tb" data-t="watch">Watchlist</div>
     <div class="tb" data-t="idea">Ideas</div>
     <div class="tb" data-t="field">Field Notes</div>
+    <div class="tb" data-t="cad">Cadence</div>
   </div>
   <div id="scanctl">
     <input id="q" placeholder="회사명 · 종목코드" autocomplete="off">
@@ -227,7 +276,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, onSnapshot, query,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20260830_0804';
+const BUILD = '20260830_0854';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -248,6 +297,11 @@ enableIndexedDbPersistence(db).catch(() => {});
 
 let DATA = null, ENT = null, MAP = null, GEO = null, USER = null;
 let STATE = {}, LOGS = [], QUEUE = [];
+let CAD = {};                 // company -> {tier, target_wk, memo}
+let cadOpen = null, cadSheet = null, fnKind = 'meet', fnPeople = [], fnQuick = true;
+const KW = {meet:1.0, meal:1.0, call:0.5, mail:0.3};
+const KLBL = {meet:'미팅', meal:'식사', call:'통화', mail:'메일'};
+const DEF_WK = 8;             // 전역 기본 주기
 let TAB = 'scan', SORT = 'ev', FILT = 'all', shown = 0, view = [];
 
 const esc = s => String(s == null ? '' : s)
@@ -295,8 +349,16 @@ function subscribe(uid){
   onSnapshot(query(collection(db,'users',uid,'orig_inbox'),orderBy('at','desc'),limit(40)),
     s => { QUEUE = s.docs.map(d=>({id:d.id,...d.data()})); if(TAB==='idea'||TAB==='word'||TAB==='field') render(); });
   onSnapshot(query(collection(db,'users',uid,'field_notes'),orderBy('date','desc'),limit(400)),
-    s => { LOGS = s.docs.map(d=>({id:d.id,...d.data()})); if(TAB==='field') render(); });
+    s => { LOGS = s.docs.map(d=>({id:d.id,...d.data()})); if(TAB==='field'||TAB==='cad') render(); });
+  onSnapshot(collection(db,'users',uid,'cadence'), s => {
+    CAD = {}; s.docs.forEach(d => { CAD[d.id] = d.data(); });
+    if(TAB==='cad'||TAB==='field') render();
+  });
 }
+const cadKey = c => String(c).replace(/[\/#?\[\]]/g,'_').slice(0,120);
+const saveCad = (c, o) => USER
+  ? setDoc(doc(db,'users',USER.uid,'cadence',cadKey(c)), {company:c, ...o}, {merge:true})
+  : Promise.reject(new Error('로그인이 필요합니다'));
 const saveState = () => USER &&
   setDoc(doc(db,'users',USER.uid,'origination','state'), {m:STATE, at:serverTimestamp()});
 const enqueue = (kind, payload) => USER
@@ -433,7 +495,7 @@ function comboFill(id, q){
        (x.p?'<i>vault</i>':'')+'</li>';
   }
   if(s && !cap.some(x=>x.n===q))
-    h='<li class="new" data-v="'+esc(q)+'">＋ "'+esc(q)+'" 그대로 쓰기</li>'+h;
+    h='<li class="new" data-v="'+esc(q)+'">+ "'+esc(q)+'" 그대로 쓰기</li>'+h;
   if(!h) h='<li class="hd">일치하는 곳이 없습니다</li>';
   if(rows.length>cap.length)
     h+='<li class="hd">+'+(rows.length-cap.length).toLocaleString()+'곳 더 — 더 적어보세요</li>';
@@ -465,6 +527,127 @@ document.addEventListener('click', e=>{
 });
 
 /* ── 큐 표시 ───────────────────────────────────── */
+
+/* -- Cadence / 빠른 컨택 이벤트 --------------------- */
+async function saveContact(company, kind, people, extra){
+  if(!USER) { needLogin(); return false; }
+  const rec = Object.assign({
+    company: company, title: company, date: todayStr(),
+    kind: kind, weight: (KW[kind] || 1), people: people || [],
+    zone: '', place: '', note: '', mode: 'quick'
+  }, extra || {});
+  const xy = resolveXY(rec.place, rec.zone, company);
+  rec.x = xy[0]; rec.y = xy[1]; rec.src = xy[2];
+  await addDoc(collection(db, 'users', USER.uid, 'field_notes'),
+    Object.assign({}, rec, {at: serverTimestamp()}));
+  return true;
+}
+
+document.addEventListener('click', async e => {
+  // 시트 닫기
+  if(e.target.dataset && e.target.dataset.shx){ cadSheet = null; render(); return; }
+
+  // 요약 줄 탭 -> Cadence
+  const gt = e.target.closest('[data-goto]');
+  if(gt){
+    TAB = gt.dataset.goto;
+    document.querySelectorAll('.tb').forEach(x =>
+      x.classList.toggle('on', x.dataset.t === TAB));
+    render(); window.scrollTo(0,0); return;
+  }
+
+  // Cadence 필터 칩
+  const cf = e.target.closest('[data-cf]');
+  if(cf){ cadFilt = cf.dataset.cf; render(); return; }
+
+  // 설정 시트 열기
+  const cs = e.target.closest('[data-cs]');
+  if(cs){ cadSheet = cs.dataset.cs; render(); return; }
+
+  // 시트 안 주기 칩
+  const wk = e.target.closest('.sheet [data-wk]');
+  if(wk){
+    wk.parentNode.querySelectorAll('[data-wk]').forEach(x => x.classList.remove('on'));
+    wk.classList.add('on'); return;
+  }
+  // 시트 안 티어
+  const tr = e.target.closest('.sheet [data-tier]');
+  if(tr){
+    tr.parentNode.querySelectorAll('[data-tier]').forEach(x => x.classList.remove('on'));
+    tr.classList.add('on'); return;
+  }
+  // 시트 저장
+  if(e.target.id === 'cd-save'){
+    const sh = e.target.closest('.sheet');
+    const w = sh.querySelector('[data-wk].on');
+    const t = sh.querySelector('[data-tier].on');
+    const memo = sh.querySelector('#cd-memo');
+    const o = {target_wk: w ? +w.dataset.wk : defWk()};
+    if(cadSheet === '__default'){
+      try{ await saveCad('__default', o); }catch(x){ alert(x.message); return; }
+    }else{
+      o.tier = (t && t.dataset.tier) ? 'T1' : null;
+      o.memo = memo ? memo.value.trim() : '';
+      try{ await saveCad(cadSheet, o); }catch(x){ alert(x.message); return; }
+    }
+    cadSheet = null; render(); return;
+  }
+
+  // Cadence 행에서 바로 컨택 담기
+  const cq = e.target.closest('[data-cq]');
+  if(cq){
+    const c = cq.dataset.cq;
+    cq.disabled = true; cq.textContent = '담는 중…';
+    try{ if(await saveContact(c, 'meet', [])) { cq.textContent = '담았습니다'; } }
+    catch(x){ cq.textContent = '실패 — ' + x.message; cq.disabled = false; }
+    return;
+  }
+
+  // Cadence 행 펼치기 (버튼 클릭이 아닐 때만)
+  const cdr = e.target.closest('[data-cad]');
+  if(cdr && !e.target.closest('button')){
+    const c = cdr.dataset.cad;
+    cadOpen = (cadOpen === c) ? null : c;
+    render(); return;
+  }
+
+  // 컨택 종류 선택
+  const kb = e.target.closest('[data-kind]');
+  if(kb){ fnKind = kb.dataset.kind; render(); return; }
+
+  // 인물 칩 토글 / 새 이름
+  const pp = e.target.closest('[data-pp]');
+  if(pp){
+    const n = pp.dataset.pp, i = fnPeople.indexOf(n);
+    if(i >= 0) fnPeople.splice(i, 1); else fnPeople.push(n);
+    render(); return;
+  }
+  if(e.target.closest('[data-ppnew]')){
+    const n = (prompt('이름을 입력하세요 (예: 김OO 상무)') || '').trim();
+    if(n && fnPeople.indexOf(n) < 0) fnPeople.push(n);
+    render(); return;
+  }
+
+  // 노트·녹음 펼치기
+  if(e.target.id === 'fn-more'){ fnQuick = !fnQuick; render(); return; }
+
+  // 컨택만 담기
+  if(e.target.id === 'fn-quick'){
+    const c = comboVal('fn-c');
+    if(!c){ $('fn-qmsg').textContent = '상대를 고르세요'; return; }
+    e.target.disabled = true; $('fn-qmsg').textContent = '담는 중…';
+    try{
+      const zsel = $('fn-z'), psel = $('fn-l');
+      const ok = await saveContact(c, fnKind, fnPeople.slice(), {
+        zone: zsel ? zsel.value : '', place: psel ? psel.value.trim() : ''});
+      if(ok){ fnPeople = []; $('fn-qmsg').textContent = '담았습니다'; }
+    }catch(x){ $('fn-qmsg').textContent = '실패 — ' + x.message; }
+    e.target.disabled = false;
+    setTimeout(() => { if($('fn-qmsg')) render(); }, 700);
+    return;
+  }
+});
+
 const QLBL = {pending:['대기','q-wait'],running:['처리중','q-run'],
               done:['완료','q-ok'],error:['실패','q-err']};
 const qWhen = q => (q.at&&q.at.toDate)
@@ -522,6 +705,7 @@ function paneField(){
     '<div class="fr"><label>상대 <em>타이핑하면 '+
       (ENT?ENT.items.length.toLocaleString():'—')+'곳에서 걸러집니다</em></label>'+
       comboHTML('fn-c','회사·기관 이름')+'</div>'+
+      quickBlock()+
     '<div class="row2">'+
       '<div class="fr"><label>일자 <em>자동</em></label>'+
         '<input id="fn-d" type="date" value="'+todayStr()+'"></div>'+
@@ -534,28 +718,29 @@ function paneField(){
       '<input id="fn-l" list="lmlist" placeholder="예: IFC · 여의도동 · 테헤란로 133">'+
       '<datalist id="lmlist">'+(GEO?Object.keys(GEO.landmark)
         .map(k=>'<option>'+esc(k)+'</option>').join(''):'')+'</datalist></div>'+
+    (fnQuick ? '' :
     '<div class="fr"><label>기록 방식</label>'+
       '<div class="seg" id="fn-seg">'+
-        '<div data-m="txt" class="'+(fnMode==='txt'?'on':'')+'">✍️ 직접 입력</div>'+
-        '<div data-m="rec" class="'+(fnMode==='rec'?'on':'')+'">🎙 녹음</div>'+
+        '<div data-m="txt" class="'+(fnMode==='txt'?'on':'')+'">직접 입력</div>'+
+        '<div data-m="rec" class="'+(fnMode==='rec'?'on':'')+'">녹음</div>'+
         '<div data-m="both" class="'+(fnMode==='both'?'on':'')+'">둘 다</div></div>'+
       '<textarea id="fn-t" style="display:'+(fnMode==='rec'?'none':'')+'" '+
         'placeholder="오간 말을 그대로 적으면 됩니다. 메모 수준이어도 되고, 문장으로 다듬는 건 PC가 합니다."></textarea>'+
       '<div id="fn-rec" style="margin-top:9px;display:'+(fnMode==='txt'?'none':'')+'">'+
         '<label class="drop'+(fnFile?' has':'')+'">'+
-          '<b>🎙</b>'+(fnFile?esc(fnFile.name):'탭해서 녹음 파일 선택')+'<br>'+
+          '<b>REC</b>'+(fnFile?esc(fnFile.name):'탭해서 녹음 파일 선택')+'<br>'+
           '<span style="font-size:10.5px;color:var(--dim)">m4a · mp3 · wav — PC가 전사합니다</span>'+
           '<input id="fn-f" type="file" accept="audio/*" style="display:none"></label></div>'+
     '</div>'+
     '<div class="acts" style="border:none;padding:0">'+
       '<button class="btn p" id="fn-go">기록 담기</button>'+
-      '<button class="btn" id="fn-brief">✉️ 보고 초안만</button>'+
-      '<button class="btn" id="fn-full">🌐 영문 보고까지</button>'+
+      '<button class="btn" id="fn-brief">보고 초안만</button>'+
+      '<button class="btn" id="fn-full">영문 보고까지</button>'+
       '<span id="fn-msg" style="font-size:11px;color:var(--mut);align-self:center"></span></div>'+
     '<div style="font-size:10px;color:var(--dim);line-height:1.7;margin-top:8px">'+
       '<b style="font-weight:600">기록 담기</b> 노트만 · '+
       '<b style="font-weight:600">보고 초안만</b> 국문 보고만 (노트 저장 안 함) · '+
-      '<b style="font-weight:600">영문 보고까지</b> 노트 + 국문 + 영문 한 번에</div>'+
+      '<b style="font-weight:600">영문 보고까지</b> 노트 + 국문 + 영문 한 번에</div>')+
   '</div>'+
   briefCards()+
   heatmap()+
@@ -576,15 +761,15 @@ function briefCards(){
     let h = '<div class="lbl">보고 초안 · 국문 <em>'+esc(q.company||q.title||'')+
       ' · '+esc(qWhen(q))+'</em></div><div class="card">'+
       '<pre class="out">'+esc(q.output)+'</pre>'+
-      '<div class="acts"><button class="btn" data-copy="'+q.id+'">📋 복사</button>'+
-      (enText||wq ? '' : '<button class="btn p" data-en="'+q.id+'">✉️ 영문으로</button>')+
+      '<div class="acts"><button class="btn" data-copy="'+q.id+'">복사</button>'+
+      (enText||wq ? '' : '<button class="btn p" data-en="'+q.id+'">영문으로</button>')+
       (q.result_path ? '<a class="btn" href="'+obs(q.result_path)+'">노트 →</a>' : '')+
       '</div>';
     if(enText){
       h += '<div class="lbl" style="margin-top:14px">영문</div>';
       h += '<pre class="out">'+esc(enText)+'</pre>'+
         '<div class="acts"><button class="btn" data-copy="'+
-        (q.output_en?q.id+':en':wq.id)+'">📋 복사</button></div>';
+        (q.output_en?q.id+':en':wq.id)+'">복사</button></div>';
     }else if(wq){
       const [lb,cls]=QLBL[wq.status]||QLBL.pending;
       h += '<div class="lbl" style="margin-top:14px">영문 <em><span class="qs '+cls+'">'+
@@ -620,6 +805,45 @@ function resolveXY(place, zone, company){
 }
 
 /* ── 서울 히트맵 (입체 다크) ──────────────────── */
+
+/* -- 커버리지 -------------------------------------
+   권역별 마지막 컨택 경과. 목표는 전역 기본 주기를 따른다. */
+function coverage(){
+  const zs = ['YBD','CBD','GBD'];
+  const last = {}, cnt = {};
+  for(const l of LOGS){
+    const z = l.zone; if(zs.indexOf(z) < 0) continue;
+    cnt[z] = (cnt[z]||0) + 1;
+    if(!last[z] || l.date > last[z]) last[z] = l.date;
+  }
+  const lim = defWk() * 7;
+  const ZKO = {YBD:'여의도', CBD:'광화문', GBD:'강남'};
+  const cells = zs.map(z => {
+    const d = last[z] ? daysAgo(last[z]) : null;
+    const over = (d == null) || (d > lim);
+    const t = d == null ? 1 : Math.max(0, 1 - Math.min(d, lim*2) / (lim*2));
+    const bgv = Math.round(18 + 60 * t);
+    return '<div class="zc" style="background:rgb(' + Math.round(bgv*0.55) + ',' +
+      Math.round(bgv*0.78) + ',' + Math.round(bgv*1.35) + ')">' +
+      (over ? '<span class="zf">필요</span>' : '') +
+      '<b>' + (cnt[z]||0) + '</b>' + z + ' ' + ZKO[z] +
+      '<em>' + (d == null ? '기록 없음' : '최근 ' + d + '일 전') + '</em></div>';
+  }).join('');
+
+  const rows = cadAgg().filter(r => r.st === 'l');
+  const t1n = rows.filter(r => r.t1).length;
+  const top = rows.slice(0, 3).map(r => esc(r.company) + ' ' + r.days + '일').join(' · ');
+  const sum = !rows.length ? '' :
+    '<div class="cdr" data-goto="cad" style="margin-top:9px">' +
+      '<div class="cdr1"><b style="color:var(--late)">컨택 필요 ' + rows.length + '곳</b>' +
+      '<span class="cdm">T-1 ' + t1n + ' · 기본 ' + (rows.length - t1n) + '</span></div>' +
+      '<div class="cdr2">' + top + (rows.length > 3 ? ' 외 ' + (rows.length-3) + '곳' : '') +
+      ' — 탭하면 Cadence로</div></div>';
+
+  return '<div class="lbl" style="margin-top:14px">권역 커버리지 ' +
+    '<em>목표 ' + defWk() + '주</em></div><div class="zrow">' + cells + '</div>' + sum;
+}
+
 function heatmap(){
   if(!MAP) return '';
   const cnt={CBD:0,YBD:0,GBD:0}, days={};
@@ -685,7 +909,174 @@ function heatmap(){
     '<div class="lbl" style="margin-top:14px">최근 9주 <em>하루 한 칸</em></div>'+
     '<div class="cal">'+cells.join('')+'</div>'+
     '<div class="callg"><span>적음</span>'+
-      [0,1,2,3,4].map(i=>'<i class="cel l'+i+'"></i>').join('')+'<span>많음</span></div>';
+      [0,1,2,3,4].map(i=>'<i class="cel l'+i+'"></i>').join('')+'<span>많음</span></div>'+
+    coverage();
+}
+
+
+
+/* -- 빠른 컨택 --------------------------------------
+   노트도 녹음도 없이 컨택만 남긴다. 큐를 태우지 않으므로 LLM 비용이 0이다. */
+function peopleOf(company){
+  const seen = {};
+  for(const l of LOGS){
+    if((l.company||l.title) !== company) continue;
+    for(const n of (l.people||[])) seen[n] = (seen[n]||0) + 1;
+  }
+  return Object.keys(seen).sort((a,b) => seen[b] - seen[a]).slice(0, 8);
+}
+
+function quickBlock(){
+  const c = (COMBO['fn-c'] || '');
+  const cand = c ? peopleOf(c) : [];
+  const chips = cand.map(n => '<span class="pchip' +
+      (fnPeople.indexOf(n) >= 0 ? ' on' : '') + '" data-pp="' + esc(n) + '">' +
+      esc(n) + '</span>').join('') +
+    fnPeople.filter(n => cand.indexOf(n) < 0).map(n =>
+      '<span class="pchip on" data-pp="' + esc(n) + '">' + esc(n) + ' ×</span>').join('') +
+    '<span class="pchip gh" data-ppnew="1">+ 이름 입력</span>';
+  const ks = Object.keys(KLBL).map(k => '<button class="kb' +
+      (fnKind === k ? ' on' : '') + '" data-kind="' + k + '">' + KLBL[k] + '</button>').join('');
+  return '<div class="fr"><label>사람 <em style="font-style:normal;color:var(--dim)">' +
+      '이 조직에서 만난 사람</em></label><div>' + chips + '</div></div>' +
+    '<div class="fr"><label>컨택 종류</label><div class="kinds">' + ks + '</div></div>' +
+    '<div style="display:flex;gap:6px;margin:9px 0 4px">' +
+      '<button class="btn p" id="fn-quick">컨택만 담기</button>' +
+      '<button class="btn" id="fn-more">' + (fnQuick ? '+ 노트·녹음까지' : '접기') + '</button>' +
+      '<span id="fn-qmsg" style="font-size:11px;color:var(--mut);align-self:center"></span></div>';
+}
+
+/* -- Cadence --------------------------------------
+   컨택을 조직·인물로 집계하고 목표 주기를 넘긴 곳을 표시한다.
+   고유 리듬은 추정하지 않는다 - 목표는 주 단위로 직접 정한다.       */
+const DAY = 86400000;
+const dnum = s => { const p = String(s||'').split('-');
+  return p.length===3 ? Date.UTC(+p[0], +p[1]-1, +p[2]) : 0; };
+const daysAgo = s => { const t = dnum(s); if(!t) return null;
+  const n = new Date();
+  return Math.floor((Date.UTC(n.getFullYear(),n.getMonth(),n.getDate()) - t)/DAY); };
+const defWk = () => (CAD.__default && CAD.__default.target_wk) || DEF_WK;
+const cadOf = c => CAD[cadKey(c)] || {};
+const targetWk = c => { const o = cadOf(c); return o.target_wk || defWk(); };
+
+function cadAgg(){
+  const m = {};
+  const put = c => m[c] || (m[c] = {company:c, last:'', n:0, w:0,
+                                    kinds:{}, people:{}, zone:'', hist:[]});
+  for(const l of LOGS){
+    const c = l.company || l.title; if(!c) continue;
+    const o = put(c);
+    const k = l.kind || 'meet';
+    const w = (l.weight != null) ? l.weight : (KW[k] || 1);
+    o.n++; o.w += w; o.kinds[k] = (o.kinds[k]||0) + 1;
+    if(l.zone && !o.zone) o.zone = l.zone;
+    if(!o.last || l.date > o.last) o.last = l.date;
+    if(o.hist.length < 8) o.hist.push({d:l.date, k:k,
+        p:(l.people||[]).join(', '), place:l.place||''});
+    for(const nmp of (l.people||[])){
+      const q = o.people[nmp] || (o.people[nmp] = {name:nmp, last:'', n:0});
+      q.n++; if(!q.last || l.date > q.last) q.last = l.date;
+    }
+  }
+  for(const k in CAD){ if(k !== '__default' && CAD[k].company) put(CAD[k].company); }
+  const rows = Object.values(m).map(o => {
+    const wk = targetWk(o.company), lim = wk * 7;
+    const d = o.last ? daysAgo(o.last) : null;
+    const st = d == null ? 'none' : (d > lim ? 'l' : (d > lim*0.8 ? 's' : 'o'));
+    return Object.assign({}, o, {wk:wk, lim:lim, days:d, st:st,
+      over:(d == null ? 9999 : d - lim), t1:(cadOf(o.company).tier === 'T1')});
+  });
+  rows.sort((a,b) => (b.t1 - a.t1) || (b.over - a.over));
+  return rows;
+}
+
+const BGL = {l:'컨택 필요', s:'임박', o:'정상', none:'미컨택'};
+
+function cadRow(r){
+  const pct = r.days == null ? 100 : Math.min(100, Math.round(r.days / r.lim * 100));
+  const cls = r.st === 'l' ? 'l' : (r.st === 's' ? 's' : '');
+  const kinds = Object.keys(r.kinds).map(k => KLBL[k] + ' ' + r.kinds[k]).join(' · ');
+  const np = Object.keys(r.people).length;
+  const open = cadOpen === r.company;
+  let h = '<div class="cdr' + (open ? ' op' : '') + '" data-cad="' + esc(r.company) + '">' +
+    '<div class="cdr1">' + (r.t1 ? '<span class="t1">T-1</span>' : '') +
+      '<b>' + esc(r.company) + '</b>' +
+      '<span class="bg bg-' + (r.st === 'none' ? 'o' : r.st) + '">' + BGL[r.st] + '</span>' +
+      '<span class="cdm">' + (r.days == null ? '기록 없음' : r.days + '일 전') + '</span></div>' +
+    '<div class="cdr2">목표 ' + r.wk + '주' +
+      (r.st === 'l' ? ' · ' + r.over + '일 초과' : '') +
+      (kinds ? ' · ' + kinds : '') + (np ? ' · 인물 ' + np + '명' : '') + '</div>' +
+    '<div class="pb"><i class="' + cls + '" style="width:' + pct + '%"></i></div>';
+  if(open){
+    h += '<div class="cdx">';
+    const ps = Object.values(r.people).sort((a,b) => dnum(b.last) - dnum(a.last));
+    if(ps.length){
+      h += '<div class="cdsec">인물 <em>' + ps.length + '명</em></div>';
+      for(const p of ps){
+        const pd = daysAgo(p.last);
+        const pst = pd == null ? 'o' : (pd > r.lim ? 'l' : (pd > r.lim*0.8 ? 's' : 'o'));
+        h += '<div class="pp"><b>' + esc(p.name) + '</b>' +
+             '<span class="bg bg-' + pst + '">' + (pd == null ? '-' : pd + '일') + '</span>' +
+             '<span class="cdm">컨택 ' + p.n + '</span></div>';
+      }
+    }
+    if(r.hist.length){
+      h += '<div class="cdsec">이력</div>';
+      for(const e of r.hist)
+        h += '<div class="hz">' + esc(e.d) + ' · ' + (KLBL[e.k] || e.k) +
+             (e.place ? ' · ' + esc(e.place) : '') + (e.p ? ' · ' + esc(e.p) : '') + '</div>';
+    }
+    h += '<div style="margin-top:8px">' +
+      '<button class="chip on" data-cq="' + esc(r.company) + '">컨택 담기</button> ' +
+      '<button class="chip" data-cs="' + esc(r.company) + '">팔로업 설정</button></div></div>';
+  }
+  return h + '</div>';
+}
+
+let cadFilt = 'over';
+function paneCad(){
+  let rows = cadAgg();
+  if(cadFilt === 't1')   rows = rows.filter(r => r.t1);
+  if(cadFilt === 'none') rows = rows.filter(r => r.st === 'none');
+  if(cadFilt === 'recent') rows = rows.slice().sort((a,b) => dnum(b.last) - dnum(a.last));
+  const need = rows.filter(r => r.st === 'l').length;
+  const CH = [['over','경과순'],['recent','최근순'],['t1','T-1만'],['none','미컨택']];
+  let h = '<div class="chips" style="margin-bottom:9px">' +
+    CH.map(c => '<div class="chip' + (cadFilt === c[0] ? ' on' : '') +
+      '" data-cf="' + c[0] + '">' + c[1] + '</div>').join('') + '</div>' +
+    '<div class="cnt" style="margin:0 0 8px">컨택 필요 <b>' + need + '</b>곳 · 전체 ' +
+      rows.length + '곳 · 기본 주기 ' + defWk() + '주</div>';
+  if(!rows.length)
+    h += '<div class="empty">아직 기록이 없습니다. Field Notes에서 컨택을 담으세요.</div>';
+  const t1 = rows.filter(r => r.t1), rest = rows.filter(r => !r.t1);
+  if(t1.length) h += '<div class="cdsec">T-1 <em>지정 ' + t1.length + '곳</em></div>' +
+    t1.map(cadRow).join('');
+  if(rest.length) h += '<div class="cdsec">기본 <em>목표 ' + defWk() + '주</em></div>' +
+    rest.map(cadRow).join('');
+  h += '<div style="margin-top:14px"><button class="chip" data-cs="__default">' +
+       '기본 주기 변경</button></div>';
+  return h;
+}
+
+const WKS = [2,4,6,8,12,26];
+function sheetCad(){
+  if(!cadSheet) return '';
+  const isDef = cadSheet === '__default';
+  const o = isDef ? {target_wk:defWk()} : cadOf(cadSheet);
+  const wk = o.target_wk || defWk();
+  return '<div class="shbg" data-shx="1"></div><div class="sheet">' +
+    '<div class="shh">' + (isDef ? '기본 주기' : esc(cadSheet)) + '</div>' +
+    (isDef ? '' : '<div class="fr"><label>티어</label><div class="seg" id="cd-tier">' +
+      '<div data-tier="T1" class="' + (o.tier === 'T1' ? 'on' : '') + '">T-1 핵심</div>' +
+      '<div data-tier="" class="' + (o.tier === 'T1' ? '' : 'on') + '">기본</div></div></div>') +
+    '<div class="fr"><label>목표 주기</label><div class="chips">' +
+      WKS.map(w => '<div class="chip' + (w === wk ? ' on' : '') +
+        '" data-wk="' + w + '">' + w + '주</div>').join('') + '</div></div>' +
+    (isDef ? '' : '<div class="fr"><label>메모</label>' +
+      '<input id="cd-memo" placeholder="선택" value="' + esc(o.memo || '') + '"></div>') +
+    '<div style="display:flex;gap:6px;margin-top:11px">' +
+      '<button class="btn p" id="cd-save">저장</button>' +
+      '<button class="btn" data-shx="1">닫기</button></div></div>';
 }
 
 /* ── 렌더 ─────────────────────────────────────── */
@@ -702,7 +1093,7 @@ function render(){
     (USER?'':'<div class="note" style="background:none;border:1px solid var(--bd);'+
       'border-radius:9px;padding:9px 11px;font-size:11px;color:var(--mut);margin-bottom:11px">'+
       '로그인하지 않았습니다 — 폼은 볼 수 있지만 담기는 되지 않습니다.</div>')+
-    (TAB==='idea'?paneIdea():paneField());
+    (TAB==='idea'?paneIdea():(TAB==='cad'?paneCad():paneField())) + sheetCad();
   if(TAB==='field'){
     const f=$('fn-f'); if(f) f.onchange=e=>{ fnFile=e.target.files[0]||null; render(); };
   }
@@ -753,8 +1144,8 @@ document.addEventListener('click', async e => {
     if(!t||!a||!d){ $('id-msg').textContent='대상·아이디어·due 는 필수입니다'; return; }
     $('id-go').disabled=true; $('id-msg').textContent='담는 중…';
     try{ await enqueue('idea',{target:t,title:t,angle:a,stage:$('id-s').value,due:d});
-      $('id-a').value=''; $('id-msg').textContent='✓ 담았습니다'; }
-    catch(x){ $('id-msg').textContent='✗ '+x.message; }
+      $('id-a').value=''; $('id-msg').textContent='담았습니다'; }
+    catch(x){ $('id-msg').textContent='실패 — '+x.message; }
     $('id-go').disabled=false; return;
   }
 
@@ -780,12 +1171,17 @@ document.addEventListener('click', async e => {
     try{
       const place=$('fn-l').value.trim();
       const xy=resolveXY(place, $('fn-z').value, c);
+      const att=$('fn-p')?$('fn-p').value.trim():'';
+      // 인물 칩이 비어 있으면 참석 칸을 쉼표로 갈라 쓴다 — 추적이 새지 않게
+      const ppl = fnPeople.length ? fnPeople.slice()
+        : att.split(',').map(x=>x.trim()).filter(Boolean);
       const rec={company:c,title:c,date:$('fn-d').value,zone:$('fn-z').value,
-                 attendees:$('fn-p').value.trim(),note:txt,mode:fnMode,
+                 attendees:att,note:txt,mode:fnMode,
+                 people:ppl, kind:'meet', weight:1,
                  place, x:xy[0], y:xy[1], src:xy[2]};
       if(briefOnly){
         await enqueue('brief', rec);
-        $('fn-msg').textContent='✓ 보고 초안을 요청했습니다';
+        $('fn-msg').textContent='보고 초안을 요청했습니다';
       }else{
         let audio='';
         if(fnFile){
@@ -799,11 +1195,11 @@ document.addEventListener('click', async e => {
                      {...rec,audio,at:serverTimestamp()});
         fnFile=null;
         $('fn-msg').textContent = full
-          ? '✓ 담았습니다 — 노트·국문·영문까지 만듭니다'
-          : '✓ 담았습니다';
+          ? '담았습니다 — 노트·국문·영문까지 만듭니다'
+          : '담았습니다';
         render();
       }
-    }catch(x){ $('fn-msg').textContent='✗ '+x.message; }
+    }catch(x){ $('fn-msg').textContent='실패 — '+x.message; }
     for(const id of ['fn-go','fn-brief','fn-full']) if($(id)) $(id).disabled=false;
     return;
   }
@@ -818,8 +1214,8 @@ document.addEventListener('click', async e => {
            context:'internal report after client meeting',
            recipient:'colleagues', parent:q.id,
            title:(q.company||'')+' 영문'});
-      en.textContent='✓ 요청함'; }
-    catch(x){ en.textContent='✗ '+x.message; en.disabled=false; }
+      en.textContent='요청함'; }
+    catch(x){ en.textContent='실패 — '+x.message; en.disabled=false; }
     return;
   }
 
@@ -829,7 +1225,7 @@ document.addEventListener('click', async e => {
     const q=QUEUE.find(x=>x.id===id);
     const txt=q && (which==='en' ? q.output_en : q.output);
     if(txt){ navigator.clipboard.writeText(txt);
-      const t=cp.textContent; cp.textContent='✓ 복사됨';
+      const t=cp.textContent; cp.textContent='복사됨';
       setTimeout(()=>cp.textContent=t,1500); } }
 });
 
