@@ -276,7 +276,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, onSnapshot, query,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20260830_0854';
+const BUILD = '20260830_0857';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -712,8 +712,9 @@ function paneField(){
       '<div class="fr"><label>권역</label><select id="fn-z">'+
         ZKEY.map(z=>'<option value="'+z+'">'+z+' '+ZNAME[z]+'</option>').join('')+
         '</select></div></div>'+
-    '<div class="fr"><label>참석</label>'+
-      '<input id="fn-p" placeholder="김OO 상무, 박OO 부장"></div>'+
+    (fnQuick ? '' :   // 인물 칩과 중복이라 펼쳤을 때만 보인다
+    '<div class="fr"><label>참석 <em>인물 칩에 없는 사람만 적으면 됩니다</em></label>'+
+      '<input id="fn-p" placeholder="김OO 상무, 박OO 부장"></div>')+
     '<div class="fr"><label>장소 <em>건물명·동·주소 아무거나 — 지도에 찍는 데 씁니다</em></label>'+
       '<input id="fn-l" list="lmlist" placeholder="예: IFC · 여의도동 · 테헤란로 133">'+
       '<datalist id="lmlist">'+(GEO?Object.keys(GEO.landmark)
@@ -820,8 +821,8 @@ function coverage(){
   const ZKO = {YBD:'여의도', CBD:'광화문', GBD:'강남'};
   const cells = zs.map(z => {
     const d = last[z] ? daysAgo(last[z]) : null;
-    const over = (d == null) || (d > lim);
-    const t = d == null ? 1 : Math.max(0, 1 - Math.min(d, lim*2) / (lim*2));
+    const over = (d != null) && (d > lim);          // 기록이 없으면 '필요'가 아니라 '없음'
+    const t = d == null ? 0 : Math.max(0, 1 - Math.min(d, lim*2) / (lim*2));
     const bgv = Math.round(18 + 60 * t);
     return '<div class="zc" style="background:rgb(' + Math.round(bgv*0.55) + ',' +
       Math.round(bgv*0.78) + ',' + Math.round(bgv*1.35) + ')">' +
