@@ -227,7 +227,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, onSnapshot, query,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20260830_0755';
+const BUILD = '20260830_0804';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -373,14 +373,15 @@ function body(r){
   if(r.q.length) h+='<div class="lbl">분기 <em>최근 '+r.q.length+'개</em></div>'+
     table(r.q,r.Q,p=>p.slice(2,4)+'.'+p.slice(4));
   else h+='<div class="lbl">분기 <em>미수집</em></div>';
-  h+='<div class="lbl">자본활동 공시</div>';
+  h+='<div class="lbl">자본활동 공시'+(r.nev>r.ev.length?
+      ' <em>최근 '+r.ev.length+'건 / 총 '+r.nev+'건</em>':'')+'</div>';
   h+= r.ev.length ? r.ev.map(e=>'<div class="ev"><span class="evd">'+
       e[0].slice(2,4)+'.'+e[0].slice(4,6)+'.'+e[0].slice(6,8)+'</span><span class="cat">'+
       esc(e[1])+'</span><a href="https://dart.fss.or.kr/dsaf001/main.do?rcpNo='+e[3]+
       '" target="_blank" rel="noopener">'+esc(e[2])+'</a></div>').join('')
-    : '<div class="empty" style="padding:6px 0;text-align:left">아직 수집하지 않았습니다 '+
-      '<em style="font-style:normal;color:var(--dim)">(3,031사 중 '+(DATA.ev_done||0)+
-      '사만 수집됨. 없다는 뜻이 아닙니다)</em></div>';
+    : '<div class="empty" style="padding:6px 0;text-align:left">자본활동 공시 없음 '+
+      '<em style="font-style:normal;color:var(--dim)">('+(DATA.ev_from||'')+
+      ' 이후 전수 수집 기준. 미수집이 아니라 해당 공시가 없다는 뜻)</em></div>';
   const vb=r.s&&DATA.vault[r.s];
   if(vb){
     h+='<div class="lbl">vault <em><a href="'+obs(vb.p)+'" style="color:var(--acc)">'+
