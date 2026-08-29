@@ -81,12 +81,17 @@ h1{font-size:17px;margin:16px 0 1px;letter-spacing:-.2px}
 .unit{font-size:9.5px;color:var(--dim);text-align:right;margin-bottom:3px}
 .unit em{font-style:normal}
 .wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-table.tt{width:100%;border-collapse:collapse;font-size:10.5px;min-width:420px;
-  font-variant-numeric:tabular-nums}
+/* 지표명 열은 가로 스크롤에도 고정한다. collapse 면 sticky 셀의 테두리가 사라져
+   separate + border-spacing:0 을 쓰고, 경계선은 box-shadow 로 그린다. */
+table.tt{width:100%;border-collapse:separate;border-spacing:0;font-size:10.5px;
+  min-width:420px;font-variant-numeric:tabular-nums}
 table.tt th,table.tt td{padding:3px 6px;border-bottom:1px solid var(--hair);
   text-align:right;white-space:nowrap}
-table.tt thead th{color:var(--dim);font-weight:600;background:var(--bg)}
+table.tt thead th{color:var(--dim);font-weight:600;background:var(--card)}
 table.tt tbody th{text-align:left;color:var(--mut);font-weight:500}
+table.tt th:first-child{position:sticky;left:0;z-index:2;background:var(--card);
+  box-shadow:1px 0 0 var(--hair)}
+table.tt thead th:first-child{z-index:3}
 .ev{display:flex;gap:6px;align-items:baseline;font-size:11px;padding:4px 0;
   border-bottom:1px solid var(--hair);flex-wrap:wrap}
 .evd{color:var(--dim);font-family:ui-monospace,monospace;font-size:10px}
@@ -222,7 +227,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, onSnapshot, query,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20260828_1618';
+const BUILD = '20260830_0755';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -343,14 +348,14 @@ function rowEl(r){
     '<span class="spk">'+spark(r.y.map(y=>(r.A[y]||{}).revenue))+'</span>'+
     '<span class="st st-'+st+'">'+SLBL[st]+'</span>'+
     (r.nev?'<span class="evn">공시 '+r.nev+'</span>':'')+
-    (r.as?'<span class="sz">자산 '+r.as.toLocaleString()+'억</span>':'')+'</summary>';
+    (r.as?'<span class="sz">자산 '+r.as.toLocaleString()+'백만</span>':'')+'</summary>';
   d.addEventListener('toggle',()=>{ if(d.open&&!d.dataset.b){
     d.insertAdjacentHTML('beforeend', body(r)); d.dataset.b='1'; }});
   return d;
 }
 function table(periods,src,lab){
   if(!periods.length) return '';
-  let h='<div class="unit">단위: 억원 <em>(%·x·일수는 행별 표기)</em></div>'+
+  let h='<div class="unit">단위: 백만원 <em>(%·x·일수는 행별 표기)</em></div>'+
     '<div class="wrap"><table class="tt"><thead><tr><th></th>'+
     periods.map(p=>'<th>'+lab(p)+'</th>').join('')+'</tr></thead><tbody>';
   for(const k of DATA.keys){
