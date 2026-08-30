@@ -139,7 +139,10 @@ table.tt thead th:first-child{z-index:3}
 /* 강도는 색을 바꾸지 않고 같은 색의 진하기로만 표현한다 (Workout 히트맵 규칙) */
 .sw{display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--acc);
   flex:none;position:relative;top:1px}
-.swlg{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--dim);margin-top:7px}
+.due{font:10px "JetBrains Mono","SF Mono",monospace;letter-spacing:.08em;font-weight:500;
+  padding:2px 7px;border-radius:5px;background:var(--acc);color:var(--acc-fg);flex:none}
+.swlg{display:inline-flex;align-items:center;gap:4px;font-size:9px;color:var(--dim);
+  margin:2px 0 8px;font-family:"JetBrains Mono","SF Mono",monospace}
 .swlg i{width:12px;height:12px;border-radius:2px;background:var(--acc);display:inline-block}
 .t1{font-size:8.5px;font-weight:700;letter-spacing:.4px;background:var(--acc);
   color:var(--acc-fg);padding:1px 5px;border-radius:4px}
@@ -313,7 +316,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, onSnapshot, query,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20260830_2024';
+const BUILD = '20260830_2032';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -1035,13 +1038,23 @@ function quickBlock(){
 
 
 
-/* 강도 = 색 하나 + opacity. Workout heatmap 과 같은 식.
-   opacity = 0.3 + 0.7 x min(v/max, 1) */
-const inten = (v, mx) => (v == null ? null :
-  Math.round((0.3 + 0.7 * Math.min(v / mx, 1)) * 100) / 100);
+/* 강도 = 색 하나 + opacity. 연속값은 비슷한 둘을 못 가리므로 계단으로 끊는다.
+   캘린더 히트맵(.cel l1~l4)과 같은 4단계다. */
+const STEPS = [0.34, 0.56, 0.78, 1.0];
+const bucket = (v, cuts) => {           // cuts 개수 = 3, 결과 0~3
+  if (v == null) return null;
+  let i = 0;
+  while (i < cuts.length && v >= cuts[i]) i++;
+  return i;
+};
+const HOLD_CUTS = [7, 10, 13];          // 보유연수 — 5~7 / 7~10 / 10~13 / 13+
+const CAD_CUTS  = [0.6, 1.0, 1.5];      // 컨택 경과율 — 목표 대비
+const inten = (v, cuts) => { const b = bucket(v, cuts); return b == null ? null : STEPS[b]; };
 const swatch = o => o == null ? '<span class="sw" style="opacity:.12"></span>'
   : '<span class="sw" style="opacity:' + o + '"></span>';
-const HOLD_MAX = 15, CAD_MAX = 2;
+const holdLegend = () =>
+  '<span class="swlg">5Y' + STEPS.map(o => '<i style="opacity:' + o + '"></i>').join('') +
+  '13Y+</span>';
 
 
 /* 매각희망가·사업설명은 내가 적는 값이다. Firestore users/{uid}/pc/{deal_id} */
@@ -1089,7 +1102,7 @@ function dealLine(d, full){
   const pc = d[12] || null, did = d[13] || '';
   const ask = did && PCM[did] ? PCM[did] : null;
   let h = '<div class="hz" style="display:flex;gap:6px;align-items:baseline">' +
-    swatch(d[3] === 'closed' ? null : inten(hy, HOLD_MAX)) +
+    swatch(d[3] === 'closed' ? null : inten(hy, HOLD_CUTS)) +
     '<span style="color:var(--dim);min-width:64px">' + per + '</span>' +
     '<b style="font-weight:600;font-size:11px">' + esc(d[0]) + '</b>' +
     (hy != null ? '<span class="cdm">' + hy + '년 ' + oc + '</span>'
@@ -1124,11 +1137,11 @@ function gpCard(g){
   const need = g.need || [], ex = g.exit || [];
   let h = '<div class="cdr' + (open ? ' op' : '') + '" data-deal="' + esc(g.i) + '">' +
     '<div class="cdr1">' +
-      (need.length ? swatch(inten(need[0][10], HOLD_MAX)) : '') +
+      (need.length ? '<span class="due">EXIT DUE ' + need.length + '</span>' : '') +
       '<b>' + esc(g.n) + '</b>' +
       (g.off ? '<span class="bg">등록부 밖</span>' : '') +
-      '<span class="cdm">딜 ' + g.d.length +
-        (need.length ? ' · 엑싯 ' + need.length : '') + '</span></div>' +
+      '<span class="cdm">' + (g.mx ? '최장 ' + g.mx + 'Y · ' : '') +
+        '딜 ' + g.d.length + '</span></div>' +
     '<div class="cdr2">' + (g.e ? esc(g.e) + ' · ' : '') +
       (g.pc ? '펀드 ' + g.pc + '개' + (g.amt ? ' · 약정 ' +
         (g.amt >= 10000 ? (g.amt/10000).toFixed(1) + '조' : g.amt.toLocaleString() + '억') : '')
@@ -1137,7 +1150,8 @@ function gpCard(g){
   if(open){
     h += '<div class="cdx">';
     if(need.length){
-      h += '<div class="cdsec">엑싯 필요 <em>보유 5년 이상 ' + need.length + '곳</em></div>';
+      h += '<div class="cdsec">엑싯 필요 <em>보유 5년 이상 ' + need.length + '곳</em></div>' +
+           holdLegend();
       for(const d of need) h += dealLine(d, true);
     }
     if(ex.length){
@@ -1266,7 +1280,7 @@ const BGL = {l:'컨택 필요', s:'임박', o:'정상', none:'미컨택'};
 
 function cadRow(r){
   const ratio = r.days == null ? null : r.days / r.lim;
-  const o = inten(ratio, CAD_MAX);
+  const o = inten(ratio, CAD_CUTS);
   const pct = r.days == null ? 100 : Math.min(100, Math.round(r.days / r.lim * 100));
   const kinds = Object.keys(r.kinds).map(k => KLBL[k] + ' ' + r.kinds[k]).join(' · ');
   const np = Object.keys(r.people).length;
@@ -1287,7 +1301,7 @@ function cadRow(r){
       h += '<div class="cdsec">인물 <em>' + ps.length + '명</em></div>';
       for(const p of ps){
         const pd = daysAgo(p.last);
-        h += '<div class="pp">' + swatch(pd == null ? null : inten(pd / r.lim, CAD_MAX)) +
+        h += '<div class="pp">' + swatch(pd == null ? null : inten(pd / r.lim, CAD_CUTS)) +
              '<b>' + esc(p.name) + '</b>' +
              '<span class="cdm">' + (pd == null ? '-' : pd + '일') +
              ' · 컨택 ' + p.n + '</span></div>';
