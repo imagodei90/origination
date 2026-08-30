@@ -250,6 +250,7 @@ pre.out{background:var(--bg);border:1px solid var(--bd);border-radius:9px;paddin
     <div class="tb" data-t="idea">Ideas</div>
     <div class="tb" data-t="field">Field Notes</div>
     <div class="tb" data-t="cad">Cadence</div>
+    <div class="tb" data-t="deal">Deals</div>
   </div>
   <div id="scanctl">
     <input id="q" placeholder="회사명 · 종목코드" autocomplete="off">
@@ -276,7 +277,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, onSnapshot, query,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20260830_0857';
+const BUILD = '20260830_0922';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -299,6 +300,7 @@ let DATA = null, ENT = null, MAP = null, GEO = null, USER = null;
 let STATE = {}, LOGS = [], QUEUE = [];
 let CAD = {};                 // company -> {tier, target_wk, memo}
 let cadOpen = null, cadSheet = null, fnKind = 'meet', fnPeople = [], fnQuick = true;
+let DEALS = null, dealOpen = null, dealQ = '', dealMode = 'gp';
 const KW = {meet:1.0, meal:1.0, call:0.5, mail:0.3};
 const KLBL = {meet:'미팅', meal:'식사', call:'통화', mail:'메일'};
 const DEF_WK = 8;             // 전역 기본 주기
@@ -504,6 +506,12 @@ function comboFill(id, q){
 function comboVal(id){ return (COMBO[id]!=null?COMBO[id]:($(id)?$(id).value:'')).trim(); }
 
 document.addEventListener('input', e=>{
+  if(e.target.id === 'dq'){ dealQ = e.target.value;
+    clearTimeout(window.__dqt);
+    window.__dqt = setTimeout(() => { const v = document.activeElement === $('dq');
+      render(); if(v && $('dq')){ $('dq').focus();
+        $('dq').setSelectionRange(dealQ.length, dealQ.length); } }, 220);
+    return; }
   const box=e.target.closest('.combo');
   if(box && e.target.tagName==='INPUT'){
     COMBO[box.dataset.combo]=e.target.value;
@@ -554,6 +562,18 @@ document.addEventListener('click', async e => {
     document.querySelectorAll('.tb').forEach(x =>
       x.classList.toggle('on', x.dataset.t === TAB));
     render(); window.scrollTo(0,0); return;
+  }
+
+  // Deals 모드 칩
+  const dm = e.target.closest('[data-dm]');
+  if(dm){ dealMode = dm.dataset.dm; dealOpen = null; render(); return; }
+
+  // Deals GP 카드 펼치기
+  const dc = e.target.closest('[data-deal]');
+  if(dc && !e.target.closest('a')){
+    const k = dc.dataset.deal;
+    dealOpen = (dealOpen === k) ? null : k;
+    render(); return;
   }
 
   // Cadence 필터 칩
@@ -947,6 +967,115 @@ function quickBlock(){
       '<span id="fn-qmsg" style="font-size:11px;color:var(--mut);align-self:center"></span></div>';
 }
 
+
+/* -- Deals -- GP 기준 딜 원장 -----------------------
+   상장 딜은 DART 공시 10년, 비상장은 홈페이지·vault 에서 왔다.
+   deals.json 은 탭을 처음 열 때만 받는다(367KB). */
+const OCL = {closed:['성사','bg-o'], dropped:['드랍','bg-l'], open:['진행·보유','bg-s']};
+
+async function loadDeals(){
+  if(DEALS) return DEALS;
+  try{
+    const r = await fetch('deals.json', {cache:'no-cache'});
+    DEALS = await r.json();
+  }catch(x){ DEALS = {gp:[], all:[], drops:[], stat:{}}; }
+  return DEALS;
+}
+
+function dealLine(d){
+  const [lb, cls] = OCL[d[3]] || OCL.open;
+  const per = d[1] ? (d[1].slice(2,4)+'.'+d[1].slice(4,6) +
+      (d[2] && d[2] !== d[1] ? '~'+d[2].slice(2,4)+'.'+d[2].slice(4,6) : '')) : '—';
+  return '<div class="hz" style="display:flex;gap:6px;align-items:baseline">' +
+    '<span style="color:var(--dim);min-width:74px">' + per + '</span>' +
+    '<b style="font-weight:600;font-size:11px">' + esc(d[0]) + '</b>' +
+    '<span class="bg ' + cls + '">' + lb + '</span>' +
+    '<span style="color:var(--dim);font-size:9px">' + esc(d[4]) + '</span>' +
+    (d[6] ? '<span class="cdm">' + d[6].toLocaleString() + '억</span>' : '') +
+    '</div>' + (d[7] || d[9] ?
+      '<div style="font-size:9.5px;color:var(--dim);margin:0 0 4px 80px">' +
+      esc(d[7] || '') + (d[9] ? ' ' + esc(d[9]) : '') + '</div>' : '');
+}
+
+function gpCard(g){
+  const open = dealOpen === g.i;
+  const dr = g.d.filter(x => x[3] === 'dropped').length;
+  let h = '<div class="cdr' + (open ? ' op' : '') + '" data-deal="' + esc(g.i) + '">' +
+    '<div class="cdr1"><b>' + esc(g.n) + '</b>' +
+      (g.off ? '<span class="bg bg-o">등록부 밖</span>' : '') +
+      '<span class="cdm">딜 ' + g.d.length + (dr ? ' · 드랍 ' + dr : '') + '</span></div>' +
+    '<div class="cdr2">' + (g.e ? esc(g.e) + ' · ' : '') +
+      (g.pc ? '펀드 ' + g.pc + '개' + (g.amt ? ' · 약정 ' +
+        (g.amt >= 10000 ? (g.amt/10000).toFixed(1) + '조' : g.amt.toLocaleString() + '억') : '')
+        : '등록 펀드 없음') + '</div>';
+  if(open){
+    h += '<div class="cdx">';
+    if(g.f.length){
+      h += '<div class="cdsec">펀드 <em>' + g.pc + '개</em></div>';
+      for(const f of g.f.slice(0,12))
+        h += '<div class="hz">' + esc(f[0]) + (f[1] ? ' · ' + f[1] : '') +
+             (f[2] ? ' · ' + Number(f[2]).toLocaleString() + '억' : '') + '</div>';
+      if(g.f.length > 12) h += '<div class="hz" style="color:var(--dim)">외 ' +
+        (g.f.length-12) + '개</div>';
+    }
+    if(g.d.length){
+      h += '<div class="cdsec">딜 이력 <em>' + g.d.length + '건</em></div>';
+      for(const d of g.d) h += dealLine(d);
+    }
+    if(g.vn) h += '<div style="margin-top:8px"><a class="ab" href="' + obs(g.vn) +
+      '">vault 노트 →</a></div>';
+    h += '</div>';
+  }
+  return h + '</div>';
+}
+
+function paneDeal(){
+  if(!DEALS) { loadDeals().then(() => { if(TAB === 'deal') render(); });
+    return '<div class="load">딜 원장을 받는 중…</div>'; }
+  const st = DEALS.stat || {};
+  const head = '<div class="cnt" style="margin:0 0 8px">GP ' +
+    DEALS.gp.length.toLocaleString() + '곳 · 딜 ' + DEALS.all.length.toLocaleString() +
+    '건 · 드랍 ' + DEALS.drops.length + '건<br>' +
+    '<span style="color:var(--dim)">' +
+    Object.keys(st).map(k => k + ' ' + st[k].toLocaleString()).join(' · ') + '</span></div>';
+  const modes = [['gp','GP'],['deal','회사'],['drop','드랍']];
+  const chips = '<div class="chips" style="margin-bottom:9px">' +
+    modes.map(m => '<div class="chip' + (dealMode === m[0] ? ' on' : '') +
+      '" data-dm="' + m[0] + '">' + m[1] + '</div>').join('') + '</div>' +
+    '<input id="dq" placeholder="' +
+      (dealMode === 'gp' ? 'GP 이름' : '회사 이름') + '" value="' + esc(dealQ) +
+      '" autocomplete="off">';
+
+  const q = dealQ.trim().toLowerCase();
+  let body = '';
+  if(dealMode === 'gp'){
+    let rows = DEALS.gp;
+    if(q) rows = rows.filter(g => (g.n + ' ' + (g.e||'')).toLowerCase().includes(q));
+    body = rows.slice(0, 80).map(gpCard).join('') ||
+      '<div class="empty">해당하는 GP가 없습니다</div>';
+    if(rows.length > 80) body += '<div class="cnt">외 ' + (rows.length-80) + '곳</div>';
+  }else if(dealMode === 'deal'){
+    let rows = DEALS.all;
+    if(q) rows = rows.filter(d => (d[0] + ' ' + d[5]).toLowerCase().includes(q));
+    body = '<div class="card">' + rows.slice(0, 200).map(d =>
+      dealLine([d[0], d[1], d[2], d[3], d[4], '', d[6], d[7],
+                '', d[5] ? '· ' + d[5] : '']))
+      .join('') + '</div>';
+    if(rows.length > 200) body += '<div class="cnt">외 ' + (rows.length-200) + '건 — 더 적어보세요</div>';
+  }else{
+    let rows = DEALS.drops;
+    if(q) rows = rows.filter(d => (d[1] + ' ' + d[2]).toLowerCase().includes(q));
+    body = '<div class="card">' + rows.map(d =>
+      '<div class="hz" style="display:flex;gap:6px">' +
+      '<span style="color:var(--dim);min-width:56px">' +
+        (d[0] ? d[0].slice(2,4)+'.'+d[0].slice(4,6) : '—') + '</span>' +
+      '<b style="font-weight:600;font-size:11px">' + esc(d[1]) + '</b>' +
+      (d[2] ? '<span style="color:var(--mut)">' + esc(d[2]) + '</span>' : '') +
+      '<span class="cdm">' + esc(d[3]) + '</span></div>').join('') + '</div>';
+  }
+  return head + chips + body;
+}
+
 /* -- Cadence --------------------------------------
    컨택을 조직·인물로 집계하고 목표 주기를 넘긴 곳을 표시한다.
    고유 리듬은 추정하지 않는다 - 목표는 주 단위로 직접 정한다.       */
@@ -1094,7 +1223,7 @@ function render(){
     (USER?'':'<div class="note" style="background:none;border:1px solid var(--bd);'+
       'border-radius:9px;padding:9px 11px;font-size:11px;color:var(--mut);margin-bottom:11px">'+
       '로그인하지 않았습니다 — 폼은 볼 수 있지만 담기는 되지 않습니다.</div>')+
-    (TAB==='idea'?paneIdea():(TAB==='cad'?paneCad():paneField())) + sheetCad();
+    (TAB==='idea'?paneIdea():(TAB==='cad'?paneCad():(TAB==='deal'?paneDeal():paneField()))) + sheetCad();
   if(TAB==='field'){
     const f=$('fn-f'); if(f) f.onchange=e=>{ fnFile=e.target.files[0]||null; render(); };
   }
