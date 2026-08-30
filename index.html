@@ -279,7 +279,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, onSnapshot, query,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20260830_1150';
+const BUILD = '20260830_1159';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -354,6 +354,10 @@ function subscribe(uid){
     s => { QUEUE = s.docs.map(d=>({id:d.id,...d.data()})); if(TAB==='idea'||TAB==='word'||TAB==='field') render(); });
   onSnapshot(query(collection(db,'users',uid,'field_notes'),orderBy('date','desc'),limit(400)),
     s => { LOGS = s.docs.map(d=>({id:d.id,...d.data()})); if(TAB==='field'||TAB==='cad') render(); });
+  onSnapshot(collection(db,'users',uid,'pc'), s => {
+    PCM = {}; s.docs.forEach(d => { PCM[d.id] = d.data(); });
+    if(TAB==='deal') render();
+  });
   onSnapshot(collection(db,'users',uid,'cadence'), s => {
     CAD = {}; s.docs.forEach(d => { CAD[d.id] = d.data(); });
     if(TAB==='cad'||TAB==='field') render();
@@ -555,7 +559,7 @@ async function saveContact(company, kind, people, extra){
 
 document.addEventListener('click', async e => {
   // 시트 닫기
-  if(e.target.dataset && e.target.dataset.shx){ cadSheet = null; render(); return; }
+  if(e.target.dataset && e.target.dataset.shx){ cadSheet = null; pcSheet = null; render(); return; }
 
   // 요약 줄 탭 -> Cadence
   const gt = e.target.closest('[data-goto]');
@@ -564,6 +568,21 @@ document.addEventListener('click', async e => {
     document.querySelectorAll('.tb').forEach(x =>
       x.classList.toggle('on', x.dataset.t === TAB));
     render(); window.scrollTo(0,0); return;
+  }
+
+  // PC 메모 시트
+  const pcb = e.target.closest('[data-pc]');
+  if(pcb){ pcSheet = {id: pcb.dataset.pc, name: pcb.dataset.pcn}; render(); return; }
+  if(e.target.id === 'pc-save'){
+    const sh = e.target.closest('.sheet');
+    const ask = (sh.querySelector('#pc-ask').value || '').replace(/[^0-9]/g,'');
+    const o = {ask: ask ? +ask : null,
+               biz: sh.querySelector('#pc-biz').value.trim(),
+               memo: sh.querySelector('#pc-memo').value.trim(),
+               asof: todayStr()};
+    try{ await savePC(pcSheet.id, o); PCM[pcSheet.id] = o; }
+    catch(x){ alert(x.message); return; }
+    pcSheet = null; render(); return;
   }
 
   // Deals 모드 칩
@@ -979,6 +998,30 @@ const swatch = o => o == null ? '<span class="sw" style="opacity:.12"></span>'
   : '<span class="sw" style="opacity:' + o + '"></span>';
 const HOLD_MAX = 15, CAD_MAX = 2;
 
+
+/* 매각희망가·사업설명은 내가 적는 값이다. Firestore users/{uid}/pc/{deal_id} */
+let PCM = {}, pcSheet = null;
+const savePC = (did, o) => USER
+  ? setDoc(doc(db,'users',USER.uid,'pc',did), o, {merge:true})
+  : Promise.reject(new Error('로그인이 필요합니다'));
+
+function sheetPC(){
+  if(!pcSheet) return '';
+  const o = PCM[pcSheet.id] || {};
+  return '<div class="shbg" data-shx="1"></div><div class="sheet">' +
+    '<div class="shh">' + esc(pcSheet.name) + '</div>' +
+    '<div class="fr"><label>매각희망가 <em style="font-style:normal;color:var(--dim)">억원</em></label>' +
+      '<input id="pc-ask" inputmode="numeric" placeholder="예: 25000" value="' +
+      esc(o.ask == null ? '' : o.ask) + '"></div>' +
+    '<div class="fr"><label>사업 한 줄</label>' +
+      '<input id="pc-biz" placeholder="무엇을 하는 회사인가" value="' + esc(o.biz || '') + '"></div>' +
+    '<div class="fr"><label>근거 메모</label>' +
+      '<input id="pc-memo" placeholder="어디서 들은 값인가" value="' + esc(o.memo || '') + '"></div>' +
+    '<div style="display:flex;gap:6px;margin-top:11px">' +
+      '<button class="btn p" id="pc-save">저장</button>' +
+      '<button class="btn" data-shx="1">닫기</button></div></div>';
+}
+
 /* -- Deals -- GP 기준 딜 원장 -----------------------
    상장 딜은 DART 공시 10년, 비상장은 홈페이지·vault 에서 왔다.
    deals.json 은 탭을 처음 열 때만 받는다(367KB). */
@@ -993,23 +1036,42 @@ async function loadDeals(){
   return DEALS;
 }
 
-function dealLine(d){
+function dealLine(d, full){
   const per = d[1] ? (d[1].slice(2,4)+'.'+d[1].slice(4,6) +
       (d[2] && d[2] !== d[1] ? '~'+d[2].slice(2,4)+'.'+d[2].slice(4,6) : '')) : '';
-  const hy = d[10];                       // 보유연수 (회수분은 회수까지 걸린 연수)
+  const hy = d[10];
   const oc = d[3] === 'closed' ? '회수' : (d[3] === 'dropped' ? '무산' : '보유');
-  return '<div class="hz" style="display:flex;gap:6px;align-items:baseline">' +
+  const pc = d[12] || null, did = d[13] || '';
+  const ask = did && PCM[did] ? PCM[did] : null;
+  let h = '<div class="hz" style="display:flex;gap:6px;align-items:baseline">' +
     swatch(d[3] === 'closed' ? null : inten(hy, HOLD_MAX)) +
     '<span style="color:var(--dim);min-width:64px">' + per + '</span>' +
     '<b style="font-weight:600;font-size:11px">' + esc(d[0]) + '</b>' +
     (hy != null ? '<span class="cdm">' + hy + '년 ' + oc + '</span>'
-                : '<span class="cdm">' + oc + '</span>') +
-    '</div>' +
-    '<div style="font-size:9.5px;color:var(--dim);margin:0 0 4px 80px">' +
+                : '<span class="cdm">' + oc + '</span>') + '</div>';
+  // 사업 한 줄
+  const biz = (ask && ask.biz) || (pc && pc[0]) || '';
+  if(biz) h += '<div style="font-size:10px;color:var(--mut);margin:0 0 2px 80px">' +
+    esc(biz) + ' <span style="color:var(--dim);font-size:9px">' +
+    esc((ask && ask.biz) ? '내 메모' : (pc ? pc[1] : '')) + '</span></div>';
+  h += '<div style="font-size:9.5px;color:var(--dim);margin:0 0 2px 80px">' +
     esc(d[4]) + (d[5] ? ' · ' + esc(d[5]) : '') +
     (d[6] ? ' · 양수도 ' + d[6].toLocaleString() + '억' : '') +
+    (ask && ask.ask ? ' · 매각희망 ' + Number(ask.ask).toLocaleString() + '억' : '') +
     (d[7] ? ' · ' + esc(d[7]) : '') + (d[9] ? ' · ' + esc(d[9]) : '') +
     (d[11] ? ' · 보유확인' : '') + '</div>';
+  // 자문사
+  if(pc && pc[2]) h += '<div style="font-size:9.5px;margin:0 0 4px 80px">' +
+    '<span class="bg">주관 ' + esc(pc[2]) + '</span>' +
+    (pc[5] ? ' <span style="color:var(--dim)">' + esc(pc[5]) + '</span>' : '') +
+    (pc[4] ? ' <a href="' + esc(pc[4]) + '" target="_blank" rel="noopener" ' +
+      'style="color:var(--acc);text-decoration:none">출처 →</a>' : '') + '</div>';
+  else if(full && pc) h += '<div style="font-size:9.5px;color:var(--dim);margin:0 0 4px 80px">' +
+    '주관사 보도 없음</div>';
+  if(full && did) h += '<div style="margin:0 0 6px 80px">' +
+    '<button class="chip" data-pc="' + esc(did) + '" data-pcn="' + esc(d[0]) + '">' +
+    (ask ? '메모 수정' : '매각희망가·메모') + '</button></div>';
+  return h;
 }
 
 function gpCard(g){
@@ -1031,7 +1093,7 @@ function gpCard(g){
     h += '<div class="cdx">';
     if(need.length){
       h += '<div class="cdsec">엑싯 필요 <em>보유 5년 이상 ' + need.length + '곳</em></div>';
-      for(const d of need) h += dealLine(d);
+      for(const d of need) h += dealLine(d, true);
     }
     if(ex.length){
       h += '<div class="cdsec">회수 완료 <em>벤치마크' +
@@ -1260,7 +1322,7 @@ function render(){
     (USER?'':'<div class="note" style="background:none;border:1px solid var(--bd);'+
       'border-radius:9px;padding:9px 11px;font-size:11px;color:var(--mut);margin-bottom:11px">'+
       '로그인하지 않았습니다 — 폼은 볼 수 있지만 담기는 되지 않습니다.</div>')+
-    (TAB==='idea'?paneIdea():(TAB==='cad'?paneCad():(TAB==='deal'?paneDeal():paneField()))) + sheetCad();
+    (TAB==='idea'?paneIdea():(TAB==='cad'?paneCad():(TAB==='deal'?paneDeal():paneField()))) + sheetCad() + sheetPC();
   if(TAB==='field'){
     const f=$('fn-f'); if(f) f.onchange=e=>{ fnFile=e.target.files[0]||null; render(); };
   }
