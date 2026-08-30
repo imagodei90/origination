@@ -4,58 +4,88 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#0a0a0a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Origination">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>Origination</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+/* Workout Dashboard 와 같은 골격. accent 만 teal 로 간다.
+   다크가 기본이고 라이트는 html[data-m="light"] 로 명시 전환한다. */
 :root{
-  --bg:#faf9f7; --fg:#1a1a1a; --card:#fff; --bd:#e6e2dc; --mut:#8b8578;
-  --dim:#b3ada2; --acc:#1f3864; --acc-fg:#fff; --hair:#f2efe9; --ok:#2a7; --warn:#b8860b;
-  --map-bg:#111016; --map-land:#23222a; --map-bd:#35333e; --map-heat:#6f9ada;
-  --map-ext:#0b0a0f; --map-ink:#e8e6e3; --map-sub:#8f8a83;
-  --late:#c0392b; --late-bg:#fdeceb; --soon:#b8860b; --soon-bg:#fdf6e3;
+  --bg:#0a0a0a; --card:#111114; --card2:#18181b;
+  --fg:#fafafa; --mut:#71717a; --dim:#52525b; --bd:#1f1f23; --hair:#1a1a1e;
+  --acc:#1EA49D; --acc-fg:#0a0a0a;
+  --map-bg:#0a0a0a; --map-land:#18181b; --map-bd:#2a2a30; --map-heat:#1EA49D;
+  --map-ext:#050507; --map-ink:#fafafa; --map-sub:#71717a;
 }
-@media(prefers-color-scheme:dark){:root{
-  --bg:#16151a; --fg:#e8e6e3; --card:#1f1e24; --bd:#33313a; --mut:#8f8a83;
-  --dim:#6b665f; --acc:#4a6da8; --acc-fg:#fff; --hair:#26252c;
-  --late:#ff7b6b; --late-bg:#3a1f1c; --soon:#e0b445; --soon-bg:#332a14;
-}}
+html[data-m="light"]{
+  --bg:#fafaf9; --card:#ffffff; --card2:#f4f4f5;
+  --fg:#18181b; --mut:#71717a; --dim:#a1a1aa; --bd:#e4e4e7; --hair:#f4f4f5;
+  --acc:#0F857E; --acc-fg:#ffffff;
+  --map-bg:#0f1113; --map-land:#1c1f22; --map-bd:#2e3238; --map-heat:#1EA49D;
+  --map-ext:#08090b; --map-ink:#fafafa; --map-sub:#8b8f95;
+}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0 auto;max-width:880px;padding:0 13px calc(40px + env(safe-area-inset-bottom));
-  background:var(--bg);color:var(--fg);
-  font:15px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
-h1{font-size:17px;margin:16px 0 1px;letter-spacing:-.2px}
-.sub{color:var(--mut);font-size:11.5px}
-.who{display:flex;align-items:center;gap:7px;font-size:10.5px;color:var(--mut);
-  margin-top:7px}
-.who button{font:10.5px inherit;padding:3px 9px;border-radius:7px;border:1px solid var(--bd);
-  background:var(--card);color:var(--mut);cursor:pointer}
-.kpi{display:flex;gap:6px;margin:12px 0 4px}
-.kpi div{flex:1;background:var(--card);border:1px solid var(--bd);border-radius:9px;
-  padding:8px 4px;text-align:center}
-.kpi b{display:block;font-size:17px;line-height:1.25;font-variant-numeric:tabular-nums}
-.kpi i{font-style:normal;font-size:9.5px;color:var(--mut)}
-.stick{position:sticky;top:0;z-index:30;background:var(--bg);padding:9px 0 7px;
-  border-bottom:1px solid var(--bd)}
-.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+body{margin:0 auto;max-width:1200px;padding:24px 24px calc(48px + env(safe-area-inset-bottom));
+  background:var(--bg);color:var(--fg);min-height:100vh;
+  font-family:"Inter",-apple-system,BlinkMacSystemFont,"SF Pro Display","Pretendard",
+    "Segoe UI",Roboto,sans-serif;
+  font-feature-settings:"cv02","cv03","cv04"}
+@media(max-width:768px){body{padding:14px 14px calc(40px + env(safe-area-inset-bottom))}}
+@media(max-width:540px){body{padding:12px 12px calc(36px + env(safe-area-inset-bottom))}}
+.mono{font-family:"JetBrains Mono","SF Mono",ui-monospace,monospace}
+h1{font-size:26px;font-weight:600;margin:0 0 4px;letter-spacing:-0.03em}
+@media(max-width:540px){h1{font-size:20px}}
+.sub{color:var(--mut);font-size:13px;
+  font-family:"JetBrains Mono","SF Mono",ui-monospace,monospace}
+@media(max-width:540px){.sub{font-size:11px}}
+/* 헤더 — 제목 왼쪽, 탭·계정 오른쪽 (Workout 의 view-toggle 배치) */
+.hdr{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.hdr .rgt{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.who{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--mut);
+  font-family:"JetBrains Mono","SF Mono",ui-monospace,monospace}
+.who button{font:11px "JetBrains Mono","SF Mono",monospace;letter-spacing:.08em;
+  padding:6px 12px;border-radius:6px;border:1px solid var(--bd);
+  background:transparent;color:var(--mut);cursor:pointer}
+.who button:hover{color:var(--fg)}
+.kpi{display:grid;gap:12px;grid-template-columns:repeat(5,1fr);margin:0 0 20px}
+@media(max-width:900px){.kpi{grid-template-columns:repeat(2,1fr)}}
+.kpi div{background:var(--card);border:1px solid var(--bd);border-radius:12px;
+  padding:16px;text-align:left}
+.kpi b{display:block;font-size:30px;font-weight:500;line-height:1.1;letter-spacing:-.04em;
+  font-family:"JetBrains Mono","SF Mono",ui-monospace,monospace;
+  font-variant-numeric:tabular-nums}
+@media(max-width:540px){.kpi b{font-size:22px}}
+.kpi i{font-style:normal;display:block;font-size:11px;color:var(--mut);margin-top:4px;
+  text-transform:uppercase;letter-spacing:.1em;
+  font-family:"JetBrains Mono","SF Mono",ui-monospace,monospace}
+.stick{position:sticky;top:0;z-index:30;background:var(--bg);padding:0 0 12px}
+.tabs{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;
+  border:1px solid var(--bd);border-radius:8px;width:max-content;max-width:100%}
 .tabs::-webkit-scrollbar{display:none}
-.tb{flex:0 0 auto;padding:8px 13px;border:1px solid var(--bd);border-radius:8px;
-  background:var(--card);color:var(--mut);font-size:12.5px;cursor:pointer;font-weight:500;
-  white-space:nowrap}
-.tb.on{background:var(--acc);color:var(--acc-fg);border-color:var(--acc)}
-#q{width:100%;padding:9px 11px;border:1px solid var(--bd);border-radius:8px;
-  background:var(--card);color:var(--fg);font:13px inherit;margin:7px 0}
+.tb{flex:0 0 auto;padding:9px 15px;border:0;border-right:1px solid var(--bd);
+  background:transparent;color:var(--mut);cursor:pointer;white-space:nowrap;
+  font:11px "JetBrains Mono","SF Mono",monospace;letter-spacing:.1em;
+  text-transform:uppercase}
+.tabs .tb:last-child{border-right:0}
+.tb.on{background:var(--acc);color:var(--acc-fg);font-weight:600}
+#q{width:100%;padding:9px 11px;border:1px solid var(--bd);border-radius:6px;
+  background:var(--card2);color:var(--fg);font:13px inherit;margin:12px 0 8px}
 .chips{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
-.chip{flex:0 0 auto;padding:5px 11px;border:1px solid var(--bd);border-radius:13px;
-  background:var(--card);color:var(--mut);font-size:11px;cursor:pointer;white-space:nowrap}
+.chip{flex:0 0 auto;padding:6px 12px;border:1px solid var(--bd);border-radius:6px;
+  background:var(--card2);color:var(--mut);cursor:pointer;white-space:nowrap;
+  font:11px "JetBrains Mono","SF Mono",monospace;letter-spacing:.06em}
 .chip.on{background:var(--acc);color:var(--acc-fg);border-color:var(--acc)}
-.cnt{font-size:11px;color:var(--mut);margin:11px 0 7px}
-.row{background:var(--card);border:1px solid var(--bd);border-radius:10px;margin-bottom:6px}
+.cnt{font-size:11.5px;color:var(--mut);margin:11px 0 8px;
+  font-family:"JetBrains Mono","SF Mono",ui-monospace,monospace}
+.row{background:var(--card);border:1px solid var(--bd);border-radius:12px;margin-bottom:8px}
 .row>summary{padding:10px 11px;cursor:pointer;display:flex;gap:7px;align-items:center;
   list-style:none;flex-wrap:wrap}
 .row>summary::-webkit-details-marker{display:none}
@@ -67,17 +97,15 @@ h1{font-size:17px;margin:16px 0 1px;letter-spacing:-.2px}
   letter-spacing:-1px;font-size:13px}
 .sz{color:var(--mut);font-size:10.5px;margin-left:auto;font-variant-numeric:tabular-nums}
 .st{font-size:9.5px;padding:2px 7px;border-radius:9px;font-weight:600}
-.st-new{background:#dbeafe;color:#1e40af}.st-watch{background:#fef3c7;color:#92400e}
-.st-seen{background:#eeece8;color:#7a746a}.st-drop{background:#f4f2ef;color:#b3ada2}
-@media(prefers-color-scheme:dark){
-.st-new{background:#1e3a6b;color:#bfd4ff}.st-watch{background:#4a3a12;color:#f0d089}
-.st-seen{background:#2e2c33;color:#a8a29a}.st-drop{background:#26252c;color:#6b665f}}
-.evn{background:#eef2ff;color:#3730a3;font-size:9.5px;padding:2px 7px;border-radius:9px}
-@media(prefers-color-scheme:dark){.evn{background:#1e3a6b;color:#bfd4ff}}
+.st-new,.st-watch,.st-seen,.st-drop{background:var(--card2);color:var(--mut);
+  border:1px solid var(--bd)}
+.st-watch{color:var(--acc);border-color:var(--acc)}
+.evn{background:var(--card2);color:var(--acc);font-size:9.5px;padding:2px 7px;
+  border-radius:6px;border:1px solid var(--bd)}
 .bd{padding:0 11px 11px;border-top:1px solid var(--hair)}
 .tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:10px}
-.tag{font-size:9.5px;padding:2px 7px;border-radius:9px;background:#fdecec;color:#9b2c2c}
-@media(prefers-color-scheme:dark){.tag{background:#3a2020;color:#e89a9a}}
+.tag{font-size:9.5px;padding:2px 7px;border-radius:6px;background:var(--card2);
+  color:var(--mut);border:1px solid var(--bd)}
 .lbl{font-size:10.5px;color:var(--mut);font-weight:600;margin:13px 0 5px}
 .lbl em{font-style:normal;color:var(--dim);font-weight:400}
 .unit{font-size:9.5px;color:var(--dim);text-align:right;margin-bottom:3px}
@@ -145,8 +173,8 @@ table.tt thead th:first-child{z-index:3}
 .ev{display:flex;gap:6px;align-items:baseline;font-size:11px;padding:4px 0;
   border-bottom:1px solid var(--hair);flex-wrap:wrap}
 .evd{color:var(--dim);font-family:ui-monospace,monospace;font-size:10px}
-.cat{font-size:9px;padding:1px 6px;border-radius:4px;background:#e0e7ff;color:#3730a3}
-@media(prefers-color-scheme:dark){.cat{background:#1e3a6b;color:#bfd4ff}}
+.cat{font-size:9px;padding:1px 6px;border-radius:4px;background:var(--card2);
+  color:var(--mut);border:1px solid var(--bd)}
 .ev a{color:var(--acc);text-decoration:none}
 .vs b{font-size:10.5px;display:block;margin:9px 0 3px;color:var(--mut)}
 .vi{font-size:11px;padding:5px 0;color:var(--fg);display:flex;gap:7px;
@@ -200,11 +228,11 @@ table.tt thead th:first-child{z-index:3}
 .qrow{display:flex;gap:8px;align-items:center;font-size:11.5px;padding:8px 0;
   border-bottom:1px solid var(--hair);flex-wrap:wrap}
 .qs{font-size:9.5px;padding:2px 8px;border-radius:9px}
-.q-wait{background:#eeece8;color:#7a746a}.q-run{background:#fef3c7;color:#92400e}
-.q-ok{background:#dcfce7;color:#166534}.q-err{background:#fee2e2;color:#991b1b}
-@media(prefers-color-scheme:dark){
-.q-wait{background:#26252c;color:#a8a29a}.q-run{background:#4a3a12;color:#f0d089}
-.q-ok{background:#14371f;color:#8fdca8}.q-err{background:#3a2020;color:#e89a9a}}
+.q-wait,.q-run,.q-ok,.q-err{background:var(--card2);color:var(--mut);
+  border:1px solid var(--bd)}
+.q-run{color:var(--acc);border-color:var(--acc)}
+.q-ok{color:var(--acc)}
+.q-err{opacity:.7}
 pre.out{background:var(--bg);border:1px solid var(--bd);border-radius:9px;padding:11px 12px;
   font:11.5px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;
   color:var(--fg);margin:0;max-height:400px;overflow:auto}
@@ -239,21 +267,27 @@ pre.out{background:var(--bg);border:1px solid var(--bd);border-radius:9px;paddin
 </head>
 <body>
 
-<h1>Origination</h1>
-<div class="sub" id="hd">불러오는 중…</div>
-<div class="who" id="who"></div>
-
-<div class="kpi" id="kpi"></div>
-
-<div class="stick">
-  <div class="tabs">
+<div class="hdr">
+  <div>
+    <h1>Origination</h1>
+    <div class="sub" id="hd">불러오는 중…</div>
+  </div>
+  <div class="rgt">
+    <div class="tabs" id="tabs">
     <div class="tb on" data-t="scan">Screening</div>
     <div class="tb" data-t="watch">Watchlist</div>
     <div class="tb" data-t="idea">Ideas</div>
     <div class="tb" data-t="field">Field Notes</div>
     <div class="tb" data-t="cad">Cadence</div>
     <div class="tb" data-t="deal">Deals</div>
+    </div>
+    <div class="who" id="who"></div>
   </div>
+</div>
+
+<div class="kpi" id="kpi"></div>
+
+<div class="stick">
   <div id="scanctl">
     <input id="q" placeholder="회사명 · 종목코드" autocomplete="off">
     <div class="chips" id="sorts"></div>
@@ -279,7 +313,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, onSnapshot, query,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20260830_1159';
+const BUILD = '20260830_2024';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -331,19 +365,30 @@ function spark(vals){
 }
 
 /* ── 인증 ─────────────────────────────────────── */
+// 테마 — 다크가 기본. 고른 값만 기억한다.
+const MODE = () => localStorage.getItem('om') || 'dark';
+const setMode = m => { localStorage.setItem('om', m);
+  document.documentElement.dataset.m = m; paintWho(); };
+document.documentElement.dataset.m = MODE();
+
+function paintWho(){
+  const u = USER;
+  $('who').innerHTML =
+    '<button id="mode">' + (MODE()==='dark' ? 'LIGHT' : 'DARK') + '</button>' +
+    (u ? '<button id="out">LOGOUT</button>'
+       : '<button id="in">LOGIN</button>');
+}
+
 onAuthStateChanged(auth, u => {
   USER = u;
-  $('who').innerHTML = u
-    ? '<span>' + esc(u.email||u.displayName||'') + '</span>' +
-      '<button id="out">로그아웃</button>'
-    : '<button id="in">Google 로그인</button>' +
-      '<span style="color:var(--dim)">로그인해야 담기·동기화가 됩니다</span>';
+  paintWho();
   if (u) subscribe(u.uid);
   render();
 });
 document.addEventListener('click', e => {
   if (e.target.id === 'in') signInWithPopup(auth, new GoogleAuthProvider()).catch(x=>alert(x.message));
   if (e.target.id === 'out') signOut(auth);
+  if (e.target.id === 'mode') setMode(MODE()==='dark' ? 'light' : 'dark');
 });
 
 function subscribe(uid){
