@@ -279,7 +279,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, onSnapshot, query,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20260830_1147';
+const BUILD = '20260830_1150';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -1046,7 +1046,10 @@ function gpCard(g){
       if(g.f.length > 12) h += '<div class="hz" style="color:var(--dim)">외 ' +
         (g.f.length-12) + '개</div>';
     }
-    const rest = g.d.filter(x => need.indexOf(x) < 0 && ex.indexOf(x) < 0);
+    // JSON 파싱 후에는 need/exit 와 d 가 서로 다른 객체다. 키로 비교한다.
+    const kk = x => x[0] + '|' + x[1] + '|' + x[4];
+    const seen = new Set(need.map(kk).concat(ex.map(kk)));
+    const rest = g.d.filter(x => !seen.has(kk(x)));
     if(rest.length){
       h += '<div class="cdsec">그 외 <em>' + rest.length + '건</em></div>';
       for(const d of rest) h += dealLine(d);
