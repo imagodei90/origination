@@ -156,6 +156,20 @@ table.tt thead th:first-child{z-index:3}
   flex:none;position:relative;top:1px}
 .due{font:10px "JetBrains Mono","SF Mono",monospace;letter-spacing:.08em;font-weight:500;
   padding:2px 7px;border-radius:5px;background:var(--acc);color:var(--acc-fg);flex:none}
+/* 예정 미팅 */
+.up{border-color:var(--acc)}
+.pl{display:inline-block;font:9.5px "JetBrains Mono","SF Mono",monospace;letter-spacing:.08em;
+  padding:2px 7px;border-radius:5px;border:1px solid var(--bd);color:var(--mut);flex:none}
+.pl.n{color:var(--acc);border-color:var(--acc)}
+.pl.o{color:#e0796b;border-color:#5a2f2a}
+.lg2{border:1px solid var(--bd);border-radius:9px;padding:9px 11px;margin-bottom:6px;
+  background:var(--card)}
+.lg2 .a{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.lg2 .a button{font:10.5px "JetBrains Mono","SF Mono",monospace;letter-spacing:.06em;
+  padding:5px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--card2);
+  color:var(--mut);cursor:pointer}
+.lg2 .a button.p{background:var(--acc);color:var(--acc-fg);border-color:var(--acc)}
+.lg2 .a button.d{color:#e0796b;border-color:#5a2f2a}
 .swlg{display:inline-flex;align-items:center;gap:4px;font-size:9px;color:var(--dim);
   margin:2px 0 8px;font-family:"JetBrains Mono","SF Mono",monospace}
 .swlg i{width:12px;height:12px;border-radius:2px;background:var(--acc);display:inline-block}
@@ -242,6 +256,7 @@ table.tt thead th:first-child{z-index:3}
 .btn{font-size:12px;padding:9px 16px;border-radius:8px;border:1px solid var(--bd);
   background:var(--card);color:var(--mut);font-family:inherit;cursor:pointer}
 .btn.p{background:var(--acc);color:var(--acc-fg);border-color:var(--acc)}
+.btn.d2{color:#e0796b;border-color:#5a2f2a}
 .btn:disabled{opacity:.45}
 .qrow{display:flex;gap:8px;align-items:center;font-size:11.5px;padding:8px 0;
   border-bottom:1px solid var(--hair);flex-wrap:wrap}
@@ -325,13 +340,13 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/fireba
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
          setPersistence, browserLocalPersistence }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
-import { getFirestore, collection, doc, addDoc, setDoc, onSnapshot, query,
-         orderBy, limit, serverTimestamp, enableIndexedDbPersistence }
+import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
+         onSnapshot, query, orderBy, limit, serverTimestamp, enableIndexedDbPersistence }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20260902_1305';
+const BUILD = '20260902_1318';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -354,6 +369,7 @@ let DATA = null, ENT = null, MAP = null, GEO = null, USER = null;
 let STATE = {}, LOGS = [], QUEUE = [];
 let CAD = {};                 // company -> {tier, target_wk, memo}
 let cadOpen = null, cadSheet = null, fnKind = 'meet', fnPeople = [], fnQuick = true;
+let fnPlan = false, fnDate = '';        // 예정 모드 · 선택한 일자
 let DEALS = null, dealOpen = null, dealQ = '', dealMode = 'gp';
 const KW = {meet:1.0, meal:1.0, call:0.5, mail:0.3};
 const KLBL = {meet:'미팅', meal:'식사', call:'통화', mail:'메일'};
@@ -430,6 +446,12 @@ function subscribe(uid){
   });
 }
 const cadKey = c => String(c).replace(/[\/#?\[\]]/g,'_').slice(0,120);
+// 기록 수정·삭제. 담기만 있고 되돌리는 길이 없으면 오타 하나도 못 고친다.
+const logRef = id => doc(db,'users',USER.uid,'field_notes',id);
+const updLog = (id, o) => USER ? updateDoc(logRef(id), o)
+  : Promise.reject(new Error('로그인이 필요합니다'));
+const delLog = id => USER ? deleteDoc(logRef(id))
+  : Promise.reject(new Error('로그인이 필요합니다'));
 const saveCad = (c, o) => USER
   ? setDoc(doc(db,'users',USER.uid,'cadence',cadKey(c)), {company:c, ...o}, {merge:true})
   : Promise.reject(new Error('로그인이 필요합니다'));
@@ -579,6 +601,12 @@ function comboFill(id, q){
 function comboVal(id){ return (COMBO[id]!=null?COMBO[id]:($(id)?$(id).value:'')).trim(); }
 
 document.addEventListener('input', e=>{
+  if(e.target.id === 'fn-d'){          // 미래 일자면 예정 모드로 바뀐다
+    fnDate = e.target.value;
+    const np = !!fnDate && fnDate > todayStr();
+    if(np !== fnPlan){ fnPlan = np; render(); }
+    return;
+  }
   if(e.target.id === 'dq'){ dealQ = e.target.value;
     clearTimeout(window.__dqt);
     window.__dqt = setTimeout(() => { const v = document.activeElement === $('dq');
@@ -615,7 +643,7 @@ async function saveContact(company, kind, people, extra){
   const rec = Object.assign({
     company: company, title: company, date: todayStr(),
     kind: kind, weight: (KW[kind] || 1), people: people || [],
-    zone: '', place: '', note: '', mode: 'quick'
+    zone: '', place: '', note: '', mode: 'quick', status: 'done'
   }, extra || {});
   const xy = resolveXY(rec.place, rec.zone, company);
   rec.x = xy[0]; rec.y = xy[1]; rec.src = xy[2];
@@ -626,7 +654,7 @@ async function saveContact(company, kind, people, extra){
 
 document.addEventListener('click', async e => {
   // 시트 닫기
-  if(e.target.dataset && e.target.dataset.shx){ cadSheet = null; pcSheet = null; render(); return; }
+  if(e.target.dataset && e.target.dataset.shx){ cadSheet = null; pcSheet = null; logSheet = null; render(); return; }
 
   // 요약 줄 탭 -> Cadence
   const gt = e.target.closest('[data-goto]');
@@ -635,6 +663,63 @@ document.addEventListener('click', async e => {
     document.querySelectorAll('.tb').forEach(x =>
       x.classList.toggle('on', x.dataset.t === TAB));
     render(); window.scrollTo(0,0); return;
+  }
+
+  // 기록 — 완료 처리 · 수정 · 삭제 · 노트
+  const dn = e.target.closest('[data-done]');
+  if(dn){
+    const l = LOGS.find(x => x.id === dn.dataset.done);
+    dn.disabled = true; dn.textContent = '처리 중…';
+    try{
+      await updLog(dn.dataset.done, {status:'done', date: todayStr()});
+      if(l && !l.kind) await updLog(dn.dataset.done, {kind:'meet', weight:1});
+    }catch(x){ alert(x.message); dn.disabled = false; dn.textContent = '완료 처리'; }
+    return;
+  }
+  const ed = e.target.closest('[data-edit]');
+  if(ed){ logSheet = ed.dataset.edit; render(); return; }
+  const dl = e.target.closest('[data-del]');
+  if(dl){
+    if(!confirm('이 기록을 지웁니다. vault 노트는 남습니다.')) return;
+    try{ await delLog(dl.dataset.del); }catch(x){ alert(x.message); }
+    return;
+  }
+  const nt = e.target.closest('[data-note]');
+  if(nt){ location.href = obs(nt.dataset.note); return; }
+  if(e.target.id === 'lg-more'){ logMore = true; render(); return; }
+
+  // 수정 시트 안
+  const lk = e.target.closest('.sheet [data-lk]');
+  if(lk){
+    lk.parentNode.querySelectorAll('[data-lk]').forEach(x => x.classList.remove('on'));
+    lk.classList.add('on'); return;
+  }
+  const st2 = e.target.closest('.sheet [data-st2]');
+  if(st2){
+    st2.parentNode.querySelectorAll('[data-st2]').forEach(x => x.classList.remove('on'));
+    st2.classList.add('on'); return;
+  }
+  if(e.target.id === 'lg-save'){
+    const sh = e.target.closest('.sheet');
+    const k = sh.querySelector('[data-lk].on');
+    const stx = sh.querySelector('[data-st2].on');
+    const kind = k ? k.dataset.lk : 'meet';
+    const status = stx ? stx.dataset.st2 : 'done';
+    const o = {date: sh.querySelector('#lg-d').value || todayStr(),
+               kind: kind, weight: (KW[kind] || 1),
+               people: sh.querySelector('#lg-p').value.split(',')
+                         .map(x => x.trim()).filter(Boolean),
+               place: sh.querySelector('#lg-l').value.trim(),
+               status: status};
+    const txt = sh.querySelector('#lg-a').value.trim();
+    if(status === 'planned') o.agenda = txt; else o.note = txt;
+    try{ await updLog(logSheet, o); }catch(x){ alert(x.message); return; }
+    logSheet = null; render(); return;
+  }
+  if(e.target.id === 'lg-del'){
+    if(!confirm('이 기록을 지웁니다. vault 노트는 남습니다.')) return;
+    try{ await delLog(logSheet); }catch(x){ alert(x.message); return; }
+    logSheet = null; render(); return;
   }
 
   // PC 메모 시트
@@ -750,12 +835,19 @@ document.addEventListener('click', async e => {
   if(e.target.id === 'fn-quick'){
     const c = comboVal('fn-c');
     if(!c){ $('fn-qmsg').textContent = '상대를 고르세요'; return; }
-    e.target.disabled = true; $('fn-qmsg').textContent = '담는 중…';
+    e.target.disabled = true;
+    $('fn-qmsg').textContent = fnPlan ? '예정 담는 중…' : '담는 중…';
     try{
       const zsel = $('fn-z'), psel = $('fn-l');
+      const ag = $('fn-ag');
       const ok = await saveContact(c, fnKind, fnPeople.slice(), {
-        zone: zsel ? zsel.value : '', place: psel ? psel.value.trim() : ''});
-      if(ok){ fnPeople = []; $('fn-qmsg').textContent = '담았습니다'; }
+        zone: zsel ? zsel.value : '', place: psel ? psel.value.trim() : '',
+        date: fnDate || todayStr(),
+        status: fnPlan ? 'planned' : 'done',
+        agenda: (fnPlan && ag) ? ag.value.trim() : ''});
+      if(ok){ fnPeople = [];
+        $('fn-qmsg').textContent = fnPlan ? '예정에 담았습니다' : '담았습니다';
+        if(fnPlan){ fnPlan = false; fnDate = ''; } }
     }catch(x){ $('fn-qmsg').textContent = '실패 — ' + x.message; }
     e.target.disabled = false;
     setTimeout(() => { if($('fn-qmsg')) render(); }, 700);
@@ -822,11 +914,13 @@ function paneField(){
       comboHTML('fn-c','회사·기관 이름')+'</div>'+
       quickBlock()+
     '<div class="row2">'+
-      '<div class="fr"><label>일자 <em>자동</em></label>'+
-        '<input id="fn-d" type="date" value="'+todayStr()+'"></div>'+
+      '<div class="fr"><label>일자 <em>'+(fnPlan?'미래 — 예정으로 담깁니다':'자동')+'</em></label>'+
+        '<input id="fn-d" type="date" value="'+(fnDate||todayStr())+'"></div>'+
       '<div class="fr"><label>권역</label><select id="fn-z">'+
         ZKEY.map(z=>'<option value="'+z+'">'+z+' '+ZNAME[z]+'</option>').join('')+
         '</select></div></div>'+
+    (fnPlan ? '<div class="fr"><label>안건 <em>무엇을 논의할 것인가</em></label>'+
+      '<input id="fn-ag" placeholder="예: 네파 매각 구조 논의"></div>' : '')+
     (fnQuick ? '' :   // 인물 칩과 중복이라 펼쳤을 때만 보인다
     '<div class="fr"><label>참석 <em>인물 칩에 없는 사람만 적으면 됩니다</em></label>'+
       '<input id="fn-p" placeholder="김OO 상무, 박OO 부장"></div>')+
@@ -834,7 +928,7 @@ function paneField(){
       '<input id="fn-l" list="lmlist" placeholder="예: IFC · 여의도동 · 테헤란로 133">'+
       '<datalist id="lmlist">'+(GEO?Object.keys(GEO.landmark)
         .map(k=>'<option>'+esc(k)+'</option>').join(''):'')+'</datalist></div>'+
-    (fnQuick ? '' :
+    (fnQuick || fnPlan ? '' :
     '<div class="fr"><label>기록 방식</label>'+
       '<div class="seg" id="fn-seg">'+
         '<div data-m="txt" class="'+(fnMode==='txt'?'on':'')+'">직접 입력</div>'+
@@ -858,9 +952,11 @@ function paneField(){
       '<b style="font-weight:600">보고 초안만</b> 국문 보고만 (노트 저장 안 함) · '+
       '<b style="font-weight:600">영문 보고까지</b> 노트 + 국문 + 영문 한 번에</div>')+
   '</div>'+
+  '<div class="card" style="margin-top:11px">'+paneLogs()+'</div>'+
   briefCards()+
   heatmap()+
-  '<div class="lbl">담은 기록</div><div class="card">'+queueRows('field')+'</div>';
+  '<div class="lbl">처리 대기열 <em>PC 가 물어가는 큐</em></div>'+
+  '<div class="card">'+queueRows('field')+'</div>';
 }
 
 /* ── 보고 초안 — 국문이 나오면 그 자리에서 영문으로 ── */
@@ -927,7 +1023,7 @@ function resolveXY(place, zone, company){
 function coverage(){
   const zs = ['YBD','CBD','GBD'];
   const last = {}, cnt = {};
-  for(const l of LOGS){
+  for(const l of doneLogs()){
     const z = l.zone; if(zs.indexOf(z) < 0) continue;
     cnt[z] = (cnt[z]||0) + 1;
     if(!last[z] || l.date > last[z]) last[z] = l.date;
@@ -963,7 +1059,7 @@ function coverage(){
 function heatmap(){
   if(!MAP) return '';
   const cnt={CBD:0,YBD:0,GBD:0}, days={};
-  for(const l of LOGS){
+  for(const l of doneLogs()){
     if(cnt[l.zone]!=null) cnt[l.zone]++;
     days[l.date]=(days[l.date]||0)+1;
   }
@@ -993,7 +1089,7 @@ function heatmap(){
   }
   // 방문 도트 — 한 건에 하나. 같은 자리에 쌓이면 투명도가 겹쳐 저절로 진해진다
   const spot={};
-  for(const l of LOGS){
+  for(const l of doneLogs()){
     let x=l.x,y=l.y;
     if(x==null||y==null){ const r=resolveXY(l.place,l.zone,l.company); x=r[0]; y=r[1]; }
     if(x==null) continue;
@@ -1016,7 +1112,7 @@ function heatmap(){
     const v=days[key]||0;
     cells.push('<div class="cel l'+(v===0?0:Math.min(v,4))+'" title="'+key+' · '+v+'건"></div>');
   }
-  return '<div class="lbl">권역 방문 <em>기록 '+LOGS.length+'건</em></div>'+
+  return '<div class="lbl">권역 방문 <em>기록 '+doneLogs().length+'건</em></div>'+
     '<div class="mapbox"><svg viewBox="'+MAP.vb+'" style="width:100%;display:block">'+
       '<defs><filter id="glow" x="-30%" y="-30%" width="160%" height="160%">'+
       '<feGaussianBlur stdDeviation="11"/></filter></defs>'+g+'</svg></div>'+
@@ -1053,12 +1149,17 @@ function quickBlock(){
     '<span class="pchip gh" data-ppnew="1">+ 이름 입력</span>';
   const ks = Object.keys(KLBL).map(k => '<button class="kb' +
       (fnKind === k ? ' on' : '') + '" data-kind="' + k + '">' + KLBL[k] + '</button>').join('');
-  return '<div class="fr"><label>사람 <em style="font-style:normal;color:var(--dim)">' +
+  return (fnPlan ? '<div class="cnt" style="margin:0 0 9px;color:var(--acc)">' +
+      '예정 미팅입니다 — 컨택·지도·캘린더에 세지 않습니다. ' +
+      '만난 뒤 <b>완료 처리</b>를 누르면 그때 기록됩니다.</div>' : '') +
+    '<div class="fr"><label>사람 <em style="font-style:normal;color:var(--dim)">' +
       '이 조직에서 만난 사람</em></label><div>' + chips + '</div></div>' +
-    '<div class="fr"><label>컨택 종류</label><div class="kinds">' + ks + '</div></div>' +
+    (fnPlan ? '' :
+      '<div class="fr"><label>컨택 종류</label><div class="kinds">' + ks + '</div></div>') +
     '<div style="display:flex;gap:6px;margin:9px 0 4px">' +
-      '<button class="btn p" id="fn-quick">컨택만 담기</button>' +
-      '<button class="btn" id="fn-more">' + (fnQuick ? '+ 노트·녹음까지' : '접기') + '</button>' +
+      '<button class="btn p" id="fn-quick">' + (fnPlan ? '예정 담기' : '컨택만 담기') + '</button>' +
+      (fnPlan ? '' :
+        '<button class="btn" id="fn-more">' + (fnQuick ? '+ 노트·녹음까지' : '접기') + '</button>') +
       '<span id="fn-qmsg" style="font-size:11px;color:var(--mut);align-self:center"></span></div>';
 }
 
@@ -1258,6 +1359,102 @@ function paneDeal(){
   return head + chips + body;
 }
 
+
+/* -- 예정 / 완료 -----------------------------------
+   미래 일자로 담은 미팅을 컨택으로 세면 안 된다 — 아직 안 만났으니까.
+   status 가 없는 과거 기록은 done 으로 본다. */
+const isPlanned = l => l.status ? l.status === 'planned' : (l.date > todayStr());
+const dDays = d => {                     // 오늘 기준 남은 일수 (음수면 지남)
+  const t = dnum(d); if(!t) return null;
+  const n = new Date();
+  return Math.round((t - Date.UTC(n.getFullYear(), n.getMonth(), n.getDate())) / DAY);
+};
+const doneLogs = () => LOGS.filter(l => !isPlanned(l));
+const planLogs = () => LOGS.filter(isPlanned)
+  .slice().sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+
+
+/* -- 미팅 목록 · 수정 · 삭제 ------------------------ */
+let logSheet = null, logMore = false;
+
+function logRow(l, plan){
+  const dd = plan ? dDays(l.date) : null;
+  const ppl = (l.people || []).join(', ') || l.attendees || '';
+  const bits = [l.place, ppl, l.agenda || (l.note || '').slice(0, 40)]
+    .filter(Boolean).map(esc).join(' · ');
+  return '<div class="lg2' + (plan ? ' up' : '') + '">' +
+    '<div class="cdr1">' +
+      (plan ? '<span class="pl ' + (dd < 0 ? 'o' : 'n') + '">' +
+              (dd < 0 ? '지남' : (dd === 0 ? '오늘' : 'D-' + dd)) + '</span>' : '') +
+      '<b style="font-size:12.5px">' + esc(l.company || l.title || '—') + '</b>' +
+      (plan ? '' : '<span class="pl">' + (KLBL[l.kind || 'meet'] || '') + '</span>') +
+      '<span class="cdm">' + esc(l.date || '') + '</span></div>' +
+    (bits ? '<div class="cdr2">' + bits + '</div>' : '') +
+    '<div class="a">' +
+      (plan ? '<button class="p" data-done="' + l.id + '">완료 처리</button>' : '') +
+      '<button data-edit="' + l.id + '">수정</button>' +
+      '<button class="d" data-del="' + l.id + '">삭제</button>' +
+      (l.result_path ? '<button data-note="' + esc(l.result_path) + '">노트 →</button>' : '') +
+    '</div></div>';
+}
+
+function paneLogs(){
+  const up = planLogs(), dn = doneLogs()
+    .slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  let h = '';
+  if(up.length)
+    h += '<div class="cdsec">다가오는 미팅 <em>' + up.length + '건</em></div>' +
+         up.map(l => logRow(l, true)).join('');
+  const cap = logMore ? dn.length : 10;
+  h += '<div class="cdsec">기록 <em>' +
+       (dn.length > cap ? '최근 ' + cap + '건 · 누적 ' + dn.length + '건'
+                        : dn.length + '건') + '</em></div>';
+  h += dn.length ? dn.slice(0, cap).map(l => logRow(l, false)).join('')
+                 : '<div class="empty" style="padding:10px 0">기록이 없습니다</div>';
+  if(dn.length > cap)
+    h += '<div style="text-align:center;margin-top:6px">' +
+         '<button class="chip" id="lg-more">전체 ' + dn.length + '건 보기</button></div>';
+  return h;
+}
+
+const WK = ['일','월','화','수','목','금','토'];
+function sheetLog(){
+  if(!logSheet) return '';
+  const l = LOGS.find(x => x.id === logSheet) || {};
+  const plan = isPlanned(l);
+  const ks = Object.keys(KLBL).map(k => '<button class="kb' +
+      ((l.kind || 'meet') === k ? ' on' : '') + '" data-lk="' + k + '">' +
+      KLBL[k] + '</button>').join('');
+  return '<div class="shbg" data-shx="1"></div><div class="sheet">' +
+    '<div class="shh">' + esc(l.company || '기록 수정') +
+      (plan ? ' <span class="pl n">예정</span>' : '') + '</div>' +
+    '<div class="fr"><label>일자</label>' +
+      '<input id="lg-d" type="date" value="' + esc(l.date || '') + '"></div>' +
+    '<div class="fr"><label>컨택 종류</label><div class="kinds" id="lg-kinds">' + ks + '</div></div>' +
+    '<div class="fr"><label>사람 <em style="font-style:normal;color:var(--dim)">쉼표로 구분</em></label>' +
+      '<input id="lg-p" value="' + esc((l.people || []).join(', ')) + '"></div>' +
+    '<div class="fr"><label>장소</label>' +
+      '<input id="lg-l" value="' + esc(l.place || '') + '"></div>' +
+    '<div class="fr"><label>' + (plan ? '안건' : '메모') + '</label>' +
+      '<input id="lg-a" value="' + esc(plan ? (l.agenda || '') : (l.note || '')) + '"></div>' +
+    (plan ? '' :
+      '<div class="fr"><label>상태</label><div class="seg" id="lg-st">' +
+      '<div data-st2="done" class="on">완료</div>' +
+      '<div data-st2="planned">예정으로</div></div></div>') +
+    (plan ?
+      '<div class="fr"><label>상태</label><div class="seg" id="lg-st">' +
+      '<div data-st2="done">완료로</div>' +
+      '<div data-st2="planned" class="on">예정</div></div></div>' : '') +
+    '<div style="display:flex;gap:6px;margin-top:11px">' +
+      '<button class="btn p" id="lg-save">저장</button>' +
+      '<button class="btn d2" id="lg-del">삭제</button>' +
+      '<button class="btn" data-shx="1">닫기</button></div>' +
+    (l.result_path ? '<div style="margin-top:9px;font-size:10.5px;color:var(--dim)">' +
+      '삭제해도 vault 노트는 남습니다 · ' +
+      '<a href="' + obs(l.result_path) + '" style="color:var(--acc)">노트 →</a></div>' : '') +
+    '</div>';
+}
+
 /* -- Cadence --------------------------------------
    컨택을 조직·인물로 집계하고 목표 주기를 넘긴 곳을 표시한다.
    고유 리듬은 추정하지 않는다 - 목표는 주 단위로 직접 정한다.       */
@@ -1275,7 +1472,7 @@ function cadAgg(){
   const m = {};
   const put = c => m[c] || (m[c] = {company:c, last:'', n:0, w:0,
                                     kinds:{}, people:{}, zone:'', hist:[]});
-  for(const l of LOGS){
+  for(const l of doneLogs()){
     const c = l.company || l.title; if(!c) continue;
     const o = put(c);
     const k = l.kind || 'meet';
@@ -1291,6 +1488,12 @@ function cadAgg(){
     }
   }
   for(const k in CAD){ if(k !== '__default' && CAD[k].company) put(CAD[k].company); }
+  // 예정이 잡혀 있으면 알려준다 — 컨택 필요는 그대로 두되 중복 연락을 막는다
+  for(const l of planLogs()){
+    const c = l.company || l.title; if(!c) continue;
+    const o = put(c);
+    if(!o.next || l.date < o.next) o.next = l.date;
+  }
   const rows = Object.values(m).map(o => {
     const wk = targetWk(o.company), lim = wk * 7;
     const d = o.last ? daysAgo(o.last) : null;
@@ -1316,6 +1519,7 @@ function cadRow(r){
     '<div class="cdr1">' + swatch(o) +
       (r.t1 ? '<span class="t1">T-1</span>' : '') +
       '<b>' + esc(r.company) + '</b>' +
+      (r.next ? '<span class="pl n">예정 ' + r.next.slice(5).replace('-','.') + '</span>' : '') +
       '<span class="cdm">' + (r.days == null ? '기록 없음' : r.days + '일 전') + '</span></div>' +
     '<div class="cdr2">목표 ' + r.wk + '주' + (over ? ' · ' + over + '일 초과' : '') +
       (kinds ? ' · ' + kinds : '') + (np ? ' · 인물 ' + np + '명' : '') + '</div>' +
@@ -1440,7 +1644,7 @@ function render(){
     (USER?'':'<div class="note" style="background:none;border:1px solid var(--bd);'+
       'border-radius:9px;padding:9px 11px;font-size:11px;color:var(--mut);margin-bottom:11px">'+
       '로그인하지 않았습니다 — 폼은 볼 수 있지만 담기는 되지 않습니다.</div>')+
-    (TAB==='idea'?paneIdea():(TAB==='cad'?paneCad():(TAB==='deal'?paneDeal():paneField()))) + sheetCad() + sheetPC();
+    (TAB==='idea'?paneIdea():(TAB==='cad'?paneCad():(TAB==='deal'?paneDeal():paneField()))) + sheetCad() + sheetPC() + sheetLog();
   putForm(keep);
   if(TAB==='field'){
     const f=$('fn-f'); if(f) f.onchange=e=>{ fnFile=e.target.files[0]||null; render(); };
@@ -1579,6 +1783,7 @@ document.addEventListener('click', async e => {
       const rec={company:c,title:c,date:$('fn-d').value,zone:$('fn-z').value,
                  attendees:att,note:txt,mode:fnMode,
                  people:ppl, kind:'meet', weight:1,
+                 status:(($('fn-d').value||todayStr())>todayStr()?'planned':'done'),
                  place, x:xy[0], y:xy[1], src:xy[2]};
       if(briefOnly){
         await enqueue('brief', rec);
