@@ -316,7 +316,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, onSnapshot, query,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20260830_2058';
+const BUILD = '20260902_1258';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -700,16 +700,23 @@ document.addEventListener('click', async e => {
     render(); return;
   }
 
-  // 컨택 종류 선택
+  // 컨택 종류 선택 — 다시 그리지 않고 버튼 상태만 바꾼다
   const kb = e.target.closest('[data-kind]');
-  if(kb){ fnKind = kb.dataset.kind; render(); return; }
+  if(kb){
+    fnKind = kb.dataset.kind;
+    const box = kb.parentNode;
+    box.querySelectorAll('[data-kind]').forEach(x => x.classList.remove('on'));
+    kb.classList.add('on');
+    return;
+  }
 
   // 인물 칩 토글 / 새 이름
   const pp = e.target.closest('[data-pp]');
   if(pp){
     const n = pp.dataset.pp, i = fnPeople.indexOf(n);
     if(i >= 0) fnPeople.splice(i, 1); else fnPeople.push(n);
-    render(); return;
+    pp.classList.toggle('on', i < 0);      // 다시 그리지 않는다
+    return;
   }
   if(e.target.closest('[data-ppnew]')){
     const n = (prompt('이름을 입력하세요 (예: 김OO 상무)') || '').trim();
@@ -1368,20 +1375,54 @@ function sheetCad(){
 }
 
 /* ── 렌더 ─────────────────────────────────────── */
+/* 폼 상태 보존 —
+   render() 는 pane 을 통째로 다시 그린다. 컨택 종류를 바꾸거나 Firestore 스냅샷이
+   들어올 때마다 일자·장소·메모가 초기화되던 문제가 여기서 났다.
+   그리기 전에 입력값과 포커스를 떠서, 그린 뒤 되돌려 놓는다. */
+function grabForm(){
+  const v = {}, ae = document.activeElement;
+  document.querySelectorAll('#panes input,#panes textarea,#panes select').forEach(el => {
+    if(el.id && el.type !== 'file') v[el.id] = el.value;
+  });
+  const f = (ae && ae.id && v.hasOwnProperty(ae.id)) ? {
+    id: ae.id,
+    s: (ae.selectionStart != null ? ae.selectionStart : null),
+    e: (ae.selectionEnd != null ? ae.selectionEnd : null)
+  } : null;
+  return {v: v, f: f};
+}
+function putForm(k){
+  if(!k) return;
+  for(const id in k.v){
+    const el = $(id);
+    if(el && el.value !== k.v[id]) el.value = k.v[id];
+  }
+  if(k.f){
+    const el = $(k.f.id);
+    if(el){
+      try{ el.focus({preventScroll:true}); }catch(x){ el.focus(); }
+      if(k.f.s != null && el.setSelectionRange){
+        try{ el.setSelectionRange(k.f.s, k.f.e); }catch(x){}
+      }
+    }
+  }
+}
+
 function render(){
   const scan = (TAB==='scan'||TAB==='watch');
   $('scanctl').style.display = scan?'':'none';
   $('cnt').style.display = scan?'':'none';
   $('list').style.display = scan?'':'none';
   $('more').style.display = (scan&&shown<view.length)?'':'none';
-  $('panes').innerHTML = '';
-  if(scan){ if(DATA) rebuild(); return; }
+  if(scan){ $('panes').innerHTML=''; if(DATA) rebuild(); return; }
+  const keep = grabForm();
   // 폼은 로그인 없이도 보인다. 막는 건 담을 때뿐이다.
   $('panes').innerHTML =
     (USER?'':'<div class="note" style="background:none;border:1px solid var(--bd);'+
       'border-radius:9px;padding:9px 11px;font-size:11px;color:var(--mut);margin-bottom:11px">'+
       '로그인하지 않았습니다 — 폼은 볼 수 있지만 담기는 되지 않습니다.</div>')+
     (TAB==='idea'?paneIdea():(TAB==='cad'?paneCad():(TAB==='deal'?paneDeal():paneField()))) + sheetCad() + sheetPC();
+  putForm(keep);
   if(TAB==='field'){
     const f=$('fn-f'); if(f) f.onchange=e=>{ fnFile=e.target.files[0]||null; render(); };
   }
