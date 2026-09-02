@@ -42,19 +42,21 @@ body{margin:0 auto;max-width:1200px;padding:24px 24px calc(48px + env(safe-area-
 .mono{font-family:"JetBrains Mono","SF Mono",ui-monospace,monospace}
 h1{font-size:26px;font-weight:600;margin:0 0 4px;letter-spacing:-0.03em}
 @media(max-width:540px){h1{font-size:20px}}
-.sub{color:var(--mut);font-size:13px;
-  font-family:"JetBrains Mono","SF Mono",ui-monospace,monospace}
-@media(max-width:540px){.sub{font-size:11px}}
-/* 헤더 — 제목 왼쪽, 탭·계정 오른쪽 (Workout 의 view-toggle 배치) */
-.hdr{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:16px}
-.hdr .rgt{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.who{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--mut);
-  font-family:"JetBrains Mono","SF Mono",ui-monospace,monospace}
-.who button{font:11px "JetBrains Mono","SF Mono",monospace;letter-spacing:.08em;
-  padding:6px 12px;border-radius:6px;border:1px solid var(--bd);
-  background:transparent;color:var(--mut);cursor:pointer}
+/* subtitle 은 mono 가 아니다 — Workout 은 본문 폰트를 쓴다 */
+.sub{color:var(--mut);font-size:13px;margin:0 0 16px}
+@media(max-width:540px){.sub{font-size:12px;margin-bottom:12px}}
+/* 헤더 — 제목 왼쪽, 탭·토글 오른쪽. 아래 줄에 subtitle */
+.hdr{display:flex;align-items:flex-start;justify-content:space-between;
+  gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.hdr .rgt{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+/* 세그먼트 토글 — Workout 의 lang-toggle */
+.who{display:inline-flex;gap:0;border:1px solid var(--bd);border-radius:6px;overflow:hidden}
+.who button{background:transparent;color:var(--mut);border:none;padding:6px 12px;
+  font:11px "JetBrains Mono","SF Mono",monospace;letter-spacing:.1em;cursor:pointer;
+  transition:all .1s}
 .who button:hover{color:var(--fg)}
-.kpi{display:grid;gap:12px;grid-template-columns:repeat(5,1fr);margin:0 0 20px}
+.who button.on{background:var(--acc);color:var(--acc-fg);font-weight:600}
+.kpi{display:grid;gap:12px;grid-template-columns:repeat(4,1fr);margin:0 0 20px}
 @media(max-width:900px){.kpi{grid-template-columns:repeat(2,1fr)}}
 .kpi div{background:var(--card);border:1px solid var(--bd);border-radius:12px;
   padding:16px;text-align:left}
@@ -62,19 +64,31 @@ h1{font-size:26px;font-weight:600;margin:0 0 4px;letter-spacing:-0.03em}
   font-family:"JetBrains Mono","SF Mono",ui-monospace,monospace;
   font-variant-numeric:tabular-nums}
 @media(max-width:540px){.kpi b{font-size:22px}}
+.kpi div.hi{border-color:var(--acc)}
+.kpi div.hi b{color:var(--acc)}
+.kpi em{font-style:normal;display:block;font-size:10.5px;color:var(--dim);margin-top:3px;
+  font-family:"JetBrains Mono","SF Mono",ui-monospace,monospace}
+.kpi2{grid-template-columns:repeat(4,1fr);margin-top:-8px}
+@media(max-width:900px){.kpi2{grid-template-columns:repeat(2,1fr)}}
+.kpi2 div{padding:12px 16px}
+.kpi2 b{font-size:20px}
 .kpi i{font-style:normal;display:block;font-size:11px;color:var(--mut);margin-top:4px;
   text-transform:uppercase;letter-spacing:.1em;
   font-family:"JetBrains Mono","SF Mono",ui-monospace,monospace}
 .stick{position:sticky;top:0;z-index:30;background:var(--bg);padding:0 0 12px}
-.tabs{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;
-  border:1px solid var(--bd);border-radius:8px;width:max-content;max-width:100%}
+.tabs{display:inline-flex;gap:4px;overflow-x:auto;scrollbar-width:none;
+  background:var(--card2);border:1px solid var(--bd);border-radius:8px;padding:2px;
+  max-width:100%}
 .tabs::-webkit-scrollbar{display:none}
-.tb{flex:0 0 auto;padding:9px 15px;border:0;border-right:1px solid var(--bd);
+.tb{flex:0 0 auto;padding:6px 10px;border:0;border-radius:6px;
   background:transparent;color:var(--mut);cursor:pointer;white-space:nowrap;
-  font:11px "JetBrains Mono","SF Mono",monospace;letter-spacing:.1em;
+  font:11px "JetBrains Mono","SF Mono",monospace;letter-spacing:.05em;
   text-transform:uppercase}
-.tabs .tb:last-child{border-right:0}
-.tb.on{background:var(--acc);color:var(--acc-fg);font-weight:600}
+.tb:hover{color:var(--fg)}
+/* 활성 탭은 accent 로 꽉 채우지 않는다 — 안쪽에서 한 겹 떠오르는 정도 */
+.tb.on{background:var(--card);color:var(--fg);font-weight:500;
+  box-shadow:0 1px 2px rgba(0,0,0,.35)}
+html[data-m="light"] .tb.on{box-shadow:0 1px 2px rgba(0,0,0,.08)}
 #q{width:100%;padding:9px 11px;border:1px solid var(--bd);border-radius:6px;
   background:var(--card2);color:var(--fg);font:13px inherit;margin:12px 0 8px}
 .chips{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
@@ -97,9 +111,10 @@ h1{font-size:26px;font-weight:600;margin:0 0 4px;letter-spacing:-0.03em}
   letter-spacing:-1px;font-size:13px}
 .sz{color:var(--mut);font-size:10.5px;margin-left:auto;font-variant-numeric:tabular-nums}
 .st{font-size:9.5px;padding:2px 7px;border-radius:9px;font-weight:600}
-.st-new,.st-watch,.st-seen,.st-drop{background:var(--card2);color:var(--mut);
+.st-new,.st-live,.st-watch,.st-seen,.st-drop{background:var(--card2);color:var(--mut);
   border:1px solid var(--bd)}
 .st-watch{color:var(--acc);border-color:var(--acc)}
+.st-live{background:var(--acc);color:var(--acc-fg);border-color:var(--acc)}
 .evn{background:var(--card2);color:var(--acc);font-size:9.5px;padding:2px 7px;
   border-radius:6px;border:1px solid var(--bd)}
 .bd{padding:0 11px 11px;border-top:1px solid var(--hair)}
@@ -271,10 +286,7 @@ pre.out{background:var(--bg);border:1px solid var(--bd);border-radius:9px;paddin
 <body>
 
 <div class="hdr">
-  <div>
-    <h1>Origination</h1>
-    <div class="sub" id="hd">불러오는 중…</div>
-  </div>
+  <h1>Origination</h1>
   <div class="rgt">
     <div class="tabs" id="tabs">
     <div class="tb on" data-t="scan">Screening</div>
@@ -285,10 +297,13 @@ pre.out{background:var(--bg);border:1px solid var(--bd);border-radius:9px;paddin
     <div class="tb" data-t="deal">Deals</div>
     </div>
     <div class="who" id="who"></div>
+    <div class="who" id="acct"></div>
   </div>
 </div>
+<p class="sub" id="hd">불러오는 중…</p>
 
 <div class="kpi" id="kpi"></div>
+<div class="kpi kpi2" id="kpi2" style="display:none"></div>
 
 <div class="stick">
   <div id="scanctl">
@@ -316,7 +331,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, onSnapshot, query,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20260902_1258';
+const BUILD = '20260902_1305';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -375,11 +390,13 @@ const setMode = m => { localStorage.setItem('om', m);
 document.documentElement.dataset.m = MODE();
 
 function paintWho(){
-  const u = USER;
+  const m = MODE();
   $('who').innerHTML =
-    '<button id="mode">' + (MODE()==='dark' ? 'LIGHT' : 'DARK') + '</button>' +
-    (u ? '<button id="out">LOGOUT</button>'
-       : '<button id="in">LOGIN</button>');
+    '<button id="md-dark" class="' + (m==='dark'?'on':'') + '">DARK</button>' +
+    '<button id="md-light" class="' + (m==='light'?'on':'') + '">LIGHT</button>';
+  const a = $('acct');
+  if(a) a.innerHTML = USER ? '<button id="out">LOGOUT</button>'
+                           : '<button id="in">LOGIN</button>';
 }
 
 onAuthStateChanged(auth, u => {
@@ -391,7 +408,8 @@ onAuthStateChanged(auth, u => {
 document.addEventListener('click', e => {
   if (e.target.id === 'in') signInWithPopup(auth, new GoogleAuthProvider()).catch(x=>alert(x.message));
   if (e.target.id === 'out') signOut(auth);
-  if (e.target.id === 'mode') setMode(MODE()==='dark' ? 'light' : 'dark');
+  if (e.target.id === 'md-dark') setMode('dark');
+  if (e.target.id === 'md-light') setMode('light');
 });
 
 function subscribe(uid){
@@ -423,7 +441,8 @@ const enqueue = (kind, payload) => USER
   : Promise.reject(new Error('로그인이 필요합니다'));
 
 const stOf = c => (STATE[c] && STATE[c].st) || 'new';
-const SLBL = {new:'신규',watch:'관심',seen:'검토',drop:'제외'};
+const SLBL = {new:'신규',live:'PIPELINE',watch:'WATCHLIST',seen:'검토',drop:'제외'};
+const SORD = ['new','live','watch','seen','drop'];   // 상태 버튼 순서
 
 /* ── 스캔·관심 ─────────────────────────────────── */
 const SORTS = [
@@ -440,7 +459,7 @@ const FILTS = [['all','전체'],['new','미검토'],['watch','관심'],['seen','
 function rebuild(){
   const q = ($('q').value||'').trim().toLowerCase();
   let rows = DATA.companies;
-  if (TAB==='watch') rows = rows.filter(r=>stOf(r.c)==='watch');
+  if (TAB==='watch') rows = rows.filter(r=>['watch','live'].indexOf(stOf(r.c))>=0);
   else if (FILT==='nodrop') rows = rows.filter(r=>stOf(r.c)!=='drop');
   else if (FILT!=='all') rows = rows.filter(r=>stOf(r.c)===FILT);
   if (q) rows = rows.filter(r=>r.n.toLowerCase().includes(q)||(r.s||'').includes(q));
@@ -514,7 +533,7 @@ function body(r){
     }
     h+='</div>';
   }
-  h+='<div class="acts">'+['watch','seen','drop'].map(k=>
+  h+='<div class="acts">'+['live','watch','seen','drop'].map(k=>
     '<button class="ab'+(st===k?' on':'')+'" data-c="'+r.c+'" data-st="'+k+'">'+SLBL[k]+'</button>').join('')+
     '<button class="ab" data-idea="'+r.c+'">Idea 등록 →</button>'+
     '<a class="ab" href="https://dart.fss.or.kr/dsab007/main.do?textCrpNm='+
@@ -1430,21 +1449,68 @@ function render(){
 
 function kpi(){
   if(!DATA) return;
-  const n={new:0,watch:0,seen:0,drop:0};
-  for(const r of DATA.companies) n[stOf(r.c)]++;
-  $('kpi').innerHTML =
-    '<div><b>'+DATA.companies.length.toLocaleString()+'</b><i>전체</i></div>'+
-    '<div><b>'+n.new.toLocaleString()+'</b><i>미검토</i></div>'+
-    '<div><b>'+n.watch+'</b><i>관심</i></div>'+
-    '<div><b>'+n.seen+'</b><i>검토</i></div>'+
-    '<div><b>'+n.drop+'</b><i>제외</i></div>';
+  const D = DATA.dsum || {};
+  const n = {new:0, live:0, watch:0, seen:0, drop:0};
+  for(const r of DATA.companies) n[stOf(r.c)] = (n[stOf(r.c)]||0) + 1;
+
+  // 컨택 필요 — Cadence 와 같은 규칙
+  let cdue = 0;
+  try{
+    if(typeof cadAgg === 'function' && LOGS.length)
+      cdue = cadAgg().filter(x => x.st === 'l').length;
+  }catch(x){}
+
+  const cell = (v, lb, sub, hi) =>
+    '<div' + (hi ? ' class="hi"' : '') + '><b>' + v + '</b><i>' + lb + '</i>' +
+    (sub ? '<em>' + sub + '</em>' : '') + '</div>';
+
+  // 고정 4칸 — 내가 만든 상태 둘, 데이터가 알려주는 것 둘
+  let fixed =
+    cell(n.live, 'Pipeline', '쿠킹 중', true) +
+    cell(n.watch, 'Watchlist', '관심 등록') +
+    cell((D.exit || 0).toLocaleString(), 'Exit Due', '보유 5년+') +
+    cell(cdue, 'Contact Due', '목표 주기 초과');
+
+  // 탭별 한 줄 — 그 탭에서만 의미 있는 것
+  let extra = '';
+  if(TAB === 'scan' || TAB === 'watch'){
+    extra = cell(DATA.companies.length.toLocaleString(), '스크리닝', '상장 유니버스') +
+            cell(n.seen.toLocaleString(), '검토', '본 것') +
+            cell(n.drop.toLocaleString(), '제외', '숨김') +
+            cell((DATA.ev_done || 0).toLocaleString(), '공시 보유', DATA.ev_from + '~');
+  }else if(TAB === 'idea'){
+    const q = k => QUEUE.filter(x => x.kind === 'idea' && x.status === k).length;
+    extra = cell(QUEUE.filter(x => x.kind === 'idea').length, '담은 건', '전체') +
+            cell(q('pending'), '대기', '') + cell(q('running'), '처리중', '') +
+            cell(q('done'), '완료', '');
+  }else if(TAB === 'field'){
+    const zs = {YBD:0, CBD:0, GBD:0};
+    LOGS.forEach(l => { if(zs[l.zone] != null) zs[l.zone]++; });
+    extra = cell(LOGS.length, '컨택', '누적') +
+            cell(zs.YBD, '여의도', '') + cell(zs.CBD, '광화문', '') + cell(zs.GBD, '강남', '');
+  }else if(TAB === 'cad'){
+    let rows = [];
+    try{ rows = cadAgg(); }catch(x){}
+    extra = cell(rows.length, '상대', '기록 있는 곳') +
+            cell(rows.filter(r => r.t1).length, 'T-1', '지정') +
+            cell(rows.filter(r => r.st === 'none').length, '미컨택', '') +
+            cell(defWk() + '주', '기본 주기', '');
+  }else if(TAB === 'deal'){
+    extra = cell((D.gp || 0).toLocaleString(), 'GP', '포트폴리오 보유') +
+            cell((D.deals || 0).toLocaleString(), 'Deals', '10년 원장') +
+            cell((D.pf || 0).toLocaleString(), 'Portfolio', '비상장 축') +
+            cell((D.mand || 0).toLocaleString(), 'Mandated', '주관사 확인');
+  }
+  $('kpi').innerHTML = fixed;
+  const ex = $('kpi2');
+  if(ex){ ex.innerHTML = extra; ex.style.display = extra ? '' : 'none'; }
 }
 
 /* ── 이벤트 ───────────────────────────────────── */
 document.addEventListener('click', async e => {
   const tb=e.target.closest('.tb');
   if(tb){ document.querySelectorAll('.tb').forEach(x=>x.classList.toggle('on',x===tb));
-    TAB=tb.dataset.t; render(); window.scrollTo(0,0); return; }
+    TAB=tb.dataset.t; kpi(); render(); window.scrollTo(0,0); return; }
 
   const ab=e.target.closest('.ab[data-st]');
   if(ab){ if(!USER) return needLogin();
@@ -1473,6 +1539,12 @@ document.addEventListener('click', async e => {
     if(!t||!a||!d){ $('id-msg').textContent='대상·아이디어·due 는 필수입니다'; return; }
     $('id-go').disabled=true; $('id-msg').textContent='담는 중…';
     try{ await enqueue('idea',{target:t,title:t,angle:a,stage:$('id-s').value,due:d});
+      // 담는 순간 그 회사는 보고 있어야 할 대상이다 — 자동으로 Watchlist 로
+      const hit = DATA && DATA.companies.find(x => x.n === t);
+      if(hit && stOf(hit.c) === 'new'){
+        STATE[hit.c] = Object.assign({}, STATE[hit.c], {st:'watch'});
+        saveState(); kpi();
+      }
       $('id-a').value=''; $('id-msg').textContent='담았습니다'; }
     catch(x){ $('id-msg').textContent='실패 — '+x.message; }
     $('id-go').disabled=false; return;
