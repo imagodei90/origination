@@ -3,7 +3,7 @@
 // 계속 옛 화면을 보여준다 — 실제로 그렇게 물렸다.
 // 데이터는 URL 에 ?v=BUILD 가 붙어 새 빌드면 자동으로 새 주소가 되므로
 // 캐시 우선이어도 안전하고, 오프라인에서는 마지막 것이 그대로 뜬다.
-const V = '20260902_1359';
+const V = '20260902_2211';
 const CACHE = 'orig-' + V;
 const ASSETS = ['./', './index.html', './data.json', './entities.json', './deals.json', './seoul.json',
                 './geo.json', './manifest.json', './icon-192.png', './icon-512.png'];
