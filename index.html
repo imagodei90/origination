@@ -32,7 +32,7 @@ html[data-m="light"]{
   --map-ext:#08090b; --map-ink:#fafafa; --map-sub:#8b8f95;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0 auto;max-width:1200px;padding:24px 24px calc(48px + env(safe-area-inset-bottom));
+body{overflow-x:hidden;margin:0 auto;max-width:1200px;padding:24px 24px calc(48px + env(safe-area-inset-bottom));
   background:var(--bg);color:var(--fg);min-height:100vh;
   font-family:"Inter",-apple-system,BlinkMacSystemFont,"SF Pro Display","Pretendard",
     "Segoe UI",Roboto,sans-serif;
@@ -78,7 +78,7 @@ h1{font-size:26px;font-weight:600;margin:0 0 4px;letter-spacing:-0.03em}
 .stick{position:sticky;top:0;z-index:30;background:var(--bg);padding:0 0 12px}
 .tabs{display:inline-flex;gap:4px;overflow-x:auto;scrollbar-width:none;
   background:var(--card2);border:1px solid var(--bd);border-radius:8px;padding:2px;
-  max-width:100%}
+  max-width:100%;min-width:0}
 .tabs::-webkit-scrollbar{display:none}
 .tb{flex:0 0 auto;padding:6px 10px;border:0;border-radius:6px;
   background:transparent;color:var(--mut);cursor:pointer;white-space:nowrap;
@@ -89,6 +89,16 @@ h1{font-size:26px;font-weight:600;margin:0 0 4px;letter-spacing:-0.03em}
 .tb.on{background:var(--card);color:var(--fg);font-weight:500;
   box-shadow:0 1px 2px rgba(0,0,0,.35)}
 html[data-m="light"] .tb.on{box-shadow:0 1px 2px rgba(0,0,0,.08)}
+@media(max-width:700px){
+  .hdr{gap:10px}
+  .hdr .rgt{width:100%;justify-content:flex-start}
+  .tabs{width:100%;flex-wrap:wrap;overflow:visible}
+  .tb{flex:1 1 auto;text-align:center;padding:8px 6px;letter-spacing:.02em;font-size:10.5px}
+  .who{flex:0 0 auto}
+}
+@media(max-width:400px){
+  .tb{font-size:10px;padding:8px 4px}
+}
 #q{width:100%;padding:9px 11px;border:1px solid var(--bd);border-radius:6px;
   background:var(--card2);color:var(--fg);font:13px inherit;margin:12px 0 8px}
 .chips{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
@@ -346,7 +356,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20260902_1318';
+const BUILD = '20260902_1359';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
