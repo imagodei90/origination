@@ -1,22 +1,22 @@
 {
-  "name": "Origination",
-  "short_name": "Origination",
-  "description": "DART 전수 스캔 — 딜 오리지네이션 레이더",
+  "name": "Work",
+  "short_name": "Work",
+  "description": "딜 원장·스크리닝·컨택 — 업무 대시보드",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
   "icons": [
     {
-      "src": "icon-192.png?v=20260902_2211",
+      "src": "icon-192.png?v=20260905_1912",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icon-512.png?v=20260902_2211",
+      "src": "icon-512.png?v=20260905_1912",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
