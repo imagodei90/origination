@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Work">
 <link rel="manifest" href="manifest.json">
 <title>Work</title>
-<link rel="icon" href="favicon.ico?v=20261020_2043" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261020_2043">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261020_2043">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261020_2043">
+<link rel="icon" href="favicon.ico?v=20261020_2110" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261020_2110">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261020_2110">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261020_2110">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -383,7 +383,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20261020_2043';
+const BUILD = '20261020_2110';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -412,12 +412,14 @@ let fnPlan = false, fnDate = '';        // 예정 모드 · 선택한 일자
 let DEALS = null, dealOpen = null, dealQ = '', dealMode = 'gp';
 // 저녁·미팅·골프는 같은 무게다 — 반나절을 통째로 쓰고 사적 대화가 섞인다.
 // 점심은 업무 시간 안이라 한 단계 아래. 숫자는 여기만 고치면 전부 따라온다.
-const KW = {meet:1.0, dinner:1.0, golf:1.0, lunch:0.8, call:0.5, mail:0.3, meal:1.0};
-const KLBL = {meet:'미팅', lunch:'점심', dinner:'저녁', golf:'골프',
+// 커피는 점심보다 짧고 가볍지만 직접 만나는 자리다 — 점심 아래, 통화 위에 둔다.
+const KW = {meet:1.0, dinner:1.0, golf:1.0, lunch:0.8, coffee:0.6,
+            call:0.5, mail:0.3, meal:1.0};
+const KLBL = {meet:'미팅', coffee:'커피', lunch:'점심', dinner:'저녁', golf:'골프',
               call:'통화', mail:'메일', meal:'식사'};
 // 고를 수 있는 것. 'meal' 은 빠져 있다 — 옛 기록을 읽기만 하는 표시다.
 // 점심이었는지 저녁이었는지 데이터에 없어 되살릴 수 없다.
-const KSEL = ['meet','lunch','dinner','golf','call','mail'];
+const KSEL = ['meet','coffee','lunch','dinner','golf','call','mail'];
 const DEF_WK = 8;             // 전역 기본 주기
 let TAB = 'scan', SORT = 'ev', FILT = 'all', shown = 0, view = [];
 
