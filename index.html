@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Work">
 <link rel="manifest" href="manifest.json">
 <title>Work</title>
-<link rel="icon" href="favicon.ico?v=20261020_2110" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261020_2110">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261020_2110">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261020_2110">
+<link rel="icon" href="favicon.ico?v=20261020_2207" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261020_2207">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261020_2207">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261020_2207">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -218,6 +218,46 @@ table.tt thead th:first-child{z-index:3}
 .nct .tg{font:9px "JetBrains Mono","SF Mono",monospace;padding:2px 7px;border-radius:10px;
   border:1px solid var(--bd);color:var(--mut);letter-spacing:.04em}
 .ncf{margin-top:10px}
+/* 기록 행의 이름 — 장소·메모와 한 문자열에 섞여 있던 것을 떼어낸다.
+   accent 를 옅게 깔아 메타데이터와 급을 가른다. 누르면 그 사람 명함으로 간다. */
+.rowC{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-top:6px}
+.nmC{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;
+  padding:2px 9px;border-radius:11px;background:rgba(30,164,157,.14);
+  color:var(--acc);border:1px solid rgba(30,164,157,.3);cursor:pointer;white-space:nowrap}
+.nmC:hover{background:rgba(30,164,157,.26)}
+.nmC i{font-style:normal;opacity:.6;font-size:10px}
+/* 칩 안의 직급 — 이름보다 가볍게. 키는 이름이고 직급은 딸려 오는 값이다. */
+.nmC .rl{font-weight:400;opacity:.72;font-size:10px;margin-left:1px}
+/* 직급 분리 제안 */
+.rsp{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:7px 2px;
+  border-top:1px solid var(--hair);font-size:11.5px}
+.rsp:first-of-type{border-top:0}
+.rsp .fr0{font-family:"JetBrains Mono","SF Mono",monospace;color:var(--mut);min-width:108px}
+.rsp .ar{color:var(--dim)}
+.rsp .to{font-weight:600}
+.rsp .rw{font:10px "JetBrains Mono",monospace;color:var(--acc);
+  border:1px solid rgba(30,164,157,.3);background:rgba(30,164,157,.14);
+  padding:1px 7px;border-radius:9px}
+.rsp .nn{font:10px "JetBrains Mono",monospace;color:var(--dim);margin-left:auto}
+.metaC{font:10.5px "JetBrains Mono","SF Mono",monospace;color:var(--dim);margin-left:2px}
+/* 저장 줄 — 폼 맨 아래. 폰에서는 화면 하단에 붙는다. */
+.fnbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;
+  margin-top:13px;padding-top:12px;border-top:1px solid var(--bd)}
+.fnhint{font-size:10px;color:var(--dim);line-height:1.7;margin-top:8px}
+.fnhint b{font-weight:600;color:var(--mut)}
+/* 기록 범위 — 저장과 역할이 다르므로 생김새도 가른다 */
+.fnsc{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  margin:0 0 12px;flex-wrap:wrap}
+.fnsc .lb{font-size:11.5px;font-weight:600}
+@media(max-width:700px){
+  /* body 의 overflow-x:hidden 때문에 sticky 가 안 먹는다. fixed 로 간다. */
+  .fnbar{position:fixed;left:0;right:0;bottom:0;z-index:50;margin:0;
+    padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+    background:var(--card);border-top:1px solid var(--bd);
+    box-shadow:0 -6px 18px rgba(0,0,0,.45)}
+  .fnbar .btn.p{flex:1 1 auto}
+  .fnpad{padding-bottom:62px}
+}
 .kinds{display:flex;gap:5px;flex-wrap:wrap}
 .kb{font:11px inherit;padding:6px 10px;border-radius:8px;border:1px solid var(--bd);
   background:var(--card);color:var(--fg);cursor:pointer;white-space:nowrap}
@@ -383,7 +423,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20261020_2110';
+const BUILD = '20261020_2207';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -712,6 +752,28 @@ document.addEventListener('click', async e => {
   // 시트 닫기
   if(e.target.dataset && e.target.dataset.shx){ cadSheet = null; pcSheet = null; logSheet = null; render(); return; }
 
+  // 직급 분리 적용
+  const rsp = e.target.closest('[data-rsp]');
+  if(rsp){
+    const c = roleCandidates().find(x => x.from === rsp.dataset.rsp);
+    if(!c) return;
+    rsp.disabled = true; rsp.textContent = '적용 중…';
+    try{ await applyRoleSplit(c); }
+    catch(x){ rsp.textContent = '실패 — ' + x.message; rsp.disabled = false; return; }
+    render(); return;
+  }
+
+  // 기록의 이름 칩 -> Cadence 인물 축에서 그 사람 명함을 펼친다
+  const pgo = e.target.closest('[data-pgo]');
+  if(pgo){
+    // 필터가 't1'·'none' 이면 건너간 사람이 걸러져 카드가 안 보인다. 풀고 간다.
+    TAB = 'cad'; cadView = 'ppl'; cadFilt = 'over';
+    cadOpen = null; perOpen = pgo.dataset.pgo;
+    document.querySelectorAll('.tb').forEach(x =>
+      x.classList.toggle('on', x.dataset.t === 'cad'));
+    kpi(); render(); window.scrollTo(0,0); return;
+  }
+
   // 요약 줄 탭 -> Cadence
   const gt = e.target.closest('[data-goto]');
   if(gt){
@@ -928,15 +990,17 @@ document.addEventListener('click', async e => {
     return;
   }
   if(e.target.closest('[data-ppnew]')){
-    const n = (prompt('이름을 입력하세요 (예: 김OO 상무)') || '').trim();
+    // 직급은 받지 않는다. 이름이 명함의 키라서 섞이면 승진 때 이력이 쪼개진다.
+    const n = (prompt('이름만 입력하세요 — 직급은 명함에서 관리합니다\n(예: 김성호)') || '').trim();
     if(n && fnPeople.indexOf(n) < 0) fnPeople.push(n);
     render(); return;
   }
 
-  // 노트·녹음 펼치기
-  if(e.target.id === 'fn-more'){ fnQuick = !fnQuick; render(); return; }
+  // 기록 범위 — 컨택만 / 노트·녹음까지
+  const sc = e.target.closest('[data-sc]');
+  if(sc){ fnQuick = (sc.dataset.sc === 'q'); render(); return; }
 
-  // 컨택만 담기
+  // 기록 저장 — 빠른 모드·예정 모두 이 핸들러로 들어온다
   if(e.target.id === 'fn-quick'){
     const c = comboVal('fn-c');
     if(!c){ $('fn-qmsg').textContent = '상대를 고르세요'; return; }
@@ -1013,7 +1077,8 @@ const ZKEY = ['YBD','CBD','GBD','ETC'];
 const ZNAME = {YBD:'여의도',CBD:'광화문',GBD:'강남',ETC:'기타'};
 
 function paneField(){
-  return '<div class="card">'+
+  return '<div class="card fnpad">'+
+    scopeSeg()+
     '<div class="fr"><label>상대 <em>타이핑하면 '+
       (ENT?ENT.items.length.toLocaleString():'—')+'곳에서 걸러집니다</em></label>'+
       comboHTML('fn-c','회사·기관 이름')+'</div>'+
@@ -1028,7 +1093,7 @@ function paneField(){
       '<input id="fn-ag" placeholder="예: 네파 매각 구조 논의"></div>' : '')+
     (fnQuick ? '' :   // 인물 칩과 중복이라 펼쳤을 때만 보인다
     '<div class="fr"><label>참석 <em>인물 칩에 없는 사람만 적으면 됩니다</em></label>'+
-      '<input id="fn-p" placeholder="김OO 상무, 박OO 부장"></div>')+
+      '<input id="fn-p" placeholder="김성호, 박지우 — 이름만"></div>')+
     '<div class="fr"><label>장소 <em>건물명·동·주소 아무거나 — 지도에 찍는 데 씁니다</em></label>'+
       '<input id="fn-l" list="lmlist" placeholder="예: IFC · 여의도동 · 테헤란로 133">'+
       '<datalist id="lmlist">'+(GEO?Object.keys(GEO.landmark)
@@ -1046,16 +1111,8 @@ function paneField(){
           '<b>REC</b>'+(fnFile?esc(fnFile.name):'탭해서 녹음 파일 선택')+'<br>'+
           '<span style="font-size:10.5px;color:var(--dim)">m4a · mp3 · wav — PC가 전사합니다</span>'+
           '<input id="fn-f" type="file" accept="audio/*" style="display:none"></label></div>'+
-    '</div>'+
-    '<div class="acts" style="border:none;padding:0">'+
-      '<button class="btn p" id="fn-go">기록 담기</button>'+
-      '<button class="btn" id="fn-brief">보고 초안만</button>'+
-      '<button class="btn" id="fn-full">영문 보고까지</button>'+
-      '<span id="fn-msg" style="font-size:11px;color:var(--mut);align-self:center"></span></div>'+
-    '<div style="font-size:10px;color:var(--dim);line-height:1.7;margin-top:8px">'+
-      '<b style="font-weight:600">기록 담기</b> 노트만 · '+
-      '<b style="font-weight:600">보고 초안만</b> 국문 보고만 (노트 저장 안 함) · '+
-      '<b style="font-weight:600">영문 보고까지</b> 노트 + 국문 + 영문 한 번에</div>')+
+    '</div>')+
+    fnBar()+
   '</div>'+
   '<div class="card" style="margin-top:11px">'+paneLogs()+'</div>'+
   briefCards()+
@@ -1261,11 +1318,36 @@ function quickBlock(){
       '이 조직에서 만난 사람</em></label><div>' + chips + '</div></div>' +
     (fnPlan ? '' :
       '<div class="fr"><label>컨택 종류</label><div class="kinds">' + ks + '</div></div>') +
-    '<div style="display:flex;gap:6px;margin:9px 0 4px">' +
-      '<button class="btn p" id="fn-quick">' + (fnPlan ? '예정 담기' : '컨택만 담기') + '</button>' +
-      (fnPlan ? '' :
-        '<button class="btn" id="fn-more">' + (fnQuick ? '+ 노트·녹음까지' : '접기') + '</button>') +
+    '';
+}
+
+/* 기록 범위 — 폼 맨 위. '어디까지 적을지' 와 '담기' 는 다른 일이라 자리를 가른다. */
+function scopeSeg(){
+  if(fnPlan) return '';
+  return '<div class="fnsc"><span class="lb">기록 범위</span>' +
+    '<div class="seg" style="width:auto">' +
+      '<div data-sc="q" class="' + (fnQuick ? 'on' : '') + '">컨택만</div>' +
+      '<div data-sc="f" class="' + (fnQuick ? '' : 'on') + '">노트·녹음까지</div>' +
+    '</div></div>';
+}
+
+/* 저장 줄 — 폼 맨 아래 하나로 모은다. 빠른 모드와 펼친 모드의 버튼이 따로
+   흩어져 있던 것을 여기서 합친다. */
+function fnBar(){
+  if(fnPlan)
+    return '<div class="fnbar"><button class="btn p" id="fn-quick">예정 저장</button>' +
       '<span id="fn-qmsg" style="font-size:11px;color:var(--mut);align-self:center"></span></div>';
+  if(fnQuick)
+    return '<div class="fnbar"><button class="btn p" id="fn-quick">기록 저장</button>' +
+      '<span id="fn-qmsg" style="font-size:11px;color:var(--mut);align-self:center"></span></div>';
+  return '<div class="fnhint"><b>기록 저장</b> 노트만 · ' +
+      '<b>보고 초안만</b> 국문 보고만 (노트 저장 안 함) · ' +
+      '<b>영문 보고까지</b> 노트 + 국문 + 영문 한 번에</div>' +
+    '<div class="fnbar">' +
+      '<button class="btn p" id="fn-go">기록 저장</button>' +
+      '<button class="btn" id="fn-brief">보고 초안만</button>' +
+      '<button class="btn" id="fn-full">영문 보고까지</button>' +
+      '<span id="fn-msg" style="font-size:11px;color:var(--mut);align-self:center"></span></div>';
 }
 
 
@@ -1484,8 +1566,10 @@ let logSheet = null, logMore = false;
 
 function logRow(l, plan){
   const dd = plan ? dDays(l.date) : null;
-  const ppl = (l.people || []).join(', ') || l.attendees || '';
-  const bits = [l.place, ppl, l.agenda || (l.note || '').slice(0, 40)]
+  // 이름은 메타데이터가 아니다. 장소·메모만 이어 붙이고 사람은 칩으로 따로 세운다.
+  const ppl = (l.people && l.people.length) ? l.people.slice()
+            : String(l.attendees || '').split(',').map(x => x.trim()).filter(Boolean);
+  const bits = [l.place, l.agenda || (l.note || '').slice(0, 40)]
     .filter(Boolean).map(esc).join(' · ');
   return '<div class="lg2' + (plan ? ' up' : '') + '">' +
     '<div class="cdr1">' +
@@ -1494,7 +1578,13 @@ function logRow(l, plan){
       '<b style="font-size:12.5px">' + esc(l.company || l.title || '—') + '</b>' +
       (plan ? '' : '<span class="pl">' + (KLBL[l.kind || 'meet'] || '') + '</span>') +
       '<span class="cdm">' + esc(l.date || '') + '</span></div>' +
-    (bits ? '<div class="cdr2">' + bits + '</div>' : '') +
+    ((ppl.length || bits) ? '<div class="rowC">' +
+      ppl.map(nm => {
+        const rl = perOf(nm).role || '';
+        return '<span class="nmC" data-pgo="' + esc(nm) + '">' + esc(nm) +
+          (rl ? ' <span class="rl">' + esc(rl) + '</span>' : '') + '<i>&rsaquo;</i></span>';
+      }).join('') +
+      (bits ? '<span class="metaC">' + bits + '</span>' : '') + '</div>' : '') +
     '<div class="a">' +
       (plan ? '<button class="p" data-done="' + l.id + '">완료 처리</button>' : '') +
       '<button data-edit="' + l.id + '">수정</button>' +
@@ -1679,7 +1769,7 @@ function perAgg(){
     }
   }
   // 명함만 만들어 두고 아직 만난 적 없는 사람도 목록에 올린다
-  for(const k in PER){ if(PER[k].name) put(PER[k].name); }
+  for(const k in PER){ if(PER[k].name && !PER[k].merged_into) put(PER[k].name); }
   for(const l of planLogs()){
     for(const nm of (l.people || [])){
       const o = put(nm);
@@ -1698,6 +1788,60 @@ function perAgg(){
       wk:wk, lim:lim, days:d, st:st,
       over:(d == null ? 9999 : d - lim), t1:(p.tier === 'T1')});
   }).sort((a,b) => (b.t1 - a.t1) || (b.over - a.over));
+}
+
+/* 직급어. 긴 것부터 본다 — '대표이사' 를 '대표'/'이사' 로 먼저 끊으면 안 된다.
+   공백으로 끊긴 마지막 토큰이 여기 들면 직급으로 본다. 붙여 쓴 '김이사' 는 건드리지 않는다. */
+const ROLE_WORDS = ['대표이사','전무이사','상무이사','부회장','회장','사장','부사장',
+  '전무','상무','본부장','센터장','그룹장','파트장','팀장','실장','부장','차장','과장',
+  '대리','주임','사원','이사','파트너','심사역','수석','책임','선임','위원','고문',
+  '교수','변호사','회계사','세무사'];
+
+function splitRole(s){
+  const m = String(s || '').trim().match(/^(.+?)\s+(\S+)$/);
+  if(!m) return null;
+  const base = m[1].trim(), w = m[2].trim();
+  if(ROLE_WORDS.indexOf(w) < 0) return null;
+  if(base.length < 2) return null;     // '김 상무' 는 이름으로 보기 어렵다
+  return {name: base, role: w};
+}
+
+// 로그에 남은 '이름+직급' 후보. 기록 건수까지 세어 무게를 보여 준다.
+function roleCandidates(){
+  const cnt = {};
+  for(const l of LOGS)
+    for(const nm of (l.people || [])) cnt[nm] = (cnt[nm] || 0) + 1;
+  const out = [];
+  for(const nm in cnt){
+    const sp = splitRole(nm);
+    if(sp) out.push({from:nm, to:sp.name, role:sp.role, n:cnt[nm]});
+  }
+  return out.sort((a,b) => b.n - a.n);
+}
+
+/* 적용 — 로그의 people 을 새 이름으로 바꾸고 직급은 명함에 넣는다.
+   옛 명함 문서는 지우지 않는다. merged_into 를 찍어 목록에서만 뺀다 —
+   사용자가 적어 둔 메모·연락처를 말없이 날리지 않기 위해서다. */
+async function applyRoleSplit(c){
+  if(!USER) { needLogin(); return; }
+  const old = perOf(c.from), cur = perOf(c.to);
+  const o = {};
+  for(const k of ['org','phone','mail','memo','tags'])
+    if(!cur[k] && old[k]) o[k] = old[k];        // 옛 명함의 값을 끌어온다
+  if(!cur.role) o.role = c.role;                // 이미 적어 둔 직급은 덮지 않는다
+  if(!cur.target_wk && old.target_wk) o.target_wk = old.target_wk;
+  if(!cur.tier && old.tier) o.tier = old.tier;
+  await savePer(c.to, o);
+  if(old.name) await savePer(c.from, {merged_into: c.to});
+  for(const l of LOGS){
+    if((l.people || []).indexOf(c.from) < 0) continue;
+    const seen = {}, next = [];
+    for(const x of l.people){
+      const y = (x === c.from) ? c.to : x;
+      if(!seen[y]) { seen[y] = 1; next.push(y); }   // 이미 새 이름이 있으면 중복 제거
+    }
+    await updLog(l.id, {people: next});
+  }
 }
 
 let perOpen = null;
@@ -1798,7 +1942,23 @@ function paneCadPpl(){
   const need = rows.filter(r => r.st === 'l').length;
   const card = rows.filter(r => r.card.name).length;
   const CH = [['over','경과순'],['recent','최근순'],['t1','T-1만'],['none','미컨택']];
-  let h = '<div class="chips" style="margin-bottom:9px">' +
+  // 이름에 직급이 붙어 있는 것들. 해당이 없으면 이 블록은 안 뜬다.
+  const rc = roleCandidates();
+  let h = (rc.length ? '<div class="card" style="margin-bottom:10px">' +
+      '<div class="cdsec" style="margin-top:0;padding-top:0;border-top:0">' +
+      '직급 분리 <em>' + rc.length + '명 — 이름에 직급이 붙어 있습니다</em></div>' +
+      '<div class="cnt" style="margin:2px 0 6px">이름은 명함의 키입니다. ' +
+      '직급이 붙어 있으면 승진할 때 같은 사람의 이력이 둘로 쪼개집니다.</div>' +
+      rc.map(c => '<div class="rsp"><span class="fr0">' + esc(c.from) + '</span>' +
+        '<span class="ar">&rarr;</span><span class="to">' + esc(c.to) + '</span>' +
+        '<span class="rw">' + esc(c.role) + '</span>' +
+        '<span class="nn">기록 ' + c.n + '건</span>' +
+        '<button class="chip" data-rsp="' + esc(c.from) + '">적용</button></div>').join('') +
+      '<div class="cnt" style="margin:7px 0 0">' +
+      '적용하면 기록의 이름이 바뀌고 직급은 명함으로 옮겨집니다. ' +
+      '옛 명함에 적어 둔 메모·연락처는 새 명함으로 끌어오고, 그 문서는 지우지 않습니다.' +
+      '</div></div>' : '') +
+    '<div class="chips" style="margin-bottom:9px">' +
     CH.map(c => '<div class="chip' + (cadFilt === c[0] ? ' on' : '') +
       '" data-cf="' + c[0] + '">' + c[1] + '</div>').join('') + '</div>' +
     '<div class="cnt" style="margin:0 0 8px">컨택 필요 <b>' + need + '</b>명 · 전체 ' +
