@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Work">
 <link rel="manifest" href="manifest.json">
 <title>Work</title>
-<link rel="icon" href="favicon.ico?v=20261020_2207" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261020_2207">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261020_2207">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261020_2207">
+<link rel="icon" href="favicon.ico?v=20261021_0642" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261021_0642">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261021_0642">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261021_0642">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -73,6 +73,9 @@ h1{font-size:26px;font-weight:600;margin:0 0 4px;letter-spacing:-0.03em}
   font-family:"JetBrains Mono","SF Mono",ui-monospace,monospace}
 .kpi2{grid-template-columns:repeat(4,1fr);margin-top:-8px}
 @media(max-width:900px){.kpi2{grid-template-columns:repeat(2,1fr)}}
+/* 권역이 넷이 되면 '컨택 누적' 까지 다섯 칸이다. 폰에서는 2열로 접힌다. */
+.kpi2.k5{grid-template-columns:repeat(5,1fr)}
+@media(max-width:900px){.kpi2.k5{grid-template-columns:repeat(2,1fr)}}
 .kpi2 div{padding:12px 16px}
 .kpi2 b{font-size:20px}
 .kpi i{font-style:normal;display:block;font-size:11px;color:var(--mut);margin-top:4px;
@@ -244,6 +247,12 @@ table.tt thead th:first-child{z-index:3}
 .fnbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;
   margin-top:13px;padding-top:12px;border-top:1px solid var(--bd)}
 .fnhint{font-size:10px;color:var(--dim);line-height:1.7;margin-top:8px}
+/* 이름에 직급이 붙어 있을 때 명함 시트 맨 위에 서는 안내 */
+.rwarn{border:1px solid rgba(30,164,157,.3);background:rgba(30,164,157,.08);
+  border-radius:9px;padding:10px 12px;margin-bottom:12px;
+  font-size:11.5px;color:var(--mut);line-height:1.65}
+.rwarn b{color:var(--fg)}
+.rwarn button{margin-top:8px}
 .fnhint b{font-weight:600;color:var(--mut)}
 /* 기록 범위 — 저장과 역할이 다르므로 생김새도 가른다 */
 .fnsc{display:flex;align-items:center;justify-content:space-between;gap:8px;
@@ -423,7 +432,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20261020_2207';
+const BUILD = '20261021_0642';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -739,7 +748,7 @@ async function saveContact(company, kind, people, extra){
   const rec = Object.assign({
     company: company, title: company, date: todayStr(),
     kind: kind, weight: (KW[kind] || 1), people: people || [],
-    zone: '', place: '', note: '', mode: 'quick', status: 'done'
+    zone: '', zone_etc: '', place: '', note: '', mode: 'quick', status: 'done'
   }, extra || {});
   const xy = resolveXY(rec.place, rec.zone, company);
   rec.x = xy[0]; rec.y = xy[1]; rec.src = xy[2];
@@ -751,6 +760,31 @@ async function saveContact(company, kind, people, extra){
 document.addEventListener('click', async e => {
   // 시트 닫기
   if(e.target.dataset && e.target.dataset.shx){ cadSheet = null; pcSheet = null; logSheet = null; render(); return; }
+
+  // 명함 시트 안에서 바로 분리
+  if(e.target.id === 'pr-split'){
+    const sp = splitRole(perSheet);
+    if(!sp) return;
+    const cnt = LOGS.filter(l => (l.people || []).indexOf(perSheet) >= 0).length;
+    e.target.disabled = true; e.target.textContent = '분리 중…';
+    try{ await applyRoleSplit({from: perSheet, to: sp.name, role: sp.role, n: cnt}); }
+    catch(x){ e.target.textContent = '실패 — ' + x.message; e.target.disabled = false; return; }
+    perSheet = sp.name; perOpen = sp.name; render(); return;
+  }
+
+  // 직급 분리 — 모두 적용
+  if(e.target.id === 'rsp-all'){
+    const all = roleCandidates();
+    if(!all.length) return;
+    if(!confirm(all.length + '명의 이름에서 직급을 떼어 명함으로 옮깁니다.\n되돌릴 수 없습니다.')) return;
+    e.target.disabled = true;
+    for(let i = 0; i < all.length; i++){
+      e.target.textContent = '적용 중… ' + (i+1) + '/' + all.length;
+      try{ await applyRoleSplit(all[i]); }
+      catch(x){ e.target.textContent = '실패 — ' + x.message; e.target.disabled = false; return; }
+    }
+    render(); return;
+  }
 
   // 직급 분리 적용
   const rsp = e.target.closest('[data-rsp]');
@@ -823,8 +857,11 @@ document.addEventListener('click', async e => {
     const stx = sh.querySelector('[data-st2].on');
     const kind = k ? k.dataset.lk : 'meet';
     const status = stx ? stx.dataset.st2 : 'done';
+    const zs = sh.querySelector('#lg-z'), ze = sh.querySelector('#lg-ze');
     const o = {date: sh.querySelector('#lg-d').value || todayStr(),
                kind: kind, weight: (KW[kind] || 1),
+               zone: zs ? zs.value : '',
+               zone_etc: (zs && zs.value === 'ETC' && ze) ? ze.value.trim() : '',
                people: sh.querySelector('#lg-p').value.split(',')
                          .map(x => x.trim()).filter(Boolean),
                place: sh.querySelector('#lg-l').value.trim(),
@@ -1010,7 +1047,9 @@ document.addEventListener('click', async e => {
       const zsel = $('fn-z'), psel = $('fn-l');
       const ag = $('fn-ag');
       const ok = await saveContact(c, fnKind, fnPeople.slice(), {
-        zone: zsel ? zsel.value : '', place: psel ? psel.value.trim() : '',
+        zone: zsel ? zsel.value : '',
+        zone_etc: (zsel && zsel.value === 'ETC' && $('fn-ze')) ? $('fn-ze').value.trim() : '',
+        place: psel ? psel.value.trim() : '',
         date: fnDate || todayStr(),
         status: fnPlan ? 'planned' : 'done',
         agenda: (fnPlan && ag) ? ag.value.trim() : ''});
@@ -1076,6 +1115,17 @@ let fnMode = 'both', fnFile = null;   // 기본은 '둘 다' — 녹음도 메�
 const ZKEY = ['YBD','CBD','GBD','ETC'];
 const ZNAME = {YBD:'여의도',CBD:'광화문',GBD:'강남',ETC:'기타'};
 
+// 전에 적은 기타 권역 이름. '판교' 를 매번 새로 타이핑하지 않게 목록으로 돌려준다.
+function etcList(){
+  const c = {};
+  for(const l of LOGS){
+    const v = (l.zone_etc || '').trim();
+    if(v) c[v] = (c[v] || 0) + 1;
+  }
+  return Object.keys(c).sort((a,b) => c[b] - c[a]);
+}
+const zoneEtcOf = l => (l.zone === 'ETC' ? (l.zone_etc || '').trim() : '');
+
 function paneField(){
   return '<div class="card fnpad">'+
     scopeSeg()+
@@ -1089,6 +1139,11 @@ function paneField(){
       '<div class="fr"><label>권역</label><select id="fn-z">'+
         ZKEY.map(z=>'<option value="'+z+'">'+z+' '+ZNAME[z]+'</option>').join('')+
         '</select></div></div>'+
+    '<div class="fr" id="fn-zewrap" style="display:none">'+
+      '<label>권역 이름 <em>서울 3권역 밖 — 직접 적습니다</em></label>'+
+      '<input id="fn-ze" list="zelist" placeholder="예: 판교 · 분당 · 부산 · 해외">'+
+      '<datalist id="zelist">'+etcList().map(z=>'<option>'+esc(z)+'</option>').join('')+
+      '</datalist></div>'+
     (fnPlan ? '<div class="fr"><label>안건 <em>무엇을 논의할 것인가</em></label>'+
       '<input id="fn-ag" placeholder="예: 네파 매각 구조 논의"></div>' : '')+
     (fnQuick ? '' :   // 인물 칩과 중복이라 펼쳤을 때만 보인다
@@ -1580,9 +1635,9 @@ function logRow(l, plan){
       '<span class="cdm">' + esc(l.date || '') + '</span></div>' +
     ((ppl.length || bits) ? '<div class="rowC">' +
       ppl.map(nm => {
-        const rl = perOf(nm).role || '';
-        return '<span class="nmC" data-pgo="' + esc(nm) + '">' + esc(nm) +
-          (rl ? ' <span class="rl">' + esc(rl) + '</span>' : '') + '<i>&rsaquo;</i></span>';
+        const v = nameView(nm);
+        return '<span class="nmC" data-pgo="' + esc(nm) + '">' + esc(v.base) +
+          (v.role ? ' <span class="rl">' + esc(v.role) + '</span>' : '') + '<i>&rsaquo;</i></span>';
       }).join('') +
       (bits ? '<span class="metaC">' + bits + '</span>' : '') + '</div>' : '') +
     '<div class="a">' +
@@ -1630,6 +1685,15 @@ function sheetLog(){
     '<div class="fr"><label>컨택 종류</label><div class="kinds" id="lg-kinds">' + ks + '</div></div>' +
     '<div class="fr"><label>사람 <em style="font-style:normal;color:var(--dim)">쉼표로 구분</em></label>' +
       '<input id="lg-p" value="' + esc((l.people || []).join(', ')) + '"></div>' +
+    '<div class="fr"><label>권역</label><select id="lg-z">' +
+      ZKEY.map(z => '<option value="' + z + '"' + ((l.zone || 'YBD') === z ? ' selected' : '') +
+        '>' + z + ' ' + ZNAME[z] + '</option>').join('') + '</select></div>' +
+    '<div class="fr" id="lg-zewrap" style="display:' + (l.zone === 'ETC' ? '' : 'none') + '">' +
+      '<label>권역 이름</label>' +
+      '<input id="lg-ze" list="zelist2" value="' + esc(l.zone_etc || '') + '" ' +
+      'placeholder="예: 판교 · 분당 · 부산">' +
+      '<datalist id="zelist2">' + etcList().map(z => '<option>' + esc(z) + '</option>').join('') +
+      '</datalist></div>' +
     '<div class="fr"><label>장소</label>' +
       '<input id="lg-l" value="' + esc(l.place || '') + '"></div>' +
     '<div class="fr"><label>' + (plan ? '안건' : '메모') + '</label>' +
@@ -1844,6 +1908,14 @@ async function applyRoleSplit(c){
   }
 }
 
+/* 보여 줄 때만 쓰는 분리. 데이터는 안 건드린다 — 키는 여전히 원래 이름이다.
+   명함에 적어 둔 직책이 있으면 그 값이 이긴다(승진하면 거기만 고치면 된다). */
+function nameView(nm){
+  const sp = splitRole(nm);
+  const role = perOf(nm).role || (sp ? sp.role : '');
+  return {base: sp ? sp.name : nm, role: role};
+}
+
 let perOpen = null;
 
 function perRow(r){
@@ -1856,9 +1928,11 @@ function perRow(r){
   let h = '<div class="cdr' + (open ? ' op' : '') + '" data-per="' + esc(r.name) + '">' +
     '<div class="cdr1">' + swatch(o) +
       (r.t1 ? '<span class="t1">T-1</span>' : '') +
-      '<b>' + esc(r.name) + '</b>' +
-      (r.org ? '<span class="pog">' + esc(r.org) +
-        (c.role ? ' · ' + esc(c.role) : '') + '</span>' : '') +
+      '<b>' + esc(nameView(r.name).base) + '</b>' +
+      (r.org || nameView(r.name).role ?
+        '<span class="pog">' + esc(r.org || '') +
+        (nameView(r.name).role ? (r.org ? ' · ' : '') + esc(nameView(r.name).role) : '') +
+        '</span>' : '') +
       (r.next ? '<span class="pl n">예정 ' + r.next.slice(5).replace('-','.') + '</span>' : '') +
       '<span class="cdm">' + (r.days == null ? '기록 없음' : r.days + '일 전') + '</span></div>' +
     '<div class="cdr2">목표 ' + r.wk + '주' + (over ? ' · ' + over + '일 초과' : '') +
@@ -1902,12 +1976,20 @@ function sheetPer(){
   if(!perSheet) return '';
   const c = perOf(perSheet);
   const wk = c.target_wk || defWk();
+  // 직책이 비어 보이던 원인 — 그 직급이 아직 이름 쪽에 있어서다. 감지값을 미리 채운다.
+  const sp = splitRole(perSheet);
+  const roleVal = c.role || (sp ? sp.role : '');
+  const warn = (sp && !c.role) ?
+    '<div class="rwarn">이름에 직급 <b>' + esc(sp.role) + '</b> 이 붙어 있습니다. ' +
+    '이대로 두면 승진할 때 같은 분의 이력이 둘로 쪼개집니다.<br>' +
+    '<button class="btn p" id="pr-split">' + esc(sp.name) + ' / ' + esc(sp.role) +
+    ' 으로 분리</button></div>' : '';
   const fr = (id, lbl, v, ph) => '<div class="fr"><label>' + lbl + '</label>' +
     '<input id="' + id + '" placeholder="' + ph + '" value="' + esc(v || '') + '"></div>';
   return '<div class="shbg" data-shx="1"></div><div class="sheet">' +
-    '<div class="shh">' + esc(perSheet) + '</div>' +
+    '<div class="shh">' + esc(perSheet) + '</div>' + warn +
     fr('pr-org', '회사', c.org, '기록에서 추정된 곳을 덮어씁니다') +
-    fr('pr-role', '직책', c.role, '예: 투자본부 · 전무') +
+    fr('pr-role', '직책', roleVal, '예: 투자본부 · 전무') +
     fr('pr-phone', '휴대폰', c.phone, '선택') +
     fr('pr-mail', '메일', c.mail, '선택') +
     '<div class="fr"><label>메모</label><textarea id="pr-memo" rows="3" ' +
@@ -1954,6 +2036,11 @@ function paneCadPpl(){
         '<span class="rw">' + esc(c.role) + '</span>' +
         '<span class="nn">기록 ' + c.n + '건</span>' +
         '<button class="chip" data-rsp="' + esc(c.from) + '">적용</button></div>').join('') +
+      '<div style="display:flex;gap:7px;align-items:center;margin-top:9px">' +
+      '<button class="btn p" id="rsp-all" style="font-size:11.5px;padding:7px 13px">' +
+      '모두 적용 (' + rc.length + '명)</button>' +
+      '<span style="font:10px \'JetBrains Mono\',monospace;color:var(--dim)">되돌릴 수 없습니다</span>' +
+      '</div>' +
       '<div class="cnt" style="margin:7px 0 0">' +
       '적용하면 기록의 이름이 바뀌고 직급은 명함으로 옮겨집니다. ' +
       '옛 명함에 적어 둔 메모·연락처는 새 명함으로 끌어오고, 그 문서는 지우지 않습니다.' +
@@ -2071,6 +2158,12 @@ function render(){
   putForm(keep);
   if(TAB==='field'){
     const f=$('fn-f'); if(f) f.onchange=e=>{ fnFile=e.target.files[0]||null; render(); };
+    // 권역을 바꿀 때마다 render() 하면 적던 내용이 날아간다. 표시만 토글한다.
+    const z=$('fn-z'), zw=$('fn-zewrap');
+    if(z && zw){
+      const sync=()=>{ zw.style.display = (z.value==='ETC' ? '' : 'none'); };
+      z.onchange=sync; sync();
+    }
   }
 }
 
@@ -2111,10 +2204,19 @@ function kpi(){
             cell(q('pending'), '대기', '') + cell(q('running'), '처리중', '') +
             cell(q('done'), '완료', '');
   }else if(TAB === 'field'){
-    const zs = {YBD:0, CBD:0, GBD:0};
-    LOGS.forEach(l => { if(zs[l.zone] != null) zs[l.zone]++; });
+    const zs = {YBD:0, CBD:0, GBD:0, ETC:0};
+    const en = {};
+    LOGS.forEach(l => {
+      if(zs[l.zone] != null) zs[l.zone]++;
+      const v = zoneEtcOf(l); if(v) en[v] = (en[v] || 0) + 1;
+    });
+    // 기타 안에 뭐가 들었는지 — 많이 간 순 둘까지만. 나머지는 '외 n'.
+    const ek = Object.keys(en).sort((a,b) => en[b] - en[a]);
+    const esub = ek.slice(0,2).map(k => k + ' ' + en[k]).join(' · ') +
+                 (ek.length > 2 ? ' 외 ' + (ek.length-2) : '');
     extra = cell(LOGS.length, '컨택', '누적') +
-            cell(zs.YBD, '여의도', '') + cell(zs.CBD, '광화문', '') + cell(zs.GBD, '강남', '');
+            cell(zs.YBD, '여의도', '') + cell(zs.CBD, '광화문', '') + cell(zs.GBD, '강남', '') +
+            cell(zs.ETC, '기타', esub);
   }else if(TAB === 'cad'){
     let rows = [];
     try{ rows = cadAgg(); }catch(x){}
@@ -2130,7 +2232,10 @@ function kpi(){
   }
   $('kpi').innerHTML = fixed;
   const ex = $('kpi2');
-  if(ex){ ex.innerHTML = extra; ex.style.display = extra ? '' : 'none'; }
+  if(ex){
+    ex.innerHTML = extra; ex.style.display = extra ? '' : 'none';
+    ex.classList.toggle('k5', ex.children.length === 5);
+  }
 }
 
 /* ── 이벤트 ───────────────────────────────────── */
@@ -2204,6 +2309,7 @@ document.addEventListener('click', async e => {
       const ppl = fnPeople.length ? fnPeople.slice()
         : att.split(',').map(x=>x.trim()).filter(Boolean);
       const rec={company:c,title:c,date:$('fn-d').value,zone:$('fn-z').value,
+        zone_etc:($('fn-z').value==='ETC'&&$('fn-ze'))?$('fn-ze').value.trim():'',
                  attendees:att,note:txt,mode:fnMode,
                  people:ppl, kind:'meet', weight:1,
                  status:(($('fn-d').value||todayStr())>todayStr()?'planned':'done'),
