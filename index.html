@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Work">
 <link rel="manifest" href="manifest.json">
 <title>Work</title>
-<link rel="icon" href="favicon.ico?v=20261020_1715" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261020_1715">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261020_1715">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261020_1715">
+<link rel="icon" href="favicon.ico?v=20261020_2043" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261020_2043">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261020_2043">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261020_2043">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -383,7 +383,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20261020_1715';
+const BUILD = '20261020_2043';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -403,6 +403,7 @@ const storage = getStorage(app);
 enableIndexedDbPersistence(db).catch(() => {});
 
 let DATA = null, ENT = null, MAP = null, GEO = null, USER = null;
+let AUTH_READY = false;       // onAuthStateChanged 가 한 번이라도 돌았는가
 let STATE = {}, LOGS = [], QUEUE = [];
 let CAD = {};                 // company -> {tier, target_wk, memo}
 let PER = {};                 // 이름 -> 명함 {name, org, role, phone, mail, memo, tags, tier, target_wk}
@@ -455,12 +456,14 @@ function paintWho(){
     '<button id="md-dark" class="' + (m==='dark'?'on':'') + '">DARK</button>' +
     '<button id="md-light" class="' + (m==='light'?'on':'') + '">LIGHT</button>';
   const a = $('acct');
-  if(a) a.innerHTML = USER ? '<button id="out">LOGOUT</button>'
-                           : '<button id="in">LOGIN</button>';
+  if(a) a.innerHTML = !AUTH_READY ? ''
+                    : (USER ? '<button id="out">LOGOUT</button>'
+                            : '<button id="in">LOGIN</button>');
 }
 
 onAuthStateChanged(auth, u => {
   USER = u;
+  AUTH_READY = true;
   paintWho();
   if (u) subscribe(u.uid);
   render();
@@ -1899,7 +1902,7 @@ function render(){
   const keep = grabForm();
   // 폼은 로그인 없이도 보인다. 막는 건 담을 때뿐이다.
   $('panes').innerHTML =
-    (USER?'':'<div class="note" style="background:none;border:1px solid var(--bd);'+
+    ((USER || !AUTH_READY)?'':'<div class="note" style="background:none;border:1px solid var(--bd);'+
       'border-radius:9px;padding:9px 11px;font-size:11px;color:var(--mut);margin-bottom:11px">'+
       '로그인하지 않았습니다 — 폼은 볼 수 있지만 담기는 되지 않습니다.</div>')+
     (TAB==='idea'?paneIdea():(TAB==='cad'?paneCad():(TAB==='deal'?paneDeal():paneField()))) + sheetCad() + sheetPC() + sheetLog() + sheetPer();
