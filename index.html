@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Work">
 <link rel="manifest" href="manifest.json">
 <title>Work</title>
-<link rel="icon" href="favicon.ico?v=20261017_0704" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261017_0704">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261017_0704">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261017_0704">
+<link rel="icon" href="favicon.ico?v=20261020_1715" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261020_1715">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261020_1715">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261020_1715">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -194,6 +194,30 @@ table.tt thead th:first-child{z-index:3}
 .pp{display:flex;align-items:baseline;gap:6px;font-size:11px;padding:3px 0}
 .pp b{font-weight:500}
 .hz{font-size:10px;color:var(--mut);padding:2px 0;font-variant-numeric:tabular-nums}
+/* 조직 / 인물 축 전환 — 필터 칩 위에 선다 */
+.seg.cv{width:auto;display:inline-flex;margin:0 0 9px}
+.seg.cv div{padding:5px 14px;font:11px "JetBrains Mono","SF Mono",monospace;letter-spacing:.06em}
+/* 인물 행의 소속 */
+.pog{font-size:10.5px;color:var(--mut)}
+.gh{color:var(--dim)}
+/* 명함 */
+.nc{position:relative;background:var(--card2);border:1px solid var(--bd);border-radius:10px;
+  padding:12px 13px 12px 15px;overflow:hidden}
+.nc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--acc)}
+.nc.dim::before{opacity:.28}
+.nch{font-size:14px;font-weight:600;letter-spacing:-.01em}
+.nco{font-size:11.5px;color:var(--mut);margin-top:2px}
+.ncr{font:10px "JetBrains Mono","SF Mono",monospace;color:var(--dim);letter-spacing:.04em;margin-top:1px}
+.ncd{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;margin-top:10px;
+  padding-top:9px;border-top:1px solid var(--hair);font-size:11px}
+.ncd dt{font:9.5px "JetBrains Mono","SF Mono",monospace;color:var(--dim);letter-spacing:.06em}
+.ncd dd{color:var(--mut);font-variant-numeric:tabular-nums;margin:0}
+.ncm{font-size:11px;color:var(--mut);margin-top:9px;padding-top:8px;
+  border-top:1px solid var(--hair);line-height:1.6;white-space:pre-wrap}
+.nct{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.nct .tg{font:9px "JetBrains Mono","SF Mono",monospace;padding:2px 7px;border-radius:10px;
+  border:1px solid var(--bd);color:var(--mut);letter-spacing:.04em}
+.ncf{margin-top:10px}
 .kinds{display:flex;gap:5px;flex-wrap:wrap}
 .kb{font:11px inherit;padding:6px 10px;border-radius:8px;border:1px solid var(--bd);
   background:var(--card);color:var(--fg);cursor:pointer;white-space:nowrap}
@@ -359,7 +383,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20261017_0704';
+const BUILD = '20261020_1715';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -381,11 +405,18 @@ enableIndexedDbPersistence(db).catch(() => {});
 let DATA = null, ENT = null, MAP = null, GEO = null, USER = null;
 let STATE = {}, LOGS = [], QUEUE = [];
 let CAD = {};                 // company -> {tier, target_wk, memo}
+let PER = {};                 // 이름 -> 명함 {name, org, role, phone, mail, memo, tags, tier, target_wk}
 let cadOpen = null, cadSheet = null, fnKind = 'meet', fnPeople = [], fnQuick = true;
 let fnPlan = false, fnDate = '';        // 예정 모드 · 선택한 일자
 let DEALS = null, dealOpen = null, dealQ = '', dealMode = 'gp';
-const KW = {meet:1.0, meal:1.0, call:0.5, mail:0.3};
-const KLBL = {meet:'미팅', meal:'식사', call:'통화', mail:'메일'};
+// 저녁·미팅·골프는 같은 무게다 — 반나절을 통째로 쓰고 사적 대화가 섞인다.
+// 점심은 업무 시간 안이라 한 단계 아래. 숫자는 여기만 고치면 전부 따라온다.
+const KW = {meet:1.0, dinner:1.0, golf:1.0, lunch:0.8, call:0.5, mail:0.3, meal:1.0};
+const KLBL = {meet:'미팅', lunch:'점심', dinner:'저녁', golf:'골프',
+              call:'통화', mail:'메일', meal:'식사'};
+// 고를 수 있는 것. 'meal' 은 빠져 있다 — 옛 기록을 읽기만 하는 표시다.
+// 점심이었는지 저녁이었는지 데이터에 없어 되살릴 수 없다.
+const KSEL = ['meet','lunch','dinner','golf','call','mail'];
 const DEF_WK = 8;             // 전역 기본 주기
 let TAB = 'scan', SORT = 'ev', FILT = 'all', shown = 0, view = [];
 
@@ -457,6 +488,10 @@ function subscribe(uid){
     CAD = {}; s.docs.forEach(d => { CAD[d.id] = d.data(); });
     if(TAB==='cad'||TAB==='field') render();
   });
+  onSnapshot(collection(db,'users',uid,'person'), s => {
+    PER = {}; s.docs.forEach(d => { PER[d.id] = d.data(); });
+    if(TAB==='cad') render();
+  });
 }
 const cadKey = c => String(c).replace(/[\/#?\[\]]/g,'_').slice(0,120);
 // 기록 수정·삭제. 담기만 있고 되돌리는 길이 없으면 오타 하나도 못 고친다.
@@ -467,6 +502,9 @@ const delLog = id => USER ? deleteDoc(logRef(id))
   : Promise.reject(new Error('로그인이 필요합니다'));
 const saveCad = (c, o) => USER
   ? setDoc(doc(db,'users',USER.uid,'cadence',cadKey(c)), {company:c, ...o}, {merge:true})
+  : Promise.reject(new Error('로그인이 필요합니다'));
+const savePer = (n, o) => USER
+  ? setDoc(doc(db,'users',USER.uid,'person',cadKey(n)), {name:n, ...o}, {merge:true})
   : Promise.reject(new Error('로그인이 필요합니다'));
 const saveState = () => USER &&
   setDoc(doc(db,'users',USER.uid,'origination','state'), {m:STATE, at:serverTimestamp()});
@@ -797,6 +835,55 @@ document.addEventListener('click', async e => {
       try{ await saveCad(cadSheet, o); }catch(x){ alert(x.message); return; }
     }
     cadSheet = null; render(); return;
+  }
+
+  // 조직 / 인물 축 전환
+  const cv = e.target.closest('[data-cv]');
+  if(cv){ cadView = cv.dataset.cv; cadOpen = perOpen = null; render(); return; }
+
+  // 인물 행에서 컨택 담기 — 회사는 명함에 적힌 소속으로 들어간다
+  const pq = e.target.closest('[data-pq]');
+  if(pq){
+    const nm = pq.dataset.pq;
+    const row = perAgg().find(x => x.name === nm) || {};
+    pq.disabled = true; pq.textContent = '담는 중…';
+    try{ if(await saveContact(row.org || nm, 'meet', [nm])) pq.textContent = '담았습니다'; }
+    catch(x){ pq.textContent = '실패 — ' + x.message; pq.disabled = false; }
+    return;
+  }
+
+  const ps = e.target.closest('[data-ps]');
+  if(ps){ perSheet = ps.dataset.ps; render(); return; }
+
+  const pwk = e.target.closest('.sheet [data-pwk]');
+  if(pwk){
+    pwk.parentNode.querySelectorAll('[data-pwk]').forEach(x => x.classList.remove('on'));
+    pwk.classList.add('on'); return;
+  }
+  const pt = e.target.closest('.sheet [data-ptier]');
+  if(pt){
+    pt.parentNode.querySelectorAll('[data-ptier]').forEach(x => x.classList.remove('on'));
+    pt.classList.add('on'); return;
+  }
+  if(e.target.id === 'pr-save'){
+    const sh = e.target.closest('.sheet');
+    const w = sh.querySelector('[data-pwk].on');
+    const t = sh.querySelector('[data-ptier].on');
+    const g = id => (sh.querySelector(id).value || '').trim();
+    const o = {org:g('#pr-org'), role:g('#pr-role'), phone:g('#pr-phone'),
+               mail:g('#pr-mail'), memo:g('#pr-memo'), tags:g('#pr-tags'),
+               tier:(t && t.dataset.ptier) ? 'T1' : null,
+               target_wk: w ? +w.dataset.pwk : defWk()};
+    try{ await savePer(perSheet, o); }catch(x){ alert(x.message); return; }
+    perSheet = null; render(); return;
+  }
+
+  // 인물 행 펼치기 (버튼 클릭이 아닐 때만)
+  const pdr = e.target.closest('[data-per]');
+  if(pdr && !e.target.closest('button')){
+    const nm = pdr.dataset.per;
+    perOpen = (perOpen === nm) ? null : nm;
+    render(); return;
   }
 
   // Cadence 행에서 바로 컨택 담기
@@ -1160,7 +1247,7 @@ function quickBlock(){
     fnPeople.filter(n => cand.indexOf(n) < 0).map(n =>
       '<span class="pchip on" data-pp="' + esc(n) + '">' + esc(n) + ' ×</span>').join('') +
     '<span class="pchip gh" data-ppnew="1">+ 이름 입력</span>';
-  const ks = Object.keys(KLBL).map(k => '<button class="kb' +
+  const ks = KSEL.map(k => '<button class="kb' +
       (fnKind === k ? ' on' : '') + '" data-kind="' + k + '">' + KLBL[k] + '</button>').join('');
   return (fnPlan ? '<div class="cnt" style="margin:0 0 9px;color:var(--acc)">' +
       '예정 미팅입니다 — 컨택·지도·캘린더에 세지 않습니다. ' +
@@ -1435,7 +1522,9 @@ function sheetLog(){
   if(!logSheet) return '';
   const l = LOGS.find(x => x.id === logSheet) || {};
   const plan = isPlanned(l);
-  const ks = Object.keys(KLBL).map(k => '<button class="kb' +
+  // 옛 기록(kind:'meal')을 열면 그 칩도 끼워 넣는다. 없으면 저장할 때 종류가 바뀐다.
+  const kl = KSEL.concat((l.kind && KSEL.indexOf(l.kind) < 0) ? [l.kind] : []);
+  const ks = kl.map(k => '<button class="kb' +
       ((l.kind || 'meet') === k ? ' on' : '') + '" data-lk="' + k + '">' +
       KLBL[k] + '</button>').join('');
   return '<div class="shbg" data-shx="1"></div><div class="sheet">' +
@@ -1563,8 +1652,164 @@ function cadRow(r){
   return h + '</div>';
 }
 
+/* ── 인물 ──────────────────────────────────────
+   명함(person)은 사람의 속성만 들고, 컨택 횟수·최근일은 로그에서 계산한다.
+   이력을 명함에 적게 두면 두 벌이 생기고 반드시 어긋난다. */
+const perOf = n => PER[cadKey(n)] || {};
+
+function perAgg(){
+  const m = {};
+  const put = n => m[n] || (m[n] = {name:n, last:'', n:0, w:0,
+                                    kinds:{}, orgs:{}, hist:[]});
+  for(const l of doneLogs()){
+    const c = l.company || l.title;
+    for(const nm of (l.people || [])){
+      const o = put(nm);
+      const k = l.kind || 'meet';
+      o.n++; o.w += (l.weight != null) ? l.weight : (KW[k] || 1);
+      o.kinds[k] = (o.kinds[k] || 0) + 1;
+      if(c) o.orgs[c] = (o.orgs[c] || 0) + 1;
+      if(!o.last || l.date > o.last) o.last = l.date;
+      if(o.hist.length < 8) o.hist.push({d:l.date, k:k, c:c || '', place:l.place || ''});
+    }
+  }
+  // 명함만 만들어 두고 아직 만난 적 없는 사람도 목록에 올린다
+  for(const k in PER){ if(PER[k].name) put(PER[k].name); }
+  for(const l of planLogs()){
+    for(const nm of (l.people || [])){
+      const o = put(nm);
+      if(!o.next || l.date < o.next) o.next = l.date;
+    }
+  }
+  return Object.values(m).map(o => {
+    const p = perOf(o.name);
+    const wk = p.target_wk || defWk(), lim = wk * 7;
+    const d = o.last ? daysAgo(o.last) : null;
+    const st = d == null ? 'none' : (d > lim ? 'l' : (d > lim * 0.8 ? 's' : 'o'));
+    // 소속은 기록에서 가장 잦은 곳. 명함에 적어 두면 그쪽이 이긴다 — 회사를 옮기면 그래야 한다.
+    const byLog = Object.keys(o.orgs).sort((a,b) => o.orgs[b] - o.orgs[a]);
+    return Object.assign({}, o, {card:p, org:(p.org || byLog[0] || ''),
+      prev:(p.org && byLog[0] && p.org !== byLog[0]) ? byLog[0] : '',
+      wk:wk, lim:lim, days:d, st:st,
+      over:(d == null ? 9999 : d - lim), t1:(p.tier === 'T1')});
+  }).sort((a,b) => (b.t1 - a.t1) || (b.over - a.over));
+}
+
+let perOpen = null;
+
+function perRow(r){
+  const o = inten(r.days == null ? null : r.days / r.lim, CAD_CUTS);
+  const pct = r.days == null ? 100 : Math.min(100, Math.round(r.days / r.lim * 100));
+  const kinds = Object.keys(r.kinds).map(k => KLBL[k] + ' ' + r.kinds[k]).join(' · ');
+  const open = perOpen === r.name;
+  const over = (r.days != null && r.days > r.lim) ? (r.days - r.lim) : 0;
+  const c = r.card;
+  let h = '<div class="cdr' + (open ? ' op' : '') + '" data-per="' + esc(r.name) + '">' +
+    '<div class="cdr1">' + swatch(o) +
+      (r.t1 ? '<span class="t1">T-1</span>' : '') +
+      '<b>' + esc(r.name) + '</b>' +
+      (r.org ? '<span class="pog">' + esc(r.org) +
+        (c.role ? ' · ' + esc(c.role) : '') + '</span>' : '') +
+      (r.next ? '<span class="pl n">예정 ' + r.next.slice(5).replace('-','.') + '</span>' : '') +
+      '<span class="cdm">' + (r.days == null ? '기록 없음' : r.days + '일 전') + '</span></div>' +
+    '<div class="cdr2">목표 ' + r.wk + '주' + (over ? ' · ' + over + '일 초과' : '') +
+      ' · 컨택 ' + r.n + '회' + (kinds ? ' · ' + kinds : '') +
+      (r.prev ? ' · 전 ' + esc(r.prev) : '') + '</div>' +
+    '<div class="pb"><i style="width:' + pct + '%;opacity:' + (o || .3) + '"></i></div>';
+  if(open){
+    h += '<div class="cdx"><div class="nc' + (c.name ? '' : ' dim') + '">' +
+      '<div class="nch">' + esc(r.name) + '</div>' +
+      '<div class="nco">' + (r.org ? esc(r.org) : '<span class="gh">소속 미입력</span>') +
+        (r.prev ? ' <span class="gh">· 전 ' + esc(r.prev) + '</span>' : '') + '</div>' +
+      (c.role ? '<div class="ncr">' + esc(c.role) + '</div>' : '') +
+      '<dl class="ncd">' +
+        '<dt>최근</dt><dd>' + (r.days == null ? '-' : r.days + '일 전' +
+          (r.hist[0] ? ' · ' + (KLBL[r.hist[0].k] || r.hist[0].k) : '')) + '</dd>' +
+        '<dt>컨택</dt><dd>' + r.n + '회</dd>' +
+        '<dt>휴대폰</dt><dd>' + (c.phone ? esc(c.phone) : '<span class="gh">-</span>') + '</dd>' +
+        '<dt>메일</dt><dd>' + (c.mail ? esc(c.mail) : '<span class="gh">-</span>') + '</dd>' +
+      '</dl>' +
+      (c.memo ? '<div class="ncm">' + esc(c.memo) + '</div>' : '') +
+      (c.tags ? '<div class="nct">' + String(c.tags).split(',').map(t => t.trim())
+          .filter(Boolean).map(t => '<span class="tg">' + esc(t) + '</span>').join('') +
+        '</div>' : '') +
+      '<div class="ncf">' +
+        '<button class="chip on" data-pq="' + esc(r.name) + '">컨택 담기</button> ' +
+        '<button class="chip" data-ps="' + esc(r.name) + '">' +
+          (c.name ? '명함 수정' : '명함 채우기') + '</button></div></div>';
+    if(r.hist.length){
+      h += '<div class="cdsec">이력</div>';
+      for(const e of r.hist)
+        h += '<div class="hz">' + esc(e.d) + ' · ' + (KLBL[e.k] || e.k) +
+             (e.c ? ' · ' + esc(e.c) : '') + (e.place ? ' · ' + esc(e.place) : '') + '</div>';
+    }
+    h += '</div>';
+  }
+  return h + '</div>';
+}
+
+let perSheet = null;
+function sheetPer(){
+  if(!perSheet) return '';
+  const c = perOf(perSheet);
+  const wk = c.target_wk || defWk();
+  const fr = (id, lbl, v, ph) => '<div class="fr"><label>' + lbl + '</label>' +
+    '<input id="' + id + '" placeholder="' + ph + '" value="' + esc(v || '') + '"></div>';
+  return '<div class="shbg" data-shx="1"></div><div class="sheet">' +
+    '<div class="shh">' + esc(perSheet) + '</div>' +
+    fr('pr-org', '회사', c.org, '기록에서 추정된 곳을 덮어씁니다') +
+    fr('pr-role', '직책', c.role, '예: 투자본부 · 전무') +
+    fr('pr-phone', '휴대폰', c.phone, '선택') +
+    fr('pr-mail', '메일', c.mail, '선택') +
+    '<div class="fr"><label>메모</label><textarea id="pr-memo" rows="3" ' +
+      'placeholder="어떻게 알게 됐는지, 관심사, 주의할 것">' + esc(c.memo || '') + '</textarea></div>' +
+    fr('pr-tags', '태그', c.tags, '쉼표로 구분 — 예: PE, 조선·기계') +
+    '<div class="fr"><label>티어</label><div class="seg" id="pr-tier">' +
+      '<div data-ptier="T1" class="' + (c.tier === 'T1' ? 'on' : '') + '">T-1 핵심</div>' +
+      '<div data-ptier="" class="' + (c.tier === 'T1' ? '' : 'on') + '">기본</div></div></div>' +
+    '<div class="fr"><label>목표 주기</label><div class="chips">' +
+      WKS.map(w => '<div class="chip' + (w === wk ? ' on' : '') +
+        '" data-pwk="' + w + '">' + w + '주</div>').join('') + '</div></div>' +
+    '<div style="display:flex;gap:6px;margin-top:11px">' +
+      '<button class="btn p" id="pr-save">저장</button>' +
+      '<button class="btn" data-shx="1">닫기</button></div></div>';
+}
+
+let cadView = 'org';
 let cadFilt = 'over';
 function paneCad(){
+  const tg = '<div class="seg cv" id="cad-view">' +
+    '<div data-cv="org" class="' + (cadView === 'org' ? 'on' : '') + '">조직</div>' +
+    '<div data-cv="ppl" class="' + (cadView === 'ppl' ? 'on' : '') + '">인물</div></div>';
+  if(cadView === 'ppl') return tg + paneCadPpl();
+  return tg + paneCadOrg();
+}
+
+function paneCadPpl(){
+  let rows = perAgg();
+  if(cadFilt === 't1')   rows = rows.filter(r => r.t1);
+  if(cadFilt === 'none') rows = rows.filter(r => r.st === 'none');
+  if(cadFilt === 'recent') rows = rows.slice().sort((a,b) => dnum(b.last) - dnum(a.last));
+  const need = rows.filter(r => r.st === 'l').length;
+  const card = rows.filter(r => r.card.name).length;
+  const CH = [['over','경과순'],['recent','최근순'],['t1','T-1만'],['none','미컨택']];
+  let h = '<div class="chips" style="margin-bottom:9px">' +
+    CH.map(c => '<div class="chip' + (cadFilt === c[0] ? ' on' : '') +
+      '" data-cf="' + c[0] + '">' + c[1] + '</div>').join('') + '</div>' +
+    '<div class="cnt" style="margin:0 0 8px">컨택 필요 <b>' + need + '</b>명 · 전체 ' +
+      rows.length + '명 · 명함 ' + card + '장' +
+      '<span class="swlg">경과 <i style="opacity:.3"></i><i style="opacity:.48"></i><i style="opacity:.65"></i><i style="opacity:.83"></i><i style="opacity:1"></i> 초과</span></div>';
+  if(!rows.length)
+    return h + '<div class="empty">아직 인물 기록이 없습니다. Field Notes에서 사람 이름을 넣어 담으세요.</div>';
+  const t1 = rows.filter(r => r.t1), rest = rows.filter(r => !r.t1);
+  if(t1.length) h += '<div class="cdsec">T-1 <em>지정 ' + t1.length + '명</em></div>' +
+    t1.map(perRow).join('');
+  if(rest.length) h += '<div class="cdsec">기본 <em>목표 ' + defWk() + '주</em></div>' +
+    rest.map(perRow).join('');
+  return h;
+}
+
+function paneCadOrg(){
   let rows = cadAgg();
   if(cadFilt === 't1')   rows = rows.filter(r => r.t1);
   if(cadFilt === 'none') rows = rows.filter(r => r.st === 'none');
@@ -1657,7 +1902,7 @@ function render(){
     (USER?'':'<div class="note" style="background:none;border:1px solid var(--bd);'+
       'border-radius:9px;padding:9px 11px;font-size:11px;color:var(--mut);margin-bottom:11px">'+
       '로그인하지 않았습니다 — 폼은 볼 수 있지만 담기는 되지 않습니다.</div>')+
-    (TAB==='idea'?paneIdea():(TAB==='cad'?paneCad():(TAB==='deal'?paneDeal():paneField()))) + sheetCad() + sheetPC() + sheetLog();
+    (TAB==='idea'?paneIdea():(TAB==='cad'?paneCad():(TAB==='deal'?paneDeal():paneField()))) + sheetCad() + sheetPC() + sheetLog() + sheetPer();
   putForm(keep);
   if(TAB==='field'){
     const f=$('fn-f'); if(f) f.onchange=e=>{ fnFile=e.target.files[0]||null; render(); };
