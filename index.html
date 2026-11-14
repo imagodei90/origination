@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Work">
 <link rel="manifest" href="manifest.json">
 <title>Work</title>
-<link rel="icon" href="favicon.ico?v=20261114_2047" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261114_2047">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261114_2047">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261114_2047">
+<link rel="icon" href="favicon.ico?v=20261114_2231" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261114_2231">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261114_2231">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261114_2231">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -412,6 +412,33 @@ pre.out{background:var(--bg);border:1px solid var(--bd);border-radius:9px;paddin
 .combo li.new{color:var(--acc);font-weight:600}
 .gate{text-align:center;padding:50px 14px}
 .gate p{font-size:12px;color:var(--mut);margin:10px 0 18px;line-height:1.7}
+
+/* DEALIDEA */
+.di-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.di-h b{font-size:14px}.di-h span{font-size:11px;color:var(--mut);letter-spacing:.06em}
+.di{display:grid;grid-template-columns:26px 1fr auto;gap:12px;padding:14px 0;border-top:1px solid var(--bd)}
+.di:first-of-type{border-top:0}
+.di .ck{width:20px;height:20px;border:1.5px solid var(--dim);border-radius:5px;margin-top:2px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;background:transparent;padding:0}
+.di.on .ck{background:var(--acc);border-color:var(--acc)}
+.di.on .ck::after{content:'';width:5px;height:10px;border:solid var(--acc-fg);border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.di .tt{font-size:14.5px;font-weight:700;margin-bottom:3px}
+.di .tt em{font-style:normal;color:var(--acc)}
+.di .ang{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#c9a14a;
+  border:1px solid #4a3d22;padding:1px 6px;border-radius:4px;margin-right:6px;vertical-align:2px}
+.di .why{font-size:13px;line-height:1.6;color:var(--fg);opacity:.85;margin:4px 0 6px}
+.di .why li{margin:2px 0}.di ul{margin:0;padding-left:16px}
+.di .itp{color:var(--mut);font-size:12.5px}
+.di .src{font-size:11.5px;color:var(--mut);line-height:1.7}
+.di .src a{color:var(--mut);text-decoration:none;border-bottom:1px dotted var(--dim)}
+.di .sc{text-align:right;min-width:54px;font-size:20px;font-weight:600}
+.di .sc small{display:block;font-size:9.5px;letter-spacing:.12em;color:var(--mut);font-weight:400}
+.di .sv{margin-top:8px;font-size:11.5px;color:var(--acc);line-height:1.6}
+.di .sv i{font-style:normal;color:var(--mut)}
+.di .pend{margin-top:8px;font-size:11.5px;color:var(--mut)}
+.di-k{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--bd);font-size:13px}
+.di-k:first-child{border-top:0}.di-k span:last-child{color:var(--mut);font-size:11.5px;white-space:nowrap}
+@media(max-width:640px){.di{grid-template-columns:24px 1fr}.di .sc{grid-column:2;text-align:left}}
 </style>
 </head>
 <body>
@@ -462,7 +489,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20261114_2047';
+const BUILD = '20261114_2231';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -483,7 +510,7 @@ enableIndexedDbPersistence(db).catch(() => {});
 
 let DATA = null, ENT = null, MAP = null, GEO = null, USER = null;
 let AUTH_READY = false;       // onAuthStateChanged 가 한 번이라도 돌았는가
-let STATE = {}, LOGS = [], QUEUE = [];
+let STATE = {}, LOGS = [], QUEUE = [], DIDEA = [];
 let CAD = {};                 // company -> {tier, target_wk, memo}
 let PER = {};                 // 이름 -> 명함 {name, org, role, phone, mail, memo, tags, tier, target_wk}
 let cadOpen = null, cadSheet = null, fnKind = 'meet', fnPeople = [], fnQuick = true;
@@ -562,6 +589,8 @@ function subscribe(uid){
   });
   onSnapshot(query(collection(db,'users',uid,'orig_inbox'),orderBy('at','desc'),limit(40)),
     s => { QUEUE = s.docs.map(d=>({id:d.id,...d.data()})); if(TAB==='idea'||TAB==='word'||TAB==='field') render(); });
+  onSnapshot(query(collection(db,'users',uid,'deal_ideas'),orderBy('date','desc'),limit(60)),
+    s => { DIDEA = s.docs.map(d=>({id:d.id,...d.data()})); if(TAB==='idea') render(); });
   onSnapshot(query(collection(db,'users',uid,'field_notes'),orderBy('date','desc'),limit(400)),
     s => { LOGS = s.docs.map(d=>({id:d.id,...d.data()})); if(TAB==='field'||TAB==='cad') render(); });
   onSnapshot(collection(db,'users',uid,'pc'), s => {
@@ -1139,11 +1168,52 @@ function queueRows(kind){
 
 const needLogin = () => { alert('담기에는 로그인이 필요합니다. 상단의 Google 로그인을 눌러주세요.'); };
 
+
+/* DEALIDEA */
+const DI_LBL = {pipeline:'파이프라인',deal:'딜 이력',news:'기사',judgment:'내 판단',entity:'기관·인물',visit:'방문'};
+function paneDealIdea(){
+  if(!DIDEA.length) return '<div class="card"><div class="di-h"><b>Today\'s Deal Idea</b>'+
+    '<span>AUTO · DAILY 06:00</span></div><div style="font-size:12.5px;color:var(--mut)">'+
+    (USER?'아직 생성된 아이디어가 없습니다. 내일 06:00 브리핑 뒤에 채워집니다.':'로그인하면 오늘의 아이디어가 보입니다.')+'</div></div>';
+  const day = DIDEA[0].date;
+  const today = DIDEA.filter(x=>x.date===day).sort((a,b)=>(b.fit||0)-(a.fit||0));
+  const kept = DIDEA.filter(x=>x.date!==day && (x.status==='saved'||x.status==='kept'));
+  const row = x => {
+    const on = x.status==='kept'||x.status==='saved';
+    const src = (x.sources||[]).map(s=>'<a href="'+esc(s.url)+'" target="_blank" rel="noopener">'+esc(s.title)+'</a>').join(' · ');
+    let foot = '';
+    if(x.status==='kept') foot = '<div class="pend">저장 대기 — PC가 10분 안에 vault 연결을 찾아 노트를 만듭니다</div>';
+    if(x.status==='saved' && x.saved){
+      const L = x.saved.links||{};
+      const cnt = Object.keys(DI_LBL).filter(k=>L[k]).map(k=>DI_LBL[k]+' '+L[k]).join(' · ');
+      foot = '<div class="sv">저장됨 → '+esc(x.saved.path.split('/').pop().replace(/\.md$/,''))+
+        ' <i>('+esc(x.saved.how||'')+')</i><br>vault 연결: '+(cnt||'<i>찾은 연결 없음</i>')+
+        (x.saved.entity?'':' <i>· 대상 회사 노트 없음</i>')+
+        ((x.saved.top||[]).length?'<br><i>'+x.saved.top.map(t=>esc(t.t)).join(' · ')+'</i>':'')+'</div>';
+    }
+    if(x.error) foot += '<div class="pend" style="color:#d9534f">오류 — '+esc(x.error)+'</div>';
+    return '<div class="di'+(on?' on':'')+'"><button class="ck" data-di="'+esc(x.id)+'" aria-label="저장"></button><div>'+
+      '<div class="tt"><span class="ang">'+esc(x.angle||'other')+'</span><em>'+esc(x.target)+'</em> — '+
+        esc((x.title||'').split('—').pop().trim())+'</div>'+
+      '<div class="why">'+esc(x.trigger||'')+
+        ((x.facts||[]).length?'<ul>'+x.facts.map(f=>'<li>'+esc(f)+'</li>').join('')+'</ul>':'')+
+        ((x.interpretation||[]).length?'<div class="itp">추론 · '+x.interpretation.map(esc).join(' / ')+'</div>':'')+'</div>'+
+      '<div class="src">근거 '+src+'</div>'+foot+'</div>'+
+      '<div class="sc">'+(x.fit==null?'—':x.fit)+'<small>FIT</small></div></div>';
+  };
+  return '<div class="card"><div class="di-h"><b>Today\'s Deal Idea <span style="font-weight:400;color:var(--mut);letter-spacing:0">— '+
+    esc(day)+' · 기사 '+(today[0].n_articles||'?')+'건 기준</span></b><span>체크하면 vault 연결을 찾아 저장</span></div>'+
+    today.map(row).join('')+'</div>'+
+    (kept.length?'<div class="lbl">지난 아이디어 중 저장한 것</div><div class="card">'+
+      kept.slice(0,12).map(x=>'<div class="di-k"><span><span class="ang" style="font-size:10px;color:#c9a14a;border:1px solid #4a3d22;padding:1px 6px;border-radius:4px;margin-right:6px">'+
+        esc(x.angle)+'</span>'+esc(x.title||x.target)+'</span><span>'+esc(x.date)+'</span></div>').join('')+'</div>':'')+
+    '<div class="lbl">직접 담기</div>';
+}
 /* ── Ideas 탭 ─────────────────────────────────── */
 let ideaPrefill = '';
 function paneIdea(){
   if(ideaPrefill){ COMBO['id-t']=ideaPrefill; }
-  return '<div class="card">'+
+  return paneDealIdea()+'<div class="card">'+
     '<div class="fr"><label>대상 <em>타이핑하면 '+
       (ENT?ENT.items.length.toLocaleString():'—')+'곳에서 걸러집니다</em></label>'+
       comboHTML('id-t','회사·기관 이름')+'</div>'+
@@ -2446,6 +2516,18 @@ function kpi(){
 
 /* ── 이벤트 ───────────────────────────────────── */
 document.addEventListener('click', async e => {
+  const dk=e.target.closest('.ck[data-di]');
+  if(dk){ if(!USER) return needLogin();
+    const x=DIDEA.find(z=>z.id===dk.dataset.di); if(!x) return;
+    const nx = x.status==='saved' ? 'unkept' : (x.status==='kept' ? 'new' : 'kept');
+    if(nx==='unkept' && !confirm('저장한 노트를 parked 로 돌릴까요? (노트는 지우지 않습니다)')) return;
+    dk.disabled=true;
+    try{ await updateDoc(doc(db,'users',USER.uid,'deal_ideas',x.id), {status:nx, error:''});
+      // 담는 순간 그 회사는 보고 있어야 할 대상이다 — 수동 Ideas 와 같은 규칙으로 Watchlist 로
+      if(nx==='kept'){ const hit = DATA && DATA.companies.find(c => c.n === x.target);
+        if(hit && stOf(hit.c)==='new'){ STATE[hit.c]=Object.assign({},STATE[hit.c],{st:'watch'}); saveState(); kpi(); } }
+    }catch(err){ alert('실패 — '+err.message); }
+    dk.disabled=false; return; }
   const tb=e.target.closest('.tb');
   if(tb){ document.querySelectorAll('.tb').forEach(x=>x.classList.toggle('on',x===tb));
     TAB=tb.dataset.t; kpi(); render(); window.scrollTo(0,0); return; }
