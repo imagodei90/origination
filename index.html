@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Work">
 <link rel="manifest" href="manifest.json">
 <title>Work</title>
-<link rel="icon" href="favicon.ico?v=20261115_2100" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_2100">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_2100">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_2100">
+<link rel="icon" href="favicon.ico?v=20261115_2102" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_2102">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_2102">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_2102">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -598,12 +598,12 @@ import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChang
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
          onSnapshot, query, orderBy, limit, serverTimestamp, enableIndexedDbPersistence,
-         writeBatch, getDocs, deleteField }
+         writeBatch, getDocs, deleteField, where }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20261115_2100';
+const BUILD = '20261115_2102';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -2779,7 +2779,8 @@ async function loadImp(){
   if(IMP || IMP_BUSY || !USER) return;
   IMP_BUSY = true;
   try{
-    const s = await getDocs(collection(db,'users',USER.uid,'person_import'));
+    // 승인된 행은 읽지 않는다 — 1,200건을 매번 읽으면 무료 할당량(하루 5만)이 하루 만에 바닥난다
+    const s = await getDocs(query(collection(db,'users',USER.uid,'person_import'), where('status','in',['open','hold'])));
     IMP = s.docs.map(d => Object.assign({id:d.id}, d.data()));
     const b = await getDocs(query(collection(db,'users',USER.uid,'person_batch'), orderBy('at','desc'), limit(40)));
     BATCH = b.docs.map(d => Object.assign({id:d.id}, d.data()));
