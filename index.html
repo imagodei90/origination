@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Work">
 <link rel="manifest" href="manifest.json">
 <title>Work</title>
-<link rel="icon" href="favicon.ico?v=20261115_1850" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_1850">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_1850">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_1850">
+<link rel="icon" href="favicon.ico?v=20261115_1916" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_1916">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_1916">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_1916">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -464,6 +464,23 @@ pre.out{background:var(--bg);border:1px solid var(--bd);border-radius:9px;paddin
 .rvseg div{flex:1;text-align:center;padding:7px 4px;font:11px "JetBrains Mono","SF Mono",monospace;color:var(--mut);cursor:pointer}
 .rvseg div.on{background:var(--acc);color:var(--acc-fg);font-weight:600}
 .rvseg div small{display:block;font-size:9px;opacity:.75}
+.calc{border:1px solid var(--bd);border-radius:9px;padding:9px 10px;margin-bottom:6px;background:var(--card2)}
+.calc.off{opacity:.55}
+.calc .h{display:flex;gap:8px;align-items:center}
+.calc .t{font-weight:600;font-size:12.5px;flex:1;min-width:0;word-break:break-word}
+.calc .d{font:10px "JetBrains Mono","SF Mono",monospace;color:var(--dim);white-space:nowrap}
+.calc .kd{font:9.5px "JetBrains Mono","SF Mono",monospace;color:var(--acc);border:1px solid var(--bd);border-radius:4px;padding:1px 6px;cursor:pointer;white-space:nowrap}
+.calc .ck{display:inline-block;width:16px;height:16px;border:1px solid var(--dim);border-radius:4px;flex:none;cursor:pointer}
+.calc .ck.on{background:var(--acc);border-color:var(--acc)}
+.calc .row{display:flex;gap:6px;align-items:center;margin-top:7px;flex-wrap:wrap}
+.calc .lb{font:9.5px "JetBrains Mono","SF Mono",monospace;color:var(--dim);letter-spacing:.06em;width:30px;flex:none}
+.calc .combo{flex:1;min-width:160px}
+.calc .combo input{padding:6px 9px;font-size:12px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--fg)}
+.pp{display:inline-flex;gap:5px;align-items:center;font-size:11px;padding:3px 8px;border-radius:12px;background:var(--hair);color:var(--mut);flex-wrap:wrap}
+.pp.ok{color:var(--fg)}
+.pp i{font-style:normal;font-size:9.5px;color:var(--dim)}
+.pp .c{font:9.5px "JetBrains Mono","SF Mono",monospace;color:var(--acc);cursor:pointer;border:1px solid var(--bd);border-radius:4px;padding:0 5px}
+.pp .x{cursor:pointer;color:var(--dim);padding:0 2px}
 .btn.xs{font-size:10.5px;padding:5px 10px;border-radius:7px}
 a.btn{display:inline-block;text-decoration:none;color:var(--fg);line-height:1.2}
 .lk{background:var(--card2);border:1px solid var(--bd);border-radius:10px;padding:9px 11px;margin-bottom:6px}
@@ -584,7 +601,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20261115_1850';
+const BUILD = '20261115_1916';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -1165,7 +1182,59 @@ document.addEventListener('click', async e => {
 
 
   // ── 가져오기 검토 ──
-  if(e.target.closest('[data-shx]')){ rvEdit = null; mgSheet = null; }
+  if(e.target.closest('[data-shx]')){ rvEdit = null; mgSheet = null; pkSheet = null; }
+  // ── 캘린더 ──
+  const calck = e.target.closest('[data-calck]');
+  if(calck){ const id = calck.dataset.calck; calDefault(); if(calSel[id]) delete calSel[id]; else calSel[id] = 1; render(); return; }
+  const calf = e.target.closest('[data-calf]');
+  if(calf){ calFilt = calf.dataset.calf; render(); return; }
+  const calpick = e.target.closest('[data-calpick]');
+  if(calpick){
+    const r = calById(calpick.dataset.g), p = r && r.people[+calpick.dataset.i]; if(!p) return;
+    const c = (p.cands || [])[+calpick.dataset.calpick]; if(!c) return;
+    p.name = c.name; p.key = c.key || ''; p.org = c.org || ''; p.how = c.key ? 'pick' : 'queue-pick';
+    await calSave(r); render(); return;
+  }
+  const calnone = e.target.closest('[data-calnone]');
+  if(calnone){ const r = calById(calnone.dataset.g), p = r && r.people[+calnone.dataset.i]; if(!p) return; p.raw = calName(p); p.how = 'raw'; await calSave(r); render(); return; }
+  const caldrop = e.target.closest('[data-caldrop]');
+  if(caldrop){ const r = calById(caldrop.dataset.g), p = r && r.people[+caldrop.dataset.i]; if(!p) return; p.drop = true; await calSave(r); render(); return; }
+  const calpk = e.target.closest('[data-calpk]');
+  if(calpk){ const r = calById(calpk.dataset.g), p = r && r.people[+calpk.dataset.i]; if(!p) return; pkSheet = {g:r.id, i:+calpk.dataset.i, t:calName(p), q:''}; render(); return; }
+  const pkto = e.target.closest('[data-pkto]');
+  if(pkto && pkSheet){
+    const r = calById(pkSheet.g), p = r && r.people[pkSheet.i]; if(!p) return;
+    const nm = pkto.dataset.pkto; p.name = nm; p.key = perKey(nm) || ''; p.org = perOf(nm).org || ''; p.how = 'pick';
+    pkSheet = null; await calSave(r); render(); return;
+  }
+  const calkind = e.target.closest('[data-calkind]');
+  if(calkind){ const r = calById(calkind.dataset.calkind); if(!r) return; const K = ['meet','lunch','dinner','coffee','call','golf']; r.kind = K[(K.indexOf(r.kind || 'meet') + 1) % K.length]; await calSave(r); render(); return; }
+  const calskip = e.target.closest('[data-calskip]');
+  if(calskip){ const r = calById(calskip.dataset.calskip); if(!r) return; r.status = (r.status === 'skip') ? 'open' : 'skip'; if(calSel) delete calSel[r.id]; await setDoc(calRef(r.id), {status:r.status}, {merge:true}); render(); return; }
+  if(e.target.id === 'cal-ok'){
+    calDefault(); const n = calOpen().filter(r => calSel[r.id]).length; if(!n) return;
+    rvBusy = '기록 중… ' + n + '건'; render();
+    try{ await approveCal(); }catch(x){ alert('실패 — ' + x.message); }
+    rvBusy = ''; render(); return;
+  }
+  // ── 기록 확인 ──
+  const fixsug = e.target.closest('[data-fixsug]');
+  if(fixsug){ const id = fixsug.dataset.fid; COMBO[id] = fixsug.dataset.fixsug; if($(id)) $(id).value = fixsug.dataset.fixsug; render(); return; }
+  const fixok = e.target.closest('[data-fixok]');
+  if(fixok){
+    const raw = fixok.dataset.fixok, canon = comboVal(fixok.dataset.fid);
+    if(!canon){ alert('정식 이름을 고르세요'); return; }
+    rvBusy = '확정 중…'; render();
+    try{ await fixApply(raw, canon); }catch(x){ alert('실패 — ' + x.message); }
+    rvBusy = ''; render(); return;
+  }
+  const fixkeep = e.target.closest('[data-fixkeep]');
+  if(fixkeep){
+    const raw = fixkeep.dataset.fixkeep;
+    rvBusy = '확정 중…'; render();
+    try{ await fixApply(raw, raw); }catch(x){ alert('실패 — ' + x.message); }
+    rvBusy = ''; render(); return;
+  }
   const rvs = e.target.closest('[data-rvseg]');
   if(rvs){ rvSeg = rvs.dataset.rvseg; rvMore = 150; render(); window.scrollTo(0, 0); return; }
   const rvf = e.target.closest('[data-rvf]');
@@ -2587,6 +2656,7 @@ function perRow(r){
    승인 한 번 = person_batch 한 건. 그 단위로 되돌린다.
    거절·보류·체크 해제는 표시일 뿐이다 — 행을 지우지 않는다. */
 let IMP = null, IMP_BUSY = false, BATCH = [];
+let CAL = null, OAL = [], calSel = null, calFilt = 'all', pkSheet = null;   // 캘린더 큐 · 회사 별칭 · 선택 · 명함 찾기 시트
 let rvSel = {};                       // 비교 카드에서 고른 리멤버 후보 {Lid:{Rid:1}}
 // LinkedIn 내보내기의 회사·직책은 내보낸 날 기준이다. 다음 내보내기 때 이 날짜를 올린다.
 const LI_ASOF = '2026-11-04';
@@ -2595,6 +2665,7 @@ let rvSeg = '', rvFilt = 'all', rvOff = {}, rvMore = 150, rvEdit = null, rvMsg =
 let rvOpen = null;                    // 신규 목록에서 펼친 행
 const RANK = {manual:4, card:3, remember:2, linkedin:1};
 const impRef = id => doc(db,'users',USER.uid,'person_import',id);
+const calRef = id => doc(db,'users',USER.uid,'cal_import',id);
 const ymd = s => String(s || '').slice(0, 10);
 const fmtPhone = s => { const d = String(s || '').replace(/\D/g, '');
   if(d.length === 11) return d.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
@@ -2610,6 +2681,10 @@ async function loadImp(){
     IMP = s.docs.map(d => Object.assign({id:d.id}, d.data()));
     const b = await getDocs(query(collection(db,'users',USER.uid,'person_batch'), orderBy('at','desc'), limit(40)));
     BATCH = b.docs.map(d => Object.assign({id:d.id}, d.data()));
+    const c = await getDocs(collection(db,'users',USER.uid,'cal_import'));
+    CAL = c.docs.map(d => Object.assign({id:d.id}, d.data()));
+    const oa = await getDocs(collection(db,'users',USER.uid,'org_alias'));
+    OAL = oa.docs.map(d => Object.assign({id:d.id}, d.data()));
   }catch(x){ IMP = IMP || []; rvMsg = '불러오지 못했습니다 — ' + x.message; }
   IMP_BUSY = false; render();
 }
@@ -2803,26 +2878,215 @@ async function undoBatch(b){
     ops.push({ref: impRef(id), data:{status:'open', batch:'', person_key:''}, merge:true});
     const r = impById(id); if(r){ r.status = 'open'; r.batch = ''; r.person_key = ''; }
   }
+  for(const id of (b.cal || [])){
+    ops.push({ref: calRef(id), data:{status:'open', log:'', batch:''}, merge:true});
+    const r = calById(id); if(r){ r.status = 'open'; r.log = ''; }
+  }
+  if(b.kind === 'fix' && b.alias){ OAL = OAL.filter(x => x.id !== b.alias); }
   ops.push({ref: doc(db,'users',USER.uid,'person_batch',b.id), data:{undone:new Date().toISOString(), skipped:skipped}, merge:true});
   await flushOps(ops);
   b.undone = true; b.skipped = skipped;
   return skipped;
 }
 
+/* ── 캘린더 ── */
+document.addEventListener('input', e => {
+  if(e.target.id === 'pk-q' && pkSheet){ pkSheet.q = e.target.value; const l = $('pk-list'); if(l) l.innerHTML = pkList(); }
+});
+const CAL_ROLE = /(대표님|대표|수석님|수석|팀장님|팀장|이사님|이사|부장님|부장|상무님|상무|전무|과장|차장|매니저|심사역|파트너|본부장|실장)$/;
+const CAL_TAIL = /(점심|저녁|통화|방문|미팅|논의|커피|식사|아침)$/;
+const calById = id => (CAL || []).find(x => x.id === id);
+const calOpen = () => (CAL || []).filter(r => r.status === 'open');
+const calName = p => p.name || p.raw || String(p.t || '').replace(CAL_ROLE, '').replace(CAL_TAIL, '').trim();
+const calSave = r => setDoc(calRef(r.id), {people: r.people, kind: r.kind || 'meet'}, {merge:true});
+function calDefault(){
+  if(calSel) return;
+  calSel = {};
+  for(const r of calOpen()) if(!r.dup && !r.weak && (r.ent || (r.people || []).some(p => p.name))) calSel[r.id] = 1;
+}
+function calRows(){
+  let r = calOpen();
+  if(calFilt === 'past') r = r.filter(x => !x.future);
+  if(calFilt === 'next') r = r.filter(x => x.future);
+  if(calFilt === 'skip') r = (CAL || []).filter(x => x.status === 'skip');
+  return r.slice().sort((a, b) => (a.future - b.future) || (a.future ? (a.date < b.date ? -1 : 1) : (a.date > b.date ? -1 : 1)));
+}
+function calCard(r){
+  const on = !!(calSel && calSel[r.id]), cid = 'cal-c-' + r.id;
+  const cval = (COMBO[cid] != null) ? COMBO[cid] : (r.company || '');
+  const isEnt = !!(ENT && ENT.items.some(x => x.n === cval));
+  const ppl = (r.people || []).map((p, i) => {
+    if(p.drop) return '';
+    const base = 'data-i="' + i + '" data-g="' + esc(r.id) + '"';
+    if(p.name) return '<span class="pp ok">' + esc(p.name) + (p.org ? ' <i>' + esc(p.org) + '</i>' : '') +
+      (p.t && p.t !== p.name && ['exact','mail','alias'].indexOf(p.how) < 0 ? ' <i>← ' + esc(p.t) + '</i>' : '') +
+      '<span class="x" data-caldrop="1" ' + base + '>×</span></span>';
+    const cs = (p.cands || []).map((c, j) => '<span class="c" data-calpick="' + j + '" ' + base + '>' + esc(c.name) + (c.org ? ' · ' + esc(c.org) : '') + '</span>').join('');
+    const lbl = p.raw ? '그대로' : p.how === 'queue' ? '검토 큐에 있음' : p.how === 'rom' ? '로마자 후보' : p.how === 'given' ? '이름 후보' : '명함 없음';
+    return '<span class="pp' + (p.raw ? ' ok' : '') + '">' + esc(calName(p)) + ' <i>' + lbl + '</i>' + cs +
+      '<span class="c" data-calpk="1" ' + base + '>찾기</span>' + (p.raw ? '' : '<span class="c" data-calnone="1" ' + base + '>그대로</span>') +
+      '<span class="x" data-caldrop="1" ' + base + '>×</span></span>';
+  }).join('');
+  return '<div class="calc' + (on ? '' : ' off') + '">' +
+    '<div class="h"><span class="ck' + (on ? ' on' : '') + '" data-calck="' + esc(r.id) + '"></span>' +
+      '<span class="t">' + esc(r.title) + '</span>' +
+      '<span class="kd" data-calkind="' + esc(r.id) + '">' + (KLBL[r.kind || 'meet'] || r.kind) + '</span>' +
+      '<span class="d">' + esc(r.date) + (r.time ? ' ' + esc(r.time) : '') + (r.future ? ' · 예정' : '') + '</span></div>' +
+    '<div class="row"><span class="lb">상대</span><div class="combo" data-combo="' + cid + '"><input id="' + cid + '" value="' + esc(cval) + '" placeholder="상대 (회사·기관)" autocomplete="off"><ul id="' + cid + '-l"></ul></div>' +
+      (cval && !isEnt ? '<span class="srcx">정식 아님</span>' : '') + '</div>' +
+    (ppl ? '<div class="row"><span class="lb">인물</span>' + ppl + '</div>' : '') +
+    (r.loc ? '<div class="row"><span class="lb">장소</span><span class="cnt" style="margin:0">' + esc(r.loc) + '</span></div>' : '') +
+    (r.mails && r.mails.length ? '<div class="row"><span class="lb">메일</span><span class="cnt" style="margin:0">' + esc(r.mails.join(', ')) + '</span></div>' : '') +
+    (r.dup ? '<div class="rvhint">같은 날 기록이 이미 있습니다 — 체크하면 새로 만들지 않고 그 기록에 묶습니다</div>' : '') +
+    (r.weak ? '<div class="rvhint">상대·인물을 못 찾았습니다 — 사적 일정이면 건너뛰세요</div>' : '') +
+    '<div class="row" style="justify-content:flex-end"><button class="btn xs" data-calskip="' + esc(r.id) + '">' + (r.status === 'skip' ? '다시 올리기' : '건너뛰기') + '</button></div>' +
+    '</div>';
+}
+function rvCalView(){
+  calDefault();
+  const all = calOpen(), rows = calRows();
+  const CH = [['all','전체',all.length],['past','지난',all.filter(x => !x.future).length],['next','예정',all.filter(x => x.future).length],['skip','건너뜀',(CAL || []).filter(x => x.status === 'skip').length]];
+  let h = '<div class="chips" style="margin-bottom:9px">' + CH.map(c => '<div class="chip' + (calFilt === c[0] ? ' on' : '') + '" data-calf="' + c[0] + '">' + c[1] + ' ' + c[2] + '</div>').join('') + '</div>' +
+    '<div class="cnt" style="margin:0 0 8px">구글 캘린더에서 추린 일정입니다. 상대·인물·종류를 고치고 체크한 것만 기록됩니다. 지난 일정은 기록, 앞의 일정은 예정으로 들어갑니다. 종류는 눌러서 바꿉니다.</div>';
+  if(!rows.length) return h + '<div class="empty">없습니다.</div>';
+  h += rows.map(calCard).join('');
+  const n = all.filter(r => calSel[r.id]).length;
+  return h + rvBar('<b>' + n + '</b>건 선택 · ' + (all.length - n) + ' 미선택', n ? '<button class="btn p" id="cal-ok">선택 기록</button>' : '');
+}
+async function approveCal(){
+  const rows = calOpen().filter(r => calSel && calSel[r.id]); if(!rows.length) return;
+  const ops = [], chg = [], gids = [], aliasAdd = {};
+  for(const r of rows){
+    const cid = 'cal-c-' + r.id;
+    const company = (comboVal(cid) || r.company || r.company_raw || r.title).trim();
+    const ppl = (r.people || []).filter(p => !p.drop);
+    const names = []; ppl.forEach(p => { const n = calName(p); if(n && names.indexOf(n) < 0) names.push(n); });
+    for(const p of ppl){
+      if(!p.key || !p.t || /@/.test(p.t)) continue;
+      const tk = String(p.t).replace(CAL_ROLE, '').replace(CAL_TAIL, '').trim();
+      const cur = PER2[p.key];
+      if(tk && cur && tk !== cur.name && (cur.aliases || []).indexOf(tk) < 0 && /^[가-힣]{2,4}$/.test(tk))
+        (aliasAdd[p.key] = aliasAdd[p.key] || []).push(tk);
+    }
+    if(r.company_raw && company && company !== r.company_raw && ENT && ENT.items.some(x => x.n === company) && r.company_raw.indexOf(',') < 0){
+      const ar = doc(collection(db,'users',USER.uid,'org_alias'));
+      ops.push({ref: ar, data:{a:r.company_raw, b:company, at:todayStr(), by:'cal'}});
+      chg.push({col:'org_alias', id:ar.id, before:null});
+      OAL.push({id:ar.id, a:r.company_raw, b:company});
+    }
+    let logId = r.dup || '';
+    if(!logId){
+      logId = 'gcal_' + r.id;
+      const xy = resolveXY(r.loc || '', 'ETC', company), kind = r.kind || 'meet';
+      ops.push({ref: logRef(logId), data:{company:company, title:company, date:r.date, zone:'ETC', zone_etc:'', attendees:names.join(', '),
+        note:'', mode:'text', people:names, kind:kind, weight:(KW[kind] || 1), status:(r.future ? 'planned' : 'done'),
+        place:r.loc || '', x:xy[0], y:xy[1], src:xy[2], origin:'gcal', gcal_id:r.id, gcal_title:r.title, at:serverTimestamp()}});
+      chg.push({col:'field_notes', id:logId, before:null});
+    }
+    ops.push({ref: calRef(r.id), data:{status:'approved', log:logId, company_final:company, people_final:names}, merge:true});
+    gids.push(r.id);
+  }
+  for(const k in aliasAdd){
+    const cur = PER2[k], add = aliasAdd[k].filter((x, i, a) => a.indexOf(x) === i);
+    chg.push({col:'person2', id:k, before:{aliases: cur.aliases || []}});
+    ops.push({ref: doc(db,'users',USER.uid,'person2',k), data:{aliases:(cur.aliases || []).concat(add), touched:new Date().toISOString()}, merge:true});
+  }
+  const bid = 'b' + Date.now(), at = new Date().toISOString();
+  const rec = {at:at, kind:'cal', label:'캘린더 ' + rows.length + '건', n:rows.length, imports:[], cal:gids, changes:chg};
+  ops.push({ref: doc(db,'users',USER.uid,'person_batch',bid), data:rec});
+  await flushOps(ops);
+  for(const r of rows){ r.status = 'approved'; delete calSel[r.id]; }
+  BATCH.unshift(Object.assign({id:bid}, rec));
+}
+function pkList(){
+  const q = String(pkSheet.q || '').trim().toLowerCase();
+  let rows = perAgg(true).filter(r => !r.del);
+  if(q) rows = rows.filter(r => (r.name + ' ' + (r.org || '') + ' ' + (r.card.role || '') + ' ' + ((r.card.aliases || []).join(' '))).toLowerCase().indexOf(q) >= 0);
+  rows.sort((a, b) => (b.n - a.n) || a.name.localeCompare(b.name));
+  return rows.slice(0, 40).map(r => '<div class="mgrow" data-pkto="' + esc(r.name) + '"><b>' + esc(nameView(r.name).base) + '</b>' +
+    '<span class="o">' + esc(r.org || '-') + (r.card.role ? ' · ' + esc(r.card.role) : '') + '</span><span class="n">컨택 ' + r.n + '회</span></div>').join('') ||
+    '<div class="empty">없습니다.</div>';
+}
+function sheetPick(){
+  if(!pkSheet) return '';
+  return '<div class="shbg" data-shx="1"></div><div class="sheet">' +
+    '<div class="shh" style="display:flex;align-items:center;gap:8px">명함 찾기 — ' + esc(pkSheet.t) + '<button class="btn xs" data-shx="1" style="margin-left:auto">닫기</button></div>' +
+    '<div class="fr"><input id="pk-q" placeholder="이름·회사·별칭으로 찾기" value="' + esc(pkSheet.q || '') + '"></div>' +
+    '<div class="mglist" id="pk-list">' + pkList() + '</div></div>';
+}
+
+/* ── 기록 확인 ── */
+function fixRows(){
+  if(!ENT || !LOGS) return [];
+  const names = {}; ENT.items.forEach(x => { names[x.n] = 1; });
+  const al = {}; OAL.forEach(x => { if(x.a) al[x.a] = x.b; });
+  const m = {};
+  for(const l of LOGS){
+    const c = l.company || ''; if(!c || names[c] || al[c]) continue;
+    (m[c] = m[c] || {raw:c, n:0, ids:[]}); m[c].n++; m[c].ids.push(l.id);
+  }
+  return Object.values(m).sort((a, b) => b.n - a.n);
+}
+function fixSug(raw){
+  const f = s => String(s || '').toLowerCase().replace(/\(.*?\)/g, '').replace(/[^0-9a-z가-힣]/g, '');
+  const q = f(raw); if(q.length < 2) return [];
+  const out = [];
+  for(const x of ENT.items){
+    const n = f(x.n), en = f((x.n.match(/\(([^)]+)\)/) || [])[1] || '');
+    if(n === q || (en && en === q)) out.unshift(x.n);
+    else if((q.length >= 3 && (n.indexOf(q) >= 0 || (en && en.indexOf(q) >= 0))) || (n.length >= 3 && q.indexOf(n) >= 0)) out.push(x.n);
+  }
+  return out.slice(0, 4);
+}
+const fixId = raw => 'fix-' + encodeURIComponent(raw).replace(/[^A-Za-z0-9]/g, '');
+function rvFixView(){
+  const rows = fixRows();
+  let h = '<div class="cnt" style="margin:0 0 8px">상대 이름이 엔티티 정식 이름이 아닌 기록입니다. 정식 이름으로 확정하면 Cadence 가 한 곳으로 묶이고, 같은 표기는 다음부터 자동입니다. 정식 이름이 없는 곳은 <b>그대로 둠</b>.</div>';
+  if(!rows.length) return h + '<div class="empty">확인할 기록이 없습니다.</div>';
+  for(const r of rows){
+    const id = fixId(r.raw), sug = fixSug(r.raw);
+    const cval = (COMBO[id] != null) ? COMBO[id] : (sug[0] || '');
+    h += '<div class="calc"><div class="h"><span class="t">' + esc(r.raw) + '</span><span class="d">기록 ' + r.n + '건</span></div>' +
+      (sug.length ? '<div class="row"><span class="lb">추정</span>' + sug.map(s => '<span class="pp' + (s === cval ? ' ok' : '') + '" style="cursor:pointer" data-fixsug="' + esc(s) + '" data-fid="' + id + '">' + esc(s) + '</span>').join('') + '</div>' : '') +
+      '<div class="row"><span class="lb">정식</span><div class="combo" data-combo="' + id + '"><input id="' + id + '" value="' + esc(cval) + '" placeholder="엔티티에서 고르기" autocomplete="off"><ul id="' + id + '-l"></ul></div></div>' +
+      '<div class="row" style="justify-content:flex-end"><button class="btn xs p" data-fixok="' + esc(r.raw) + '" data-fid="' + id + '">확정</button>' +
+      '<button class="btn xs" data-fixkeep="' + esc(r.raw) + '">그대로 둠</button></div></div>';
+  }
+  return h;
+}
+async function fixApply(raw, canon){
+  const row = fixRows().find(r => r.raw === raw); if(!row) return;
+  const ops = [], chg = [];
+  if(canon !== raw) for(const id of row.ids){
+    const l = LOGS.find(x => x.id === id) || {};
+    ops.push({ref: logRef(id), data:{company:canon, title:(l.title === raw || !l.title) ? canon : l.title, company_raw:raw}, merge:true});
+    chg.push({col:'field_notes', id:id, before:{company:raw, title:(l.title || raw), company_raw:null}});
+  }
+  const ar = doc(collection(db,'users',USER.uid,'org_alias'));
+  ops.push({ref: ar, data:{a:raw, b:canon, at:todayStr(), by:'fix'}});
+  chg.push({col:'org_alias', id:ar.id, before:null});
+  const bid = 'b' + Date.now(), at = new Date().toISOString();
+  const rec = {at:at, kind:'fix', label:'기록 상대 ' + raw + (canon === raw ? ' 그대로' : ' → ' + canon), n:row.ids.length, imports:[], alias:ar.id, changes:chg};
+  ops.push({ref: doc(db,'users',USER.uid,'person_batch',bid), data:rec});
+  await flushOps(ops);
+  OAL.push({id:ar.id, a:raw, b:canon});
+  BATCH.unshift(Object.assign({id:bid}, rec));
+}
+
 /* ── 화면 ── */
 function rvEntry(){
   if(!USER) return '';
   if(!IMP){ if(!IMP_BUSY) loadImp(); return ''; }
-  const n = impOpen().length;
+  const nc = calOpen().length, nf = fixRows().length, n = impOpen().length + nc + nf;
   if(!n) return '';
   return '<div class="rvent" data-cv="rv"><b>검토 대기 ' + n.toLocaleString() + '</b>' +
-    '<em>리멤버 · LinkedIn 가져오기 — 연결 ' + rvLinks().length + ' · 신규 ' + rvNews().length +
+    '<em>' + (nc ? '캘린더 ' + nc + ' · ' : '') + (nf ? '기록 확인 ' + nf + ' · ' : '') + '연결 ' + rvLinks().length + ' · 신규 ' + rvNews().length +
     ' · 기존 채움 ' + rvUpds().length + '</em><span>열기</span></div>';
 }
 function rvSegBar(){
-  const n = {link:rvLinks().length, new:rvNews().length, upd:rvUpds().length, hist:BATCH.filter(b => !b.undone).length};
-  if(!rvSeg) rvSeg = n.link ? 'link' : (n.new ? 'new' : (n.upd ? 'upd' : 'hist'));
-  const S = [['link','연결'],['new','신규'],['upd','기존 채움'],['hist','이력']];
+  const n = {cal:calOpen().length, fix:fixRows().length, link:rvLinks().length, new:rvNews().length, upd:rvUpds().length, hist:BATCH.filter(b => !b.undone).length};
+  if(!rvSeg) rvSeg = n.cal ? 'cal' : (n.link ? 'link' : (n.new ? 'new' : (n.upd ? 'upd' : (n.fix ? 'fix' : 'hist'))));
+  const S = [['cal','캘린더'],['fix','기록 확인'],['link','연결'],['new','신규'],['upd','기존 채움'],['hist','이력']];
   return '<div class="rvseg">' + S.map(x => '<div data-rvseg="' + x[0] + '" class="' + (rvSeg === x[0] ? 'on' : '') +
     '">' + x[1] + '<small>' + n[x[0]].toLocaleString() + '</small></div>').join('') + '</div>';
 }
@@ -2830,7 +3094,9 @@ function paneReview(){
   if(!USER) return '<div class="empty">로그인이 필요합니다.</div>';
   if(!IMP){ loadImp(); return '<div class="empty">검토 목록을 불러오는 중…</div>'; }
   let h = rvSegBar() + (rvMsg ? '<div class="cnt">' + esc(rvMsg) + '</div>' : '');
-  if(rvSeg === 'link') h += rvLinkView();
+  if(rvSeg === 'cal') h += rvCalView();
+  else if(rvSeg === 'fix') h += rvFixView();
+  else if(rvSeg === 'link') h += rvLinkView();
   else if(rvSeg === 'new') h += rvNewView();
   else if(rvSeg === 'upd') h += rvUpdView();
   else h += rvHistView();
@@ -3292,7 +3558,7 @@ function render(){
     ((USER || !AUTH_READY)?'':'<div class="note" style="background:none;border:1px solid var(--bd);'+
       'border-radius:9px;padding:9px 11px;font-size:11px;color:var(--mut);margin-bottom:11px">'+
       '로그인하지 않았습니다 — 폼은 볼 수 있지만 담기는 되지 않습니다.</div>')+
-    (TAB==='idea'?paneIdea():(TAB==='cad'?paneCad():(TAB==='deal'?paneDeal():paneField()))) + sheetCad() + sheetPC() + sheetLog() + sheetPer() + sheetMerge() + sheetRv();
+    (TAB==='idea'?paneIdea():(TAB==='cad'?paneCad():(TAB==='deal'?paneDeal():paneField()))) + sheetCad() + sheetPC() + sheetLog() + sheetPer() + sheetMerge() + sheetPick() + sheetRv();
   putForm(keep);
   if(TAB==='cad'){
     const cf=$('cd-file');
