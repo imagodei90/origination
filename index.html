@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Work">
 <link rel="manifest" href="manifest.json">
 <title>Work</title>
-<link rel="icon" href="favicon.ico?v=20261115_0928" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_0928">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_0928">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_0928">
+<link rel="icon" href="favicon.ico?v=20261115_1553" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_1553">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_1553">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_1553">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -445,6 +445,77 @@ pre.out{background:var(--bg);border:1px solid var(--bd);border-radius:9px;paddin
 .dd small{display:block;font-size:10px;opacity:.8}
 .dd.on{border-color:var(--acc);color:var(--fg)}
 @media(max-width:640px){.di{grid-template-columns:24px 1fr}.di .sc{grid-column:2;text-align:left}}
+/* ── 가져오기 검토 ── */
+.rvent{display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid var(--acc);border-radius:10px;
+  background:rgba(30,164,157,.06);margin-bottom:10px;cursor:pointer}
+.rvent b{font-size:12.5px;font-weight:600;white-space:nowrap}
+.rvent em{flex:1;font:10px "JetBrains Mono","SF Mono",monospace;color:var(--mut);font-style:normal;line-height:1.5}
+.rvent span{font:10px "JetBrains Mono","SF Mono",monospace;color:var(--acc);letter-spacing:.08em}
+.rvseg{display:flex;border:1px solid var(--bd);border-radius:8px;overflow:hidden;margin:0 0 10px}
+.rvseg div{flex:1;text-align:center;padding:7px 4px;font:11px "JetBrains Mono","SF Mono",monospace;color:var(--mut);cursor:pointer}
+.rvseg div.on{background:var(--acc);color:var(--acc-fg);font-weight:600}
+.rvseg div small{display:block;font-size:9px;opacity:.75}
+.btn.xs{font-size:10.5px;padding:5px 10px;border-radius:7px}
+a.btn{display:inline-block;text-decoration:none;color:var(--fg);line-height:1.2}
+.lk{background:var(--card2);border:1px solid var(--bd);border-radius:10px;padding:9px 11px;margin-bottom:6px}
+.lk .pair{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;flex-wrap:wrap}
+.lk .eq{font:10px "JetBrains Mono","SF Mono",monospace;color:var(--acc)}
+.lk .why{font:9px "JetBrains Mono","SF Mono",monospace;letter-spacing:.08em;color:var(--acc);background:rgba(30,164,157,.1);
+  padding:1px 6px;border-radius:4px;margin-left:auto}
+.lk .meta{font:10px "JetBrains Mono","SF Mono",monospace;color:var(--dim);margin-top:3px;line-height:1.7}
+.lk .meta b{color:var(--mut);font-weight:400}
+.lk .act,.cmp .act{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.cmp{background:var(--card2);border:1px solid var(--bd);border-radius:12px;padding:11px 12px;margin-bottom:9px}
+.cmp .hd{display:flex;align-items:center;gap:7px;margin-bottom:9px;font-size:12.5px;font-weight:600}
+.cmp .hd .n{font:9.5px "JetBrains Mono","SF Mono",monospace;color:var(--dim);margin-left:auto;font-weight:400}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.side{background:var(--bg);border:1px solid var(--bd);border-radius:9px;padding:9px 10px;min-width:0}
+.side.pk{cursor:pointer}
+.side.pk:active{border-color:var(--acc);background:rgba(30,164,157,.06)}
+.side .s{font:9px "JetBrains Mono","SF Mono",monospace;letter-spacing:.1em;color:var(--dim);margin-bottom:5px;display:flex;justify-content:space-between}
+.side .nm{font-size:13px;font-weight:600;line-height:1.3;word-break:break-word}
+.side .o{font-size:11px;color:var(--mut);margin-top:3px;line-height:1.5;word-break:break-word}
+.side .r{font:10px "JetBrains Mono","SF Mono",monospace;color:var(--dim);margin-top:2px;word-break:break-all}
+.side .dt{font:9.5px "JetBrains Mono","SF Mono",monospace;color:var(--dim);margin-top:7px;padding-top:6px;border-top:1px solid var(--bd);
+  word-break:break-all;line-height:1.6}
+.side .dt a{color:var(--acc);text-decoration:none}
+.cmp .act .btn{flex:1;text-align:center}
+.rvrow{display:flex;align-items:center;gap:9px;padding:8px 9px;border:1px solid var(--bd);border-radius:9px;background:var(--card2);margin-bottom:5px}
+.rvrow .ck{width:16px;height:16px;border:1px solid var(--dim);border-radius:4px;flex:0 0 auto;cursor:pointer}
+.rvrow .ck.on{background:var(--acc);border-color:var(--acc)}
+.rvrow .b{flex:1;min-width:0;cursor:pointer}
+.rvrow .nm{font-size:12.5px;font-weight:600;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.rvrow .o{font-size:10.5px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.rvrow .d{font:9.5px "JetBrains Mono","SF Mono",monospace;color:var(--dim);text-align:right;line-height:1.5;white-space:nowrap}
+.rvrow .ent{font:8.5px "JetBrains Mono","SF Mono",monospace;color:var(--acc);letter-spacing:.06em}
+.rvrow.off{opacity:.45}
+.srcx{font:9px "JetBrains Mono","SF Mono",monospace;letter-spacing:.08em;padding:1px 5px;border-radius:4px;border:1px solid var(--bd);color:var(--dim)}
+.srcx.rm{color:var(--acc);border-color:var(--acc);background:rgba(30,164,157,.06)}
+.srcx.li{color:var(--acc);border-color:transparent;background:rgba(30,164,157,.2)}
+.upd{background:var(--card2);border:1px solid var(--bd);border-radius:12px;padding:11px 12px 11px 14px;margin-bottom:9px;position:relative;overflow:hidden}
+.upd::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--acc)}
+.upd .nm{font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.upd .nm .rl{font:10px "JetBrains Mono","SF Mono",monospace;color:var(--dim)}
+.upd .nm .lnk{font:9.5px "JetBrains Mono","SF Mono",monospace;color:var(--dim);margin-left:auto}
+.fld{display:grid;grid-template-columns:52px 1fr 1fr;gap:4px 8px;margin-top:9px;font-size:11px;align-items:center}
+.fld .k,.fld .h{font:9px "JetBrains Mono","SF Mono",monospace;color:var(--dim);letter-spacing:.08em}
+.fld .cur{color:var(--mut);word-break:break-all}
+.fld .cur.e{color:var(--dim);font-style:italic}
+.fld .new{color:var(--fg);word-break:break-all}
+.fld .new.keep{color:var(--dim);text-decoration:line-through}
+.fld .new span{font:8.5px "JetBrains Mono","SF Mono",monospace;color:var(--acc);margin-left:5px}
+.rvhist{background:var(--card2);border:1px solid var(--bd);border-radius:10px;padding:9px 11px;margin-bottom:6px;display:flex;align-items:center;gap:9px}
+.rvhist .b{flex:1}
+.rvhist .t{font-size:12px;font-weight:500}
+.rvhist .m{font:9.5px "JetBrains Mono","SF Mono",monospace;color:var(--dim);margin-top:2px}
+.rvbar{position:fixed;left:0;right:0;bottom:0;z-index:40;padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+  background:var(--card);border-top:1px solid var(--bd);display:flex;gap:7px;align-items:center}
+.rvbar .s{font:10px "JetBrains Mono","SF Mono",monospace;color:var(--mut);flex:1;line-height:1.5}
+.rvbar .s b{color:var(--fg);font-weight:500}
+.rvpad{height:64px}
+.rvhint{font:10px "JetBrains Mono","SF Mono",monospace;color:var(--dim);margin:7px 0 0;line-height:1.7}
+.rvhint b{color:var(--acc);font-weight:500}
+@media(min-width:900px){.rvgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}}
 </style>
 </head>
 <body>
@@ -490,12 +561,13 @@ import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChang
          setPersistence, browserLocalPersistence }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
-         onSnapshot, query, orderBy, limit, serverTimestamp, enableIndexedDbPersistence }
+         onSnapshot, query, orderBy, limit, serverTimestamp, enableIndexedDbPersistence,
+         writeBatch, getDocs, deleteField }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20261115_0928';
+const BUILD = '20261115_1553';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -519,6 +591,8 @@ let AUTH_READY = false;       // onAuthStateChanged 가 한 번이라도 돌았�
 let STATE = {}, LOGS = [], QUEUE = [], DIDEA = [], DI_DAY = null;
 let CAD = {};                 // company -> {tier, target_wk, memo}
 let PER = {};                 // 이름 -> 명함 {name, org, role, phone, mail, memo, tags, tier, target_wk}
+// 원장 둘을 같이 구독하고 cfg.person_col 로 어느 쪽을 보여 줄지 정한다 — 시험 중 되돌리기가 스위치 하나다.
+let PER1 = {}, PER2 = {}, PCOL = 'person', CFG = {}, PER_IDX = {};
 let cadOpen = null, cadSheet = null, fnKind = 'meet', fnPeople = [], fnQuick = true;
 let fnPlan = false, fnDate = '';        // 예정 모드 · 선택한 일자
 let DEALS = null, dealOpen = null, dealQ = '', dealMode = 'gp';
@@ -607,12 +681,45 @@ function subscribe(uid){
     CAD = {}; s.docs.forEach(d => { CAD[d.id] = d.data(); });
     if(TAB==='cad'||TAB==='field') render();
   });
+  onSnapshot(doc(db,'users',uid,'origination','cfg'), s => {
+    CFG = s.exists() ? s.data() : {};
+    PCOL = (CFG.person_col === 'person2') ? 'person2' : 'person';
+    pickPer(); if(TAB==='cad'||TAB==='field') render();
+  });
   onSnapshot(collection(db,'users',uid,'person'), s => {
-    PER = {}; s.docs.forEach(d => { PER[d.id] = d.data(); });
-    if(TAB==='cad') render();
+    PER1 = {}; s.docs.forEach(d => { PER1[d.id] = d.data(); });
+    pickPer(); if(TAB==='cad') render();
+  });
+  onSnapshot(collection(db,'users',uid,'person2'), s => {
+    PER2 = {}; s.docs.forEach(d => { PER2[d.id] = d.data(); });
+    pickPer(); if(TAB==='cad') render();
   });
 }
 const cadKey = c => String(c).replace(/[\/#?\[\]]/g,'_').slice(0,120);
+/* person2 는 '이름@첫소속' 이 키다. 같은 이름이 다른 회사에 있어도 갈라진다.
+   이름으로 찾을 때는 색인을 거친다. */
+function pickPer(){
+  PER = (PCOL === 'person2') ? PER2 : PER1;
+  PER_IDX = {};
+  for(const k in PER){
+    const p = PER[k]; if(!p.name) continue;
+    const put = n => { n = String(n || '').trim(); if(!n) return; (PER_IDX[n] = PER_IDX[n] || []).push(k); };
+    put(p.name); for(const a of (p.aliases || [])) put(a);
+  }
+}
+function perKey(n){
+  if(PCOL !== 'person2') return cadKey(n);
+  const ks = PER_IDX[String(n).trim()] || [];
+  const live = ks.filter(k => !PER[k].merged_into);
+  return live[0] || ks[0] || null;
+}
+const orgSlug = o => String(o || '').toLowerCase().replace(/\(.*?\)/g,'').replace(/[^0-9a-z가-힣]/g,'').slice(0,16);
+function mkKey(n, org){
+  const base = cadKey(n) + (orgSlug(org) ? '@' + orgSlug(org) : '');
+  let k = base, i = 2;
+  while(PER2[k] && PER2[k].name !== n) k = base + '~' + (i++);
+  return k;
+}
 // 기록 수정·삭제. 담기만 있고 되돌리는 길이 없으면 오타 하나도 못 고친다.
 const logRef = id => doc(db,'users',USER.uid,'field_notes',id);
 const updLog = (id, o) => USER ? updateDoc(logRef(id), o)
@@ -622,9 +729,19 @@ const delLog = id => USER ? deleteDoc(logRef(id))
 const saveCad = (c, o) => USER
   ? setDoc(doc(db,'users',USER.uid,'cadence',cadKey(c)), {company:c, ...o}, {merge:true})
   : Promise.reject(new Error('로그인이 필요합니다'));
-const savePer = (n, o) => USER
-  ? setDoc(doc(db,'users',USER.uid,'person',cadKey(n)), {name:n, ...o}, {merge:true})
-  : Promise.reject(new Error('로그인이 필요합니다'));
+const savePer = (n, o) => {
+  if(!USER) return Promise.reject(new Error('로그인이 필요합니다'));
+  if(PCOL !== 'person2')
+    return setDoc(doc(db,'users',USER.uid,'person',cadKey(n)), {name:n, ...o}, {merge:true});
+  // 손으로 적은 값은 출처를 manual 로 남긴다 — 가져오기가 절대 못 덮는다
+  const k = perKey(n) || mkKey(n, o.org || '');
+  const src = {};
+  for(const f of ['org','role','dept','phone','mail','url'])
+    if(o[f] !== undefined && o[f] !== null) src[f] = {v:o[f], from:'manual', at:todayStr()};
+  const body = {name:n, ...o, touched:new Date().toISOString()};
+  if(Object.keys(src).length) body.src = src;
+  return setDoc(doc(db,'users',USER.uid,'person2',k), body, {merge:true});
+};
 const saveState = () => USER &&
   setDoc(doc(db,'users',USER.uid,'origination','state'), {m:STATE, at:serverTimestamp()});
 const enqueue = (kind, payload) => USER
@@ -1027,6 +1144,100 @@ document.addEventListener('click', async e => {
       try{ await saveCad(cadSheet, o); }catch(x){ alert(x.message); return; }
     }
     cadSheet = null; render(); return;
+  }
+
+
+  // ── 가져오기 검토 ──
+  if(e.target.closest('[data-shx]')) rvEdit = null;
+  const rvs = e.target.closest('[data-rvseg]');
+  if(rvs){ rvSeg = rvs.dataset.rvseg; rvMore = 150; render(); window.scrollTo(0, 0); return; }
+  const rvf = e.target.closest('[data-rvf]');
+  if(rvf){ rvFilt = rvf.dataset.rvf; rvMore = 150; render(); return; }
+  if(e.target.id === 'rv-more'){ rvMore += 300; render(); return; }
+  const rvck = e.target.closest('[data-rvck]');
+  if(rvck){
+    const r = impById(rvck.dataset.rvck); if(!r) return;
+    if(r.status === 'hold'){ try{ await setImp(r, {status:'open', hold_why:''}); }catch(x){ alert(x.message); } }
+    else rvOff[r.id] = !rvOff[r.id];
+    render(); return;
+  }
+  const rved = e.target.closest('[data-rved]');
+  if(rved){ rvEdit = rved.dataset.rved; render(); return; }
+  if(e.target.id === 'rv-ed-save' || e.target.id === 'rv-ed-hold' || e.target.id === 'rv-ed-unhold'){
+    const r = impById(rvEdit); if(!r) return;
+    const o = {name: $('rv-nm').value.trim(), org: $('rv-org').value.trim(), role: $('rv-role').value.trim()};
+    if($('rv-dept')) o.dept = $('rv-dept').value.trim();
+    if(e.target.id === 'rv-ed-hold'){ o.status = 'hold'; o.hold_why = '직접 보류'; }
+    if(e.target.id === 'rv-ed-unhold'){ o.status = 'open'; o.hold_why = ''; }
+    if(!o.name){ alert('이름이 비어 있습니다'); return; }
+    try{ await setImp(r, o); }catch(x){ alert(x.message); return; }
+    rvEdit = null; render(); return;
+  }
+  const rvok = e.target.closest('[data-rvok]');
+  if(rvok){
+    const L = impById(rvok.dataset.rvok), R = L && rvCands(L)[0]; if(!L || !R) return;
+    rvBusy = '연결 중…'; rvok.disabled = true;
+    try{ await approveLink(L, R); }catch(x){ alert('실패 — ' + x.message); }
+    rvBusy = ''; render(); return;
+  }
+  const rvpk = e.target.closest('[data-rvpick]');
+  if(rvpk){
+    const ids = rvpk.dataset.rvpick.split('|');
+    const L = impById(ids[0]), R = impById(ids[1]); if(!L || !R) return;
+    if(!confirm(L.name + ' 을(를) ' + R.name + ' (' + (R.org || '-') + ') 에 연결합니다.')) return;
+    rvBusy = '연결 중…';
+    try{ await approveLink(L, R); }catch(x){ alert('실패 — ' + x.message); }
+    rvBusy = ''; render(); return;
+  }
+  const rvno = e.target.closest('[data-rvno]');
+  if(rvno){
+    const L = impById(rvno.dataset.rvno); if(!L) return;
+    try{ await unlinkRow(L); }catch(x){ alert(x.message); }
+    render(); return;
+  }
+  const rvh = e.target.closest('[data-rvhold]');
+  if(rvh){
+    const r = impById(rvh.dataset.rvhold); if(!r) return;
+    try{ await setImp(r, {status:'hold', hold_why:'검토 보류'}); }catch(x){ alert(x.message); }
+    render(); return;
+  }
+  if(e.target.id === 'rv-link-all'){
+    const n = rvB().length; if(!n) return;
+    if(!confirm(n + '쌍을 한 사람으로 연결합니다. 이력에서 되돌릴 수 있습니다.')) return;
+    rvBusy = '연결 중… ' + n + '쌍'; render();
+    try{ await approveLinkAll(); }catch(x){ alert('실패 — ' + x.message); }
+    rvBusy = ''; render(); return;
+  }
+  if(e.target.id === 'rv-new-ok'){
+    const sel = rvNewRows().filter(r => r.status === 'open' && !rvOff[r.id]);
+    if(!sel.length) return;
+    if(!confirm(sel.length.toLocaleString() + '명을 인물로 등록합니다. 이력에서 되돌릴 수 있습니다.')) return;
+    rvBusy = '등록 중… ' + sel.length.toLocaleString() + '명'; render();
+    try{ await approveRows(sel, 'new', '신규 ' + sel.length + '명' + (rvFilt !== 'all' ? ' · ' + rvFilt : '')); }
+    catch(x){ alert('실패 — ' + x.message); }
+    rvBusy = ''; render(); return;
+  }
+  const rvu = e.target.closest('[data-rvupd]');
+  if(rvu){
+    const r = impById(rvu.dataset.rvupd); if(!r) return;
+    rvBusy = '채우는 중…'; rvu.disabled = true;
+    try{ await approveRows([r], 'update', r.name + ' 채움'); }catch(x){ alert('실패 — ' + x.message); }
+    rvBusy = ''; render(); return;
+  }
+  if(e.target.id === 'rv-upd-all'){
+    const rows = rvUpds(); if(!rows.length) return;
+    rvBusy = '채우는 중… ' + rows.length + '명'; render();
+    try{ await approveRows(rows, 'update', '기존 채움 ' + rows.length + '명'); }catch(x){ alert('실패 — ' + x.message); }
+    rvBusy = ''; render(); return;
+  }
+  const ud = e.target.closest('[data-undo]');
+  if(ud){
+    const b = BATCH.find(x => x.id === ud.dataset.undo); if(!b) return;
+    if(!confirm('"' + (b.label || b.kind) + '" 을(를) 되돌립니다. 그 뒤 직접 고친 사람은 건너뜁니다.')) return;
+    rvBusy = '되돌리는 중…'; ud.disabled = true;
+    try{ const sk = await undoBatch(b); if(sk) alert(sk + '명은 그 뒤 직접 고쳐서 건너뛰었습니다.'); }
+    catch(x){ alert('실패 — ' + x.message); }
+    rvBusy = ''; render(); return;
   }
 
   // 조직 / 인물 축 전환
@@ -1954,7 +2165,7 @@ function cadRow(r){
 /* ── 인물 ──────────────────────────────────────
    명함(person)은 사람의 속성만 들고, 컨택 횟수·최근일은 로그에서 계산한다.
    이력을 명함에 적게 두면 두 벌이 생기고 반드시 어긋난다. */
-const perOf = n => PER[cadKey(n)] || {};
+const perOf = n => { const k = perKey(n); return (k && PER[k]) || {}; };
 
 /* ── 명함 ──────────────────────────────────────
    사진이 본체다. 파싱값이 틀려도 원본을 다시 볼 수 있어야 아카이브가 된다. */
@@ -2191,6 +2402,384 @@ function perRow(r){
   return h + '</div>';
 }
 
+
+/* ── 가져오기 검토 ──────────────────────────────
+   리멤버·LinkedIn 은 person_import(staging) 에 머물고, 승인한 것만 person2 에 쓴다.
+   승인 한 번 = person_batch 한 건. 그 단위로 되돌린다.
+   거절·보류·체크 해제는 표시일 뿐이다 — 행을 지우지 않는다. */
+let IMP = null, IMP_BUSY = false, BATCH = [];
+let rvSeg = '', rvFilt = 'all', rvOff = {}, rvMore = 150, rvEdit = null, rvMsg = '', rvBusy = '';
+const RANK = {manual:4, card:3, remember:2, linkedin:1};
+const impRef = id => doc(db,'users',USER.uid,'person_import',id);
+const ymd = s => String(s || '').slice(0, 10);
+const fmtPhone = s => { const d = String(s || '').replace(/\D/g, '');
+  if(d.length === 11) return d.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+  if(d.length === 10) return d.replace(/(\d{2,3})(\d{3,4})(\d{4})/, '$1-$2-$3');
+  return s || ''; };
+const srcTag = s => '<span class="srcx ' + (s === 'remember' ? 'rm">RM' : 'li">LI') + '</span>';
+
+async function loadImp(){
+  if(IMP || IMP_BUSY || !USER) return;
+  IMP_BUSY = true;
+  try{
+    const s = await getDocs(collection(db,'users',USER.uid,'person_import'));
+    IMP = s.docs.map(d => Object.assign({id:d.id}, d.data()));
+    const b = await getDocs(query(collection(db,'users',USER.uid,'person_batch'), orderBy('at','desc'), limit(40)));
+    BATCH = b.docs.map(d => Object.assign({id:d.id}, d.data()));
+  }catch(x){ IMP = IMP || []; rvMsg = '불러오지 못했습니다 — ' + x.message; }
+  IMP_BUSY = false; render();
+}
+const impById = id => (IMP || []).find(x => x.id === id);
+const impOpen = () => (IMP || []).filter(x => x.status === 'open');
+const rvLinks = () => impOpen().filter(x => x.kind === 'link');
+const rvNews  = () => impOpen().filter(x => x.kind === 'new');
+const rvUpds  = () => impOpen().filter(x => x.kind === 'update');
+const rvHolds = () => (IMP || []).filter(x => x.status === 'hold');
+const rvCands = L => (L.cands && L.cands.length ? L.cands : [L.link_to]).map(impById).filter(x => x && x.status !== 'approved');
+const rvB = () => rvLinks().filter(L => L.grade === 'B' && rvCands(L).length === 1);
+const rvC = () => rvLinks().filter(L => !(L.grade === 'B' && rvCands(L).length === 1));
+async function setImp(r, o){ Object.assign(r, o); await setDoc(impRef(r.id), o, {merge:true}); }
+
+// person2 안에서 이름(별칭 포함)으로 키 찾기. 스위치가 아직 person 이어도 쓰기는 person2 로 간다.
+function per2Key(n){
+  n = String(n || '').trim(); let f = null;
+  for(const k in PER2){ const p = PER2[k];
+    if(p.name === n || (p.aliases || []).indexOf(n) >= 0){ if(!p.merged_into) return k; f = f || k; } }
+  return f;
+}
+
+/* 빈 칸만 채운다. 값이 있으면 출처 순위가 낮을 때만 덮는다 — 직접 입력은 아무도 못 덮는다. */
+function fillFrom(cur, row, from, fields){
+  const o = {}, s = {};
+  for(const k of fields){
+    const v = String(row[k] == null ? '' : row[k]).trim();
+    if(!v) continue;
+    const have = cur[k];
+    const curFrom = (cur.src && cur.src[k] && cur.src[k].from) || (have ? 'manual' : '');
+    if(have && (RANK[curFrom] || 4) >= RANK[from]) continue;
+    o[k] = v; s[k] = {v:v, from:from, at:ymd(row.date) || todayStr()};
+  }
+  if(Object.keys(s).length) o.src = s;
+  return o;
+}
+
+/* 한 사람 반영 계획. R=리멤버 행, L=LinkedIn 행 — 하나는 있어야 한다.
+   쓰기는 ops 에 쌓고, 바뀌는 칸의 옛값은 chg 에 남겨 되돌릴 수 있게 한다. */
+function planPerson(R, L, ops, chg){
+  const base = R || L;
+  const nm = String(base.name || '').trim();
+  let key = base.person_key || (R && R.target) || (L && L.target) || per2Key(nm);
+  if(key && !PER2[key]) key = null;
+  const isNew = !key;
+  if(isNew) key = mkKey(nm, base.org || '');
+  const cur = isNew ? {} : PER2[key];
+  const o = isNew ? {name:nm, created:todayStr(), memo:'', tags:''} : {};
+  const view = () => Object.assign({}, cur, o, {src: Object.assign({}, cur.src || {}, o.src || {})});
+  const merge = (row, from, fields) => {
+    if(!row) return;
+    const f = fillFrom(view(), row, from, fields);
+    const src = Object.assign({}, o.src || {}, f.src || {});
+    Object.assign(o, f);
+    if(Object.keys(src).length) o.src = src;
+    const al = {};
+    (cur.aliases || []).concat(o.aliases || [], row.aliases || []).forEach(a => { if(a) al[a] = 1; });
+    if(row.name && row.name !== nm) al[row.name] = 1;
+    o.aliases = Object.keys(al);
+    const orgs = (o.orgs || cur.orgs || []).slice();
+    if(row.org && !orgs.some(x => x.org === row.org)) orgs.push({org:row.org, from:ymd(row.date), src:from});
+    o.orgs = orgs;
+    const im = {};
+    (cur.imports || []).concat(o.imports || [], [row.id]).forEach(x => { im[x] = 1; });
+    o.imports = Object.keys(im);
+    row.person_key = key;
+  };
+  merge(R, 'remember', ['org','role','dept','phone','mail','tel']);
+  merge(L, 'linkedin', ['org','role','url']);
+  o.touched = new Date().toISOString();
+  const before = {};
+  if(!isNew) for(const k in o) before[k] = (cur[k] === undefined) ? null : cur[k];
+  ops.push({ref: doc(db,'users',USER.uid,'person2',key), data:o, merge:true});
+  chg.push({col:'person2', id:key, before: isNew ? null : before});
+  PER2[key] = Object.assign({}, cur, o);      // 같은 승인 안에서 같은 사람이 또 나오면 이 키를 쓴다
+  return key;
+}
+
+async function flushOps(ops){
+  const by = {}, order = [];
+  for(const op of ops){
+    const p = op.ref.path;
+    if(!by[p]){ by[p] = op; order.push(p); }
+    else if(op.del){ by[p] = op; }
+    else { Object.assign(by[p].data, op.data); }
+  }
+  for(let i = 0; i < order.length; i += 400){
+    const b = writeBatch(db);
+    for(const p of order.slice(i, i + 400)){
+      const op = by[p];
+      if(op.del) b.delete(op.ref); else b.set(op.ref, op.data, {merge: !!op.merge});
+    }
+    await b.commit();
+  }
+}
+
+async function commitBatch(kind, label, rows, ops, chg){
+  const bid = 'b' + Date.now(), at = new Date().toISOString();
+  for(const r of rows)
+    ops.push({ref: impRef(r.id), data:{status:'approved', batch:bid, person_key:r.person_key || ''}, merge:true});
+  const rec = {at:at, kind:kind, label:label, n:rows.length, imports:rows.map(r => r.id), changes:chg};
+  ops.push({ref: doc(db,'users',USER.uid,'person_batch',bid), data:rec});
+  await flushOps(ops);
+  for(const r of rows){ r.status = 'approved'; r.batch = bid; }
+  BATCH.unshift(Object.assign({id:bid}, rec));
+}
+
+const orgAliasOp = (L, R) => (L.why && L.why.indexOf('회사') < 0 && R.org && L.org && R.org !== L.org)
+  ? [{ref: doc(collection(db,'users',USER.uid,'org_alias')), data:{a:R.org, b:L.org, at:todayStr(), by:'review'}}] : [];
+
+// 다른 사람 — LinkedIn 행은 신규로, 숨겨 둔 리멤버 후보도 신규로 돌아간다
+async function unlinkRow(L){
+  const ops = [];
+  for(const R of rvCands(L))
+    if(R.kind === 'linked'){ R.kind = 'new'; ops.push({ref: impRef(R.id), data:{kind:'new'}, merge:true}); }
+  L.kind = 'new'; L.link_to = ''; L.cands = [];
+  ops.push({ref: impRef(L.id), data:{kind:'new', link_to:'', cands:[], unlinked:true}, merge:true});
+  await flushOps(ops);
+}
+function releaseOthers(L, R, ops){
+  for(const x of rvCands(L))
+    if(x !== R && x.kind === 'linked'){ x.kind = 'new'; ops.push({ref: impRef(x.id), data:{kind:'new'}, merge:true}); }
+}
+async function approveLink(L, R){
+  const ops = [], chg = [];
+  planPerson(R, L, ops, chg);
+  releaseOthers(L, R, ops);
+  ops.push(...orgAliasOp(L, R));
+  await commitBatch('link', L.name + ' = ' + R.name, [L, R], ops, chg);
+}
+async function approveLinkAll(){
+  const ops = [], chg = [], rows = [];
+  for(const L of rvB()){
+    const R = rvCands(L)[0];
+    planPerson(R, L, ops, chg); rows.push(L, R);
+    ops.push(...orgAliasOp(L, R));
+  }
+  if(!rows.length) return;
+  await commitBatch('link-all', '연결 ' + (rows.length / 2) + '쌍 (회사·메일 근거)', rows, ops, chg);
+}
+async function approveRows(rows, kind, label){
+  const ops = [], chg = [], done = [];
+  for(const r of rows){
+    if(r.status !== 'open') continue;
+    // 리멤버 행에 근거 있는(B) LinkedIn 쌍이 붙어 있으면 같이 들어간다
+    const L = (r.src === 'remember')
+      ? impOpen().find(x => x.kind === 'link' && x.grade === 'B' && x.link_to === r.id && rvCands(x).length === 1) : null;
+    planPerson(r.src === 'remember' ? r : null, r.src === 'remember' ? L : r, ops, chg);
+    done.push(r); if(L) done.push(L);
+  }
+  if(!done.length) return 0;
+  await commitBatch(kind, label, done, ops, chg);
+  return done.length;
+}
+async function undoBatch(b){
+  const ops = []; let skipped = 0;
+  for(const c of (b.changes || [])){
+    const cur = PER2[c.id];
+    if(cur && cur.touched && cur.touched > b.at){ skipped++; continue; }   // 그 뒤 직접 고쳤다
+    const ref = doc(db,'users',USER.uid,c.col,c.id);
+    if(c.before === null){ ops.push({ref:ref, del:true}); continue; }
+    const data = {};
+    for(const k in c.before) data[k] = (c.before[k] === null) ? deleteField() : c.before[k];
+    ops.push({ref:ref, data:data, merge:true});
+  }
+  for(const id of (b.imports || [])){
+    ops.push({ref: impRef(id), data:{status:'open', batch:'', person_key:''}, merge:true});
+    const r = impById(id); if(r){ r.status = 'open'; r.batch = ''; r.person_key = ''; }
+  }
+  ops.push({ref: doc(db,'users',USER.uid,'person_batch',b.id), data:{undone:new Date().toISOString(), skipped:skipped}, merge:true});
+  await flushOps(ops);
+  b.undone = true; b.skipped = skipped;
+  return skipped;
+}
+
+/* ── 화면 ── */
+function rvEntry(){
+  if(!USER) return '';
+  if(!IMP){ if(!IMP_BUSY) loadImp(); return ''; }
+  const n = impOpen().length;
+  if(!n) return '';
+  return '<div class="rvent" data-cv="rv"><b>검토 대기 ' + n.toLocaleString() + '</b>' +
+    '<em>리멤버 · LinkedIn 가져오기 — 연결 ' + rvLinks().length + ' · 신규 ' + rvNews().length +
+    ' · 기존 채움 ' + rvUpds().length + '</em><span>열기</span></div>';
+}
+function rvSegBar(){
+  const n = {link:rvLinks().length, new:rvNews().length, upd:rvUpds().length, hist:BATCH.filter(b => !b.undone).length};
+  if(!rvSeg) rvSeg = n.link ? 'link' : (n.new ? 'new' : (n.upd ? 'upd' : 'hist'));
+  const S = [['link','연결'],['new','신규'],['upd','기존 채움'],['hist','이력']];
+  return '<div class="rvseg">' + S.map(x => '<div data-rvseg="' + x[0] + '" class="' + (rvSeg === x[0] ? 'on' : '') +
+    '">' + x[1] + '<small>' + n[x[0]].toLocaleString() + '</small></div>').join('') + '</div>';
+}
+function paneReview(){
+  if(!USER) return '<div class="empty">로그인이 필요합니다.</div>';
+  if(!IMP){ loadImp(); return '<div class="empty">검토 목록을 불러오는 중…</div>'; }
+  let h = rvSegBar() + (rvMsg ? '<div class="cnt">' + esc(rvMsg) + '</div>' : '');
+  if(rvSeg === 'link') h += rvLinkView();
+  else if(rvSeg === 'new') h += rvNewView();
+  else if(rvSeg === 'upd') h += rvUpdView();
+  else h += rvHistView();
+  return h + '<div class="rvpad"></div>';
+}
+const rvBar = (s, btn) => '<div class="rvbar"><div class="s">' + s + '</div>' +
+  (rvBusy ? '<span class="cnt" style="margin:0">' + esc(rvBusy) + '</span>' : btn) + '</div>';
+const lkMeta = x => '<b>' + esc(x.org || '-') + '</b> · ' + esc(x.role || '-') + ' · ' + esc(ymd(x.date) || '-');
+
+function sideBox(x, lbl, pick){
+  const li = x.src === 'linkedin';
+  return '<div class="side' + (pick ? ' pk' : '') + '"' + (pick ? ' data-rvpick="' + esc(pick) + '"' : '') + '>' +
+    '<div class="s"><span>' + lbl + '</span><span>' + esc(ymd(x.date)) + '</span></div>' +
+    '<div class="nm">' + esc(x.name) + '</div>' +
+    '<div class="o">' + esc(x.org || '-') + (x.dept ? ' · ' + esc(x.dept) : '') + '</div>' +
+    '<div class="r">' + esc(x.role || '-') + '</div>' +
+    '<div class="dt">' + (li
+      ? (x.url ? '<a href="' + esc(x.url) + '" target="_blank" rel="noopener">프로필 열기</a>' : '-')
+      : ([x.phone ? fmtPhone(x.phone) : '', x.mail].filter(Boolean).map(esc).join('<br>') || '-')) +
+    '</div></div>';
+}
+function rvLinkView(){
+  const B = rvB(), C = rvC();
+  if(!B.length && !C.length) return '<div class="empty">연결할 쌍이 없습니다.</div>';
+  let h = '';
+  if(B.length){
+    h += '<div class="cdsec">회사·메일 근거 있음 <em>' + B.length + '쌍</em></div>';
+    for(const L of B){
+      const R = rvCands(L)[0];
+      h += '<div class="lk"><div class="pair">' + esc(L.name) + ' <span class="eq">=</span> ' + esc(R.name) +
+        '<span class="why">' + esc(L.why || '') + '</span></div>' +
+        '<div class="meta">' + lkMeta(L) + '<br>' + lkMeta(R) + '</div>' +
+        '<div class="act"><button class="btn xs p" data-rvok="' + esc(L.id) + '">연결</button>' +
+        '<button class="btn xs" data-rvno="' + esc(L.id) + '">다른 사람</button>' +
+        (L.url ? '<a class="btn xs" href="' + esc(L.url) + '" target="_blank" rel="noopener">LinkedIn</a>' : '') +
+        '</div></div>';
+    }
+  }
+  if(C.length){
+    h += '<div class="cdsec">이름만 같음 <em>' + C.length + '쌍 — 나란히 보고 고릅니다</em></div>';
+    C.forEach((L, i) => {
+      const cs = rvCands(L);
+      h += '<div class="cmp"><div class="hd">같은 사람입니까?<span class="n">' + (i + 1) + ' / ' + C.length + '</span></div>' +
+        '<div class="two">' + sideBox(L, 'LINKEDIN', '') +
+        cs.map((R, j) => sideBox(R, cs.length > 1 ? '리멤버 ' + (j + 1) + ' — 눌러서 선택' : '리멤버',
+                                 cs.length > 1 ? L.id + '|' + R.id : '')).join('') + '</div>' +
+        '<div class="act">' +
+        (cs.length === 1 ? '<button class="btn xs p" data-rvok="' + esc(L.id) + '">같은 사람</button>' : '') +
+        '<button class="btn xs" data-rvno="' + esc(L.id) + '">다른 사람</button>' +
+        '<button class="btn xs" data-rvhold="' + esc(L.id) + '">보류</button></div>' +
+        (cs.length === 1 && L.org && cs[0].org && L.org !== cs[0].org
+          ? '<div class="rvhint">승인 시 학습: <b>' + esc(cs[0].org) + ' = ' + esc(L.org) + '</b></div>' : '') +
+        '</div>';
+    });
+  }
+  return h + rvBar('<b>' + B.length + '쌍</b> 근거 있음 · 이름만 ' + C.length + '쌍',
+    B.length ? '<button class="btn p" id="rv-link-all">' + B.length + '쌍 모두 연결</button>' : '');
+}
+
+function rvNewRows(){
+  const yr = String(new Date().getFullYear());
+  let rows = rvNews();
+  if(rvFilt === 'remember' || rvFilt === 'linkedin') rows = rows.filter(r => r.src === rvFilt);
+  if(rvFilt === 'ent') rows = rows.filter(r => r.ent);
+  if(rvFilt === 'yr') rows = rows.filter(r => ymd(r.date).slice(0, 4) === yr);
+  if(rvFilt === 'hold') rows = rvHolds();
+  return rows.slice().sort((a, b) => ymd(b.date) < ymd(a.date) ? -1 : (ymd(b.date) > ymd(a.date) ? 1 : 0));
+}
+function rvNewView(){
+  const all = rvNews(), yr = String(new Date().getFullYear());
+  const CH = [['all','전체',all.length],['remember','리멤버',all.filter(r => r.src === 'remember').length],
+    ['linkedin','LinkedIn',all.filter(r => r.src === 'linkedin').length],['ent','상대조직',all.filter(r => r.ent).length],
+    ['yr', yr + '년', all.filter(r => ymd(r.date).slice(0, 4) === yr).length],['hold','보류',rvHolds().length]];
+  const rows = rvNewRows();
+  const sel = rows.filter(r => r.status === 'open' && !rvOff[r.id]);
+  let h = '<div class="chips" style="margin-bottom:9px">' + CH.map(c => '<div class="chip' + (rvFilt === c[0] ? ' on' : '') +
+      '" data-rvf="' + c[0] + '">' + c[1] + ' ' + c[2].toLocaleString() + '</div>').join('') + '</div>' +
+    '<div class="cnt" style="margin:0 0 8px">체크된 사람만 등록됩니다. 행을 누르면 이름·회사·직책을 고칠 수 있습니다. ' +
+    '체크 해제는 보류 — 지우지 않습니다.</div>';
+  if(!rows.length) return h + '<div class="empty">없습니다.</div>';
+  h += '<div class="rvgrid">' + rows.slice(0, rvMore).map(r => {
+    const on = r.status === 'open' && !rvOff[r.id];
+    return '<div class="rvrow' + (on ? '' : ' off') + '">' +
+      '<div class="ck' + (on ? ' on' : '') + '" data-rvck="' + esc(r.id) + '"></div>' +
+      '<div class="b" data-rved="' + esc(r.id) + '"><div class="nm">' + esc(r.name) + ' ' + srcTag(r.src) +
+      (r.fn ? '<span class="srcx">기록 ' + r.fn + '</span>' : '') +
+      (r.status === 'hold' ? '<span class="srcx">' + esc(r.hold_why || '보류') + '</span>' : '') + '</div>' +
+      '<div class="o">' + esc(r.org || '-') + (r.dept ? ' · ' + esc(r.dept) : '') + ' · ' + esc(r.role || '-') + '</div></div>' +
+      '<div class="d">' + (r.ent ? '<span class="ent">상대조직</span><br>' : '') + esc(ymd(r.date)) + '</div></div>';
+  }).join('') + '</div>';
+  if(rows.length > rvMore)
+    h += '<button class="btn" id="rv-more" style="width:100%;margin-top:4px">더 보기 (' + (rows.length - rvMore).toLocaleString() + ')</button>';
+  return h + rvBar('<b>' + sel.length.toLocaleString() + '</b> 선택 · ' + (rows.length - sel.length) + ' 보류',
+    sel.length ? '<button class="btn p" id="rv-new-ok">선택 승인</button>' : '');
+}
+
+function rvUpdView(){
+  const rows = rvUpds();
+  if(!rows.length) return '<div class="empty">채울 것이 없습니다.</div>';
+  let h = '<div class="cnt" style="margin:0 0 8px">이미 기록에 있던 사람입니다. 빈 칸만 채우고, 직접 적은 값은 건드리지 않습니다.</div>';
+  let nfill = 0;
+  const F = [['org','회사'],['role','직책'],['dept','부서'],['phone','휴대폰'],['mail','메일'],['url','LinkedIn']];
+  for(const R of rows){
+    const key = (R.target && PER2[R.target]) ? R.target : per2Key(R.name);
+    const cur = (key && PER2[key]) || {};
+    const L = impOpen().find(x => x.kind === 'link' && x.grade === 'B' && x.link_to === R.id);
+    let g = '<div class="h"></div><div class="h">지금</div><div class="h">들어올 값</div>';
+    for(const f of F){
+      const k = f[0], from = (k === 'url') ? 'linkedin' : 'remember';
+      const v = String(((k === 'url') ? (L || {}) : R)[k] || '').trim();
+      const have = cur[k];
+      if(!v && !have) continue;
+      const curFrom = (cur.src && cur.src[k] && cur.src[k].from) || (have ? 'manual' : '');
+      const keep = have && (RANK[curFrom] || 4) >= RANK[from];
+      if(v && !keep) nfill++;
+      g += '<div class="k">' + f[1] + '</div>' +
+        '<div class="cur' + (have ? '' : ' e') + '">' + (have ? esc(k === 'phone' ? fmtPhone(have) : have) : '비어 있음') + '</div>' +
+        '<div class="new' + (keep ? ' keep' : '') + '">' + (v ? esc(k === 'phone' ? fmtPhone(v) : v) +
+          '<span>' + (from === 'linkedin' ? 'LI' : 'RM') + '</span>' : '') + '</div>';
+    }
+    h += '<div class="upd"><div class="nm">' + esc(R.name) + '<span class="rl">' + esc(cur.role || R.role || '') + '</span>' +
+      '<span class="lnk">' + (key ? '명함 있음' : '기록 ' + (R.fn || '') + '건') + (L ? ' + LI' : '') + '</span></div>' +
+      '<div class="fld">' + g + '</div>' +
+      '<div class="act" style="display:flex;gap:5px;margin-top:9px">' +
+      '<button class="btn xs p" data-rvupd="' + esc(R.id) + '">채움</button>' +
+      '<button class="btn xs" data-rvhold="' + esc(R.id) + '">보류</button></div></div>';
+  }
+  h += '<div class="rvhint">직접 입력 &gt; 명함 &gt; 리멤버 &gt; LinkedIn. 줄 그어진 값은 들어오지 않습니다.</div>';
+  return h + rvBar('<b>' + rows.length + '명</b> · 채울 칸 ' + nfill,
+    '<button class="btn p" id="rv-upd-all">모두 채움</button>');
+}
+
+function rvHistView(){
+  if(!BATCH.length) return '<div class="empty">아직 승인한 것이 없습니다.</div>';
+  return BATCH.map(b => '<div class="rvhist"><div class="b"><div class="t">' + esc(b.label || b.kind) +
+      (b.undone ? ' — 되돌림' : '') + '</div>' +
+      '<div class="m">' + esc(String(b.at).replace('T', ' ').slice(0, 16)) + ' · person2 ' + (b.changes || []).length + '건' +
+      (b.skipped ? ' · 건너뜀 ' + b.skipped : '') + '</div></div>' +
+      (b.undone ? '' : '<button class="btn xs" data-undo="' + esc(b.id) + '">되돌리기</button>') + '</div>').join('');
+}
+
+function sheetRv(){
+  if(!rvEdit) return '';
+  const r = impById(rvEdit); if(!r) return '';
+  const fr = (id, lbl, v) => '<div class="fr"><label>' + lbl + '</label><input id="' + id + '" value="' + esc(v || '') + '"></div>';
+  return '<div class="shbg" data-shx="1"></div><div class="sheet">' +
+    '<div class="shh">' + esc(r.name_raw || r.name) + ' ' + srcTag(r.src) + '</div>' +
+    fr('rv-nm', '이름', r.name) + fr('rv-org', '회사', r.org) + fr('rv-role', '직책', r.role) +
+    (r.src === 'remember' ? fr('rv-dept', '부서', r.dept) : '') +
+    '<div class="cnt" style="margin:2px 0 8px">' +
+      [r.phone ? fmtPhone(r.phone) : '', r.mail, r.url].filter(Boolean).map(esc).join(' · ') + '</div>' +
+    '<div style="display:flex;gap:6px;margin-top:11px"><button class="btn p" id="rv-ed-save">저장</button>' +
+    (r.status === 'hold' ? '<button class="btn" id="rv-ed-unhold">보류 해제</button>'
+                         : '<button class="btn" id="rv-ed-hold">보류</button>') +
+    '<button class="btn" data-shx="1">닫기</button></div></div>';
+}
+
 let perSheet = null;
 function sheetPer(){
   if(!perSheet) return '';
@@ -2231,7 +2820,9 @@ let cadFilt = 'over';
 function paneCad(){
   const tg = '<div class="seg cv" id="cad-view">' +
     '<div data-cv="org" class="' + (cadView === 'org' ? 'on' : '') + '">조직</div>' +
-    '<div data-cv="ppl" class="' + (cadView === 'ppl' ? 'on' : '') + '">인물</div></div>';
+    '<div data-cv="ppl" class="' + (cadView === 'ppl' ? 'on' : '') + '">인물</div>' +
+    '<div data-cv="rv" class="' + (cadView === 'rv' ? 'on' : '') + '">검토</div></div>';
+  if(cadView === 'rv') return tg + paneReview();
   if(cadView === 'ppl') return tg + paneCadPpl();
   return tg + paneCadOrg();
 }
@@ -2310,7 +2901,7 @@ function paneCadPpl(){
   const CH = [['over','경과순'],['recent','최근순'],['t1','T-1만'],['none','미컨택']];
   // 이름에 직급이 붙어 있는 것들. 해당이 없으면 이 블록은 안 뜬다.
   const rc = roleCandidates();
-  let h = cardBlock() + (rc.length ? '<div class="card" style="margin-bottom:10px">' +
+  let h = rvEntry() + cardBlock() + (rc.length ? '<div class="card" style="margin-bottom:10px">' +
       '<div class="cdsec" style="margin-top:0;padding-top:0;border-top:0">' +
       '직급 분리 <em>' + rc.length + '명 — 이름에 직급이 붙어 있습니다</em></div>' +
       '<div class="cnt" style="margin:2px 0 6px">이름은 명함의 키입니다. ' +
@@ -2438,7 +3029,7 @@ function render(){
     ((USER || !AUTH_READY)?'':'<div class="note" style="background:none;border:1px solid var(--bd);'+
       'border-radius:9px;padding:9px 11px;font-size:11px;color:var(--mut);margin-bottom:11px">'+
       '로그인하지 않았습니다 — 폼은 볼 수 있지만 담기는 되지 않습니다.</div>')+
-    (TAB==='idea'?paneIdea():(TAB==='cad'?paneCad():(TAB==='deal'?paneDeal():paneField()))) + sheetCad() + sheetPC() + sheetLog() + sheetPer();
+    (TAB==='idea'?paneIdea():(TAB==='cad'?paneCad():(TAB==='deal'?paneDeal():paneField()))) + sheetCad() + sheetPC() + sheetLog() + sheetPer() + sheetRv();
   putForm(keep);
   if(TAB==='cad'){
     const cf=$('cd-file');
