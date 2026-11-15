@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Work">
 <link rel="manifest" href="manifest.json">
 <title>Work</title>
-<link rel="icon" href="favicon.ico?v=20261115_1814" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_1814">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_1814">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_1814">
+<link rel="icon" href="favicon.ico?v=20261115_1825" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_1825">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_1825">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_1825">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -160,6 +160,9 @@ table.tt thead th:first-child{z-index:3}
 .cdr{background:var(--card);border:1px solid var(--bd);border-radius:9px;
   padding:8px 10px;margin-bottom:5px;cursor:pointer}
 .cdr.op{border-color:var(--acc)}
+.cdr.tk{opacity:.55}
+.cdr .ck{display:inline-block;width:15px;height:15px;border:1px solid var(--dim);border-radius:4px;flex:none;position:relative;top:2px}
+.cdr .ck.on{background:var(--acc);border-color:var(--acc)}
 .cdr1{display:flex;align-items:baseline;gap:6px}
 .cdr1 b{font-size:12.5px;font-weight:600}
 .cdm{margin-left:auto;font-size:10px;color:var(--mut);
@@ -575,7 +578,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20261115_1814';
+const BUILD = '20261115_1825';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -1292,15 +1295,39 @@ document.addEventListener('click', async e => {
     const g = id => (sh.querySelector(id).value || '').trim();
     const o = {org:g('#pr-org'), role:g('#pr-role'), phone:g('#pr-phone'),
                mail:g('#pr-mail'), memo:g('#pr-memo'), tags:g('#pr-tags'),
-               tier:(t && t.dataset.ptier) ? 'T1' : null,
+               tier:(t && t.dataset.ptier) || null,
                target_wk: w ? +w.dataset.pwk : defWk(),
                unverified: false};   // 사람이 보고 저장했으니 더 이상 미확인이 아니다
     try{ await savePer(perSheet, o); }catch(x){ alert(x.message); return; }
     perSheet = null; render(); return;
   }
 
-  // 인물 행 펼치기 (버튼 클릭이 아닐 때만)
+  // 추적 안 함 / 재개 — 한 명
+  const ptk = e.target.closest('[data-ptk]');
+  if(ptk){
+    const nm = ptk.dataset.ptk, off = perOf(nm).tier === 'off';
+    try{ await savePer(nm, {tier: off ? null : 'off'}); }catch(x){ alert(x.message); }
+    render(); return;
+  }
+  if(e.target.closest('[data-ppick]')){ perPick = perPick ? null : {}; render(); return; }
+  if(e.target.id === 'pk-x'){ perPick = null; render(); return; }
+  if(e.target.id === 'pk-go'){
+    const names = Object.keys(perPick || {}); if(!names.length) return;
+    const on = !!e.target.dataset.on;
+    e.target.disabled = true;
+    try{
+      for(let i = 0; i < names.length; i += 20)
+        await Promise.all(names.slice(i, i + 20).map(nm => savePer(nm, {tier: on ? null : 'off'})));
+    }catch(x){ alert('실패 — ' + x.message); }
+    perPick = null; render(); return;
+  }
+  // 인물 행 펼치기 (버튼 클릭이 아닐 때만). 선택 모드면 체크 토글
   const pdr = e.target.closest('[data-per]');
+  if(pdr && perPick && !e.target.closest('button')){
+    const nm = pdr.dataset.per;
+    if(perPick[nm]) delete perPick[nm]; else perPick[nm] = 1;
+    render(); return;
+  }
   if(pdr && !e.target.closest('button')){
     const nm = pdr.dataset.per;
     perOpen = (perOpen === nm) ? null : nm;
@@ -2291,9 +2318,9 @@ function perAgg(){
     const byLog = Object.keys(o.orgs).sort((a,b) => o.orgs[b] - o.orgs[a]);
     return Object.assign({}, o, {card:p, org:(p.org || byLog[0] || ''),
       prev:(p.org && byLog[0] && p.org !== byLog[0]) ? byLog[0] : '',
-      wk:wk, lim:lim, days:d, st:st,
+      wk:wk, lim:lim, days:d, st:(p.tier === 'off' ? 'off' : st), off:(p.tier === 'off'),
       over:(d == null ? 9999 : d - lim), t1:(p.tier === 'T1')});
-  }).sort((a,b) => (b.t1 - a.t1) || (b.over - a.over));
+  }).sort((a,b) => (b.t1 - a.t1) || (a.off - b.off) || (b.over - a.over));
 }
 
 /* 직급어. 긴 것부터 본다 — '대표이사' 를 '대표'/'이사' 로 먼저 끊으면 안 된다.
@@ -2359,6 +2386,7 @@ function nameView(nm){
 }
 
 let perOpen = null;
+let perPick = null;                   // 선택 모드 {이름:1}. null 이면 꺼짐
 
 function perRow(r){
   const o = inten(r.days == null ? null : r.days / r.lim, CAD_CUTS);
@@ -2367,8 +2395,9 @@ function perRow(r){
   const open = perOpen === r.name;
   const over = (r.days != null && r.days > r.lim) ? (r.days - r.lim) : 0;
   const c = r.card;
-  let h = '<div class="cdr' + (open ? ' op' : '') + '" data-per="' + esc(r.name) + '">' +
-    '<div class="cdr1">' + swatch(o) +
+  const pk = perPick && perPick[r.name];
+  let h = '<div class="cdr' + (open ? ' op' : '') + (r.off ? ' tk' : '') + '" data-per="' + esc(r.name) + '">' +
+    '<div class="cdr1">' + (perPick ? '<span class="ck' + (pk ? ' on' : '') + '"></span>' : '') + swatch(o) +
       (r.t1 ? '<span class="t1">T-1</span>' : '') +
       '<b>' + esc(nameView(r.name).base) + '</b>' +
       (r.org || nameView(r.name).role ?
@@ -2377,10 +2406,12 @@ function perRow(r){
         '</span>' : '') +
       (r.next ? '<span class="pl n">예정 ' + r.next.slice(5).replace('-','.') + '</span>' : '') +
       '<span class="cdm">' + (r.days == null ? '기록 없음' : r.days + '일 전') + '</span></div>' +
-    '<div class="cdr2">목표 ' + r.wk + '주' + (over ? ' · ' + over + '일 초과' : '') +
+    (r.off
+      ? '<div class="cdr2">추적 안 함 · 컨택 ' + r.n + '회' + (kinds ? ' · ' + kinds : '') + '</div>'
+      : '<div class="cdr2">목표 ' + r.wk + '주' + (over ? ' · ' + over + '일 초과' : '') +
       ' · 컨택 ' + r.n + '회' + (kinds ? ' · ' + kinds : '') +
       (r.prev ? ' · 전 ' + esc(r.prev) : '') + '</div>' +
-    '<div class="pb"><i style="width:' + pct + '%;opacity:' + (o || .3) + '"></i></div>';
+    '<div class="pb"><i style="width:' + pct + '%;opacity:' + (o || .3) + '"></i></div>');
   if(open){
     const cim = (c.cards && c.cards.length) ? c.cards[c.cards.length-1] : null;
     h += '<div class="cdx"><div class="nc' + (c.name ? '' : ' dim') + '">' +
@@ -2407,7 +2438,8 @@ function perRow(r){
       '<div class="ncf">' +
         '<button class="chip on" data-pq="' + esc(r.name) + '">컨택 담기</button> ' +
         '<button class="chip" data-ps="' + esc(r.name) + '">' +
-          (c.name ? '명함 수정' : '명함 채우기') + '</button></div></div>';
+          (c.name ? '명함 수정' : '명함 채우기') + '</button> ' +
+        '<button class="chip" data-ptk="' + esc(r.name) + '">' + (r.off ? '추적 재개' : '추적 안 함') + '</button></div></div>';
     if(r.hist.length){
       h += '<div class="cdsec">이력</div>';
       for(const e of r.hist)
@@ -2888,7 +2920,8 @@ function sheetPer(){
     fr('pr-tags', '태그', c.tags, '쉼표로 구분 — 예: PE, 조선·기계') +
     '<div class="fr"><label>티어</label><div class="seg" id="pr-tier">' +
       '<div data-ptier="T1" class="' + (c.tier === 'T1' ? 'on' : '') + '">T-1 핵심</div>' +
-      '<div data-ptier="" class="' + (c.tier === 'T1' ? '' : 'on') + '">기본</div></div></div>' +
+      '<div data-ptier="" class="' + (!c.tier || (c.tier !== 'T1' && c.tier !== 'off') ? 'on' : '') + '">기본</div>' +
+      '<div data-ptier="off" class="' + (c.tier === 'off' ? 'on' : '') + '">추적 안 함</div></div></div>' +
     '<div class="fr"><label>목표 주기</label><div class="chips">' +
       WKS.map(w => '<div class="chip' + (w === wk ? ' on' : '') +
         '" data-pwk="' + w + '">' + w + '주</div>').join('') + '</div></div>' +
@@ -2975,12 +3008,14 @@ function cardBlock(){
 
 function paneCadPpl(){
   let rows = perAgg();
+  const offs = rows.filter(r => r.off);
+  rows = (cadFilt === 'off') ? offs : rows.filter(r => !r.off);   // 추적 안 함은 따로 본다
   if(cadFilt === 't1')   rows = rows.filter(r => r.t1);
   if(cadFilt === 'none') rows = rows.filter(r => r.st === 'none');
   if(cadFilt === 'recent') rows = rows.slice().sort((a,b) => dnum(b.last) - dnum(a.last));
   const need = rows.filter(r => r.st === 'l').length;
   const card = rows.filter(r => r.card.name).length;
-  const CH = [['over','경과순'],['recent','최근순'],['t1','T-1만'],['none','미컨택']];
+  const CH = [['over','경과순'],['recent','최근순'],['t1','T-1만'],['none','미컨택'],['off','추적 안 함' + (offs.length ? ' ' + offs.length : '')]];
   // 이름에 직급이 붙어 있는 것들. 해당이 없으면 이 블록은 안 뜬다.
   const rc = roleCandidates();
   let h = rvEntry() + cardBlock() + (rc.length ? '<div class="card" style="margin-bottom:10px">' +
@@ -3004,17 +3039,29 @@ function paneCadPpl(){
       '</div></div>' : '') +
     '<div class="chips" style="margin-bottom:9px">' +
     CH.map(c => '<div class="chip' + (cadFilt === c[0] ? ' on' : '') +
-      '" data-cf="' + c[0] + '">' + c[1] + '</div>').join('') + '</div>' +
+      '" data-cf="' + c[0] + '">' + c[1] + '</div>').join('') +
+      '<div class="chip' + (perPick ? ' on' : '') + '" data-ppick="1">선택</div></div>' +
+    (perPick ? '<div class="cnt" style="margin:0 0 8px">행을 눌러 고르고, 아래에서 한 번에 바꿉니다.</div>' : '') +
     '<div class="cnt" style="margin:0 0 8px">컨택 필요 <b>' + need + '</b>명 · 전체 ' +
       rows.length + '명 · 명함 ' + card + '장' +
       '<span class="swlg">경과 <i style="opacity:.3"></i><i style="opacity:.48"></i><i style="opacity:.65"></i><i style="opacity:.83"></i><i style="opacity:1"></i> 초과</span></div>';
   if(!rows.length)
     return h + '<div class="empty">아직 인물 기록이 없습니다. Field Notes에서 사람 이름을 넣어 담으세요.</div>';
-  const t1 = rows.filter(r => r.t1), rest = rows.filter(r => !r.t1);
-  if(t1.length) h += '<div class="cdsec">T-1 <em>지정 ' + t1.length + '명</em></div>' +
-    t1.map(perRow).join('');
-  if(rest.length) h += '<div class="cdsec">기본 <em>목표 ' + defWk() + '주</em></div>' +
-    rest.map(perRow).join('');
+  if(cadFilt === 'off'){
+    h += '<div class="cdsec">추적 안 함 <em>' + rows.length + '명 — 주기·경과 계산에서 빠집니다</em></div>' + rows.map(perRow).join('');
+  }else{
+    const t1 = rows.filter(r => r.t1), rest = rows.filter(r => !r.t1);
+    if(t1.length) h += '<div class="cdsec">T-1 <em>지정 ' + t1.length + '명</em></div>' +
+      t1.map(perRow).join('');
+    if(rest.length) h += '<div class="cdsec">기본 <em>목표 ' + defWk() + '주</em></div>' +
+      rest.map(perRow).join('');
+  }
+  if(perPick){
+    const n = Object.keys(perPick).length, toOn = (cadFilt === 'off');
+    h += '<div class="rvpad"></div>' + rvBar('<b>' + n + '</b>명 선택',
+      (n ? '<button class="btn p" id="pk-go" data-on="' + (toOn ? '1' : '') + '">' + n + '명 ' + (toOn ? '추적 재개' : '추적 안 함') + '</button>' : '') +
+      '<button class="btn" id="pk-x">취소</button>');
+  }
   return h;
 }
 
