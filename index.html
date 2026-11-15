@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Work">
 <link rel="manifest" href="manifest.json">
 <title>Work</title>
-<link rel="icon" href="favicon.ico?v=20261115_2040" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_2040">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_2040">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_2040">
+<link rel="icon" href="favicon.ico?v=20261115_2042" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_2042">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_2042">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_2042">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -603,7 +603,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20261115_2040';
+const BUILD = '20261115_2042';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -1050,7 +1050,9 @@ document.addEventListener('click', async e => {
   if(pgo){
     // 필터가 't1'·'none' 이면 건너간 사람이 걸러져 카드가 안 보인다. 풀고 간다.
     TAB = 'cad'; cadView = 'ppl'; cadFilt = 'over';
-    cadOpen = null; perOpen = pgo.dataset.pgo;
+    // 인물이 천 명이 넘으면 펼친 카드가 화면 밖에 있다 — 검색창에 그 이름을 넣어 그 사람만 보이게 한다
+    const who = perCanon(pgo.dataset.pgo);
+    cadOpen = null; perOpen = who; perQ = nameView(who).base; perPick = null;
     document.querySelectorAll('.tb').forEach(x =>
       x.classList.toggle('on', x.dataset.t === 'cad'));
     kpi(); render(); window.scrollTo(0,0); return;
