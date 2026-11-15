@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Work">
 <link rel="manifest" href="manifest.json">
 <title>Work</title>
-<link rel="icon" href="favicon.ico?v=20261115_2042" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_2042">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_2042">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_2042">
+<link rel="icon" href="favicon.ico?v=20261115_2046" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_2046">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_2046">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_2046">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -603,7 +603,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20261115_2042';
+const BUILD = '20261115_2046';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -922,6 +922,21 @@ function comboFill(id, q){
   ul.innerHTML=h; ul.classList.add('on');
 }
 function comboVal(id){ return (COMBO[id]!=null?COMBO[id]:($(id)?$(id).value:'')).trim(); }
+// 연락처 드롭다운 — 이름·별칭·회사·직책으로 찾는다. 삭제·합쳐진 명함은 뺀다
+function perSuggest(q, limit){
+  q = String(q || '').trim().toLowerCase(); if(!q) return [];
+  const out = [];
+  for(const k in PER){ const p = PER[k]; if(!p.name || p.merged_into || p.deleted) continue;
+    const hay = [p.name, p.org, p.role].concat(p.aliases || []).filter(Boolean).join(' ').toLowerCase();
+    if(hay.indexOf(q) >= 0) out.push(p); if(out.length >= (limit || 12)) break; }
+  return out.sort((a, b) => (a.name.toLowerCase().indexOf(q) === 0 ? 0 : 1) - (b.name.toLowerCase().indexOf(q) === 0 ? 0 : 1));
+}
+function perSuggestHTML(q, attr){
+  const rows = perSuggest(q);
+  if(!rows.length) return '';
+  return rows.map(p => '<li ' + attr + '="' + esc(p.name) + '"><b>' + esc(p.name) + '</b>' +
+    (p.org || p.role ? '<span style="color:var(--dim);font-size:10.5px;margin-left:6px">' + esc([p.org, p.role].filter(Boolean).join(' · ')) + '</span>' : '') + '</li>').join('');
+}
 
 document.addEventListener('input', e=>{
   if(e.target.id === 'fn-d'){          // 미래 일자면 예정 모드로 바뀐다
@@ -929,6 +944,15 @@ document.addEventListener('input', e=>{
     const np = !!fnDate && fnDate > todayStr();
     if(np !== fnPlan){ fnPlan = np; render(); }
     return;
+  }
+  if(e.target.id === 'lg-p'){
+    const parts = e.target.value.split(','), last = parts[parts.length - 1].trim();
+    const ul = $('lg-p-l'); if(!ul) return;
+    const h = perSuggestHTML(last, 'data-lgp'); ul.innerHTML = h; ul.classList.toggle('on', !!h); return;
+  }
+  if(e.target.id === 'fn-pn'){
+    const ul = $('fn-pn-l'); if(!ul) return;
+    const h = perSuggestHTML(e.target.value, 'data-fnpn'); ul.innerHTML = h; ul.classList.toggle('on', !!h); return;
   }
   if(e.target.id === 'pq'){ perQ = e.target.value;
     clearTimeout(window.__pqt);
@@ -1046,6 +1070,21 @@ document.addEventListener('click', async e => {
   }
 
   // 기록의 이름 칩 -> Cadence 인물 축에서 그 사람 명함을 펼친다
+  const lgp = e.target.closest('[data-lgp]');
+  if(lgp){
+    const inp = $('lg-p'); if(!inp) return;
+    const parts = inp.value.split(',').map(x => x.trim()).filter(Boolean);
+    if(parts.length && inp.value.trim().slice(-1) !== ',') parts.pop();   // 치던 토큰을 고른 이름으로
+    if(parts.indexOf(lgp.dataset.lgp) < 0) parts.push(lgp.dataset.lgp);
+    inp.value = parts.join(', ') + ', '; $('lg-p-l').classList.remove('on'); inp.focus(); return;
+  }
+  const fnpn = e.target.closest('[data-fnpn]');
+  if(fnpn){ const n = fnpn.dataset.fnpn; if(n && fnPeople.indexOf(n) < 0) fnPeople.push(n); fnPn = false; render(); return; }
+  if(e.target.id === 'fn-pn-ok'){
+    const n = ($('fn-pn') ? $('fn-pn').value : '').trim();
+    if(n && fnPeople.indexOf(n) < 0) fnPeople.push(n); fnPn = false; render(); return;
+  }
+  if(e.target.id === 'fn-pn-x'){ fnPn = false; render(); return; }
   const pgo = e.target.closest('[data-pgo]');
   if(pgo){
     // 필터가 't1'·'none' 이면 건너간 사람이 걸러져 카드가 안 보인다. 풀고 간다.
@@ -1496,9 +1535,7 @@ document.addEventListener('click', async e => {
   }
   if(e.target.closest('[data-ppnew]')){
     // 직급은 받지 않는다. 이름이 명함의 키라서 섞이면 승진 때 이력이 쪼개진다.
-    const n = (prompt('이름만 입력하세요 — 직급은 명함에서 관리합니다\n(예: 김성호)') || '').trim();
-    if(n && fnPeople.indexOf(n) < 0) fnPeople.push(n);
-    render(); return;
+    fnPn = true; render(); setTimeout(() => { if($('fn-pn')) $('fn-pn').focus(); }, 30); return;
   }
 
   // 기록 범위 — 컨택만 / 노트·녹음까지
@@ -1882,14 +1919,18 @@ function quickBlock(){
       esc(n) + '</span>').join('') +
     fnPeople.filter(n => cand.indexOf(n) < 0).map(n =>
       '<span class="pchip on" data-pp="' + esc(n) + '">' + esc(n) + ' ×</span>').join('') +
-    '<span class="pchip gh" data-ppnew="1">+ 이름 입력</span>';
+    (fnPn ? '' : '<span class="pchip gh" data-ppnew="1">+ 이름 입력</span>');
+  const pn = fnPn ? '<div class="combo" style="margin-top:6px"><div style="display:flex;gap:6px">' +
+    '<input id="fn-pn" placeholder="이름 — 치면 연락처에서 찾습니다. 직급은 빼고" autocomplete="off" style="flex:1">' +
+    '<button class="btn xs" id="fn-pn-ok" type="button">추가</button><button class="btn xs" id="fn-pn-x" type="button">닫기</button></div>' +
+    '<ul id="fn-pn-l"></ul></div>' : '';
   const ks = KSEL.map(k => '<button class="kb' +
       (fnKind === k ? ' on' : '') + '" data-kind="' + k + '">' + KLBL[k] + '</button>').join('');
   return (fnPlan ? '<div class="cnt" style="margin:0 0 9px;color:var(--acc)">' +
       '예정 미팅입니다 — 컨택·지도·캘린더에 세지 않습니다. ' +
       '만난 뒤 <b>완료 처리</b>를 누르면 그때 기록됩니다.</div>' : '') +
     '<div class="fr"><label>사람 <em style="font-style:normal;color:var(--dim)">' +
-      '이 조직에서 만난 사람</em></label><div>' + chips + '</div></div>' +
+      '이 조직에서 만난 사람</em></label><div>' + chips + '</div>' + pn + '</div>' +
     (fnPlan ? '' :
       '<div class="fr"><label>컨택 종류</label><div class="kinds">' + ks + '</div></div>') +
     '';
@@ -2204,8 +2245,8 @@ function sheetLog(){
     '<div class="fr"><label>일자</label>' +
       '<input id="lg-d" type="date" value="' + esc(l.date || '') + '"></div>' +
     '<div class="fr"><label>컨택 종류</label><div class="kinds" id="lg-kinds">' + ks + '</div></div>' +
-    '<div class="fr"><label>사람 <em style="font-style:normal;color:var(--dim)">쉼표로 구분</em></label>' +
-      '<input id="lg-p" value="' + esc((l.people || []).join(', ')) + '"></div>' +
+    '<div class="fr"><label>사람 <em style="font-style:normal;color:var(--dim)">쉼표로 구분 — 치면 연락처에서 찾습니다</em></label>' +
+      '<div class="combo"><input id="lg-p" value="' + esc((l.people || []).join(', ')) + '" autocomplete="off"><ul id="lg-p-l"></ul></div></div>' +
     '<div class="fr"><label>권역</label><select id="lg-z">' +
       ZKEY.map(z => '<option value="' + z + '"' + ((l.zone || 'YBD') === z ? ' selected' : '') +
         '>' + z + ' ' + ZNAME[z] + '</option>').join('') + '</select></div>' +
@@ -2515,6 +2556,7 @@ function nameView(nm){
 
 let perOpen = null;
 let perPick = null;
+let fnPn = false;                     // Field Notes 폼 이름 입력 열림
 let perQ = '';                        // 인물 검색어
 /* 인물 일괄 동작. off/on = 추적, del = 휴지통(표시만), restore = 복구, purge = 문서 삭제.
    취소하면 false. Field Notes 기록은 어느 동작도 건드리지 않는다. */
@@ -2925,6 +2967,9 @@ async function undoBatch(b){
 }
 
 /* ── 캘린더 ── */
+document.addEventListener('keydown', e => {
+  if(e.target.id === 'fn-pn' && e.key === 'Enter'){ e.preventDefault(); const b = $('fn-pn-ok'); if(b) b.click(); }
+});
 document.addEventListener('input', e => {
   if(e.target.id === 'pk-q' && pkSheet){ pkSheet.q = e.target.value; const l = $('pk-list'); if(l) l.innerHTML = pkList(); }
 });
