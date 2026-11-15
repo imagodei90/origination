@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Work">
 <link rel="manifest" href="manifest.json">
 <title>Work</title>
-<link rel="icon" href="favicon.ico?v=20261115_1916" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_1916">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_1916">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_1916">
+<link rel="icon" href="favicon.ico?v=20261115_2014" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_2014">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_2014">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_2014">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -601,7 +601,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20261115_1916';
+const BUILD = '20261115_2014';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -2895,6 +2895,7 @@ document.addEventListener('input', e => {
 });
 const CAL_ROLE = /(대표님|대표|수석님|수석|팀장님|팀장|이사님|이사|부장님|부장|상무님|상무|전무|과장|차장|매니저|심사역|파트너|본부장|실장)$/;
 const CAL_TAIL = /(점심|저녁|통화|방문|미팅|논의|커피|식사|아침)$/;
+const calWday = d => { const t = new Date(d + 'T00:00:00'); return isNaN(t) ? '' : '일월화수목금토'[t.getDay()]; };
 const calById = id => (CAL || []).find(x => x.id === id);
 const calOpen = () => (CAL || []).filter(r => r.status === 'open');
 const calName = p => p.name || p.raw || String(p.t || '').replace(CAL_ROLE, '').replace(CAL_TAIL, '').trim();
@@ -2931,7 +2932,7 @@ function calCard(r){
     '<div class="h"><span class="ck' + (on ? ' on' : '') + '" data-calck="' + esc(r.id) + '"></span>' +
       '<span class="t">' + esc(r.title) + '</span>' +
       '<span class="kd" data-calkind="' + esc(r.id) + '">' + (KLBL[r.kind || 'meet'] || r.kind) + '</span>' +
-      '<span class="d">' + esc(r.date) + (r.time ? ' ' + esc(r.time) : '') + (r.future ? ' · 예정' : '') + '</span></div>' +
+      '<span class="d">' + esc(r.date) + ' (' + calWday(r.date) + ')' + (r.time ? ' ' + esc(r.time) : '') + (r.future ? ' · 예정' : '') + '</span></div>' +
     '<div class="row"><span class="lb">상대</span><div class="combo" data-combo="' + cid + '"><input id="' + cid + '" value="' + esc(cval) + '" placeholder="상대 (회사·기관)" autocomplete="off"><ul id="' + cid + '-l"></ul></div>' +
       (cval && !isEnt ? '<span class="srcx">정식 아님</span>' : '') + '</div>' +
     (ppl ? '<div class="row"><span class="lb">인물</span>' + ppl + '</div>' : '') +
