@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Work">
 <link rel="manifest" href="manifest.json">
 <title>Work</title>
-<link rel="icon" href="favicon.ico?v=20261115_2052" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_2052">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_2052">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_2052">
+<link rel="icon" href="favicon.ico?v=20261115_2100" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_2100">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_2100">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_2100">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -603,7 +603,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20261115_2052';
+const BUILD = '20261115_2100';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -994,11 +994,11 @@ document.addEventListener('click', e=>{
 async function saveContact(company, kind, people, extra){
   if(!USER) { needLogin(); return false; }
   const rec = Object.assign({
-    company: company, title: company, date: todayStr(),
+    company: company || '', title: company || (people || []).slice(0, 3).join(', '), date: todayStr(),
     kind: kind, weight: (KW[kind] || 1), people: people || [],
     zone: '', zone_etc: '', place: '', note: '', mode: 'quick', status: 'done'
   }, extra || {});
-  const xy = resolveXY(rec.place, rec.zone, company);
+  const xy = resolveXY(rec.place, rec.zone, company || rec.title);
   rec.x = xy[0]; rec.y = xy[1]; rec.src = xy[2];
   await addDoc(collection(db, 'users', USER.uid, 'field_notes'),
     Object.assign({}, rec, {at: serverTimestamp()}));
@@ -1545,7 +1545,7 @@ document.addEventListener('click', async e => {
   // 기록 저장 — 빠른 모드·예정 모두 이 핸들러로 들어온다
   if(e.target.id === 'fn-quick'){
     const c = comboVal('fn-c');
-    if(!c){ $('fn-qmsg').textContent = '상대를 고르세요'; return; }
+    if(!c && !fnPeople.length){ $('fn-qmsg').textContent = '상대를 고르거나 사람을 넣으세요'; return; }
     e.target.disabled = true;
     $('fn-qmsg').textContent = fnPlan ? '예정 담는 중…' : '담는 중…';
     try{
@@ -2190,7 +2190,7 @@ function logRow(l, plan){
     '<div class="cdr1">' +
       (plan ? '<span class="pl ' + (dd < 0 ? 'o' : 'n') + '">' +
               (dd < 0 ? '지남' : (dd === 0 ? '오늘' : 'D-' + dd)) + '</span>' : '') +
-      '<b style="font-size:12.5px">' + esc(l.company || l.title || '—') + '</b>' +
+      '<b style="font-size:12.5px">' + esc(logLabel(l)) + '</b>' +
       (plan ? '' : '<span class="pl">' + (KLBL[l.kind || 'meet'] || '') + '</span>') +
       '<span class="cdm">' + esc(l.date || '') + (l.date ? ' (' + calWday(l.date) + ')' : '') + '</span></div>' +
     ((ppl.length || bits) ? '<div class="rowC">' +
@@ -2238,7 +2238,7 @@ function sheetLog(){
       ((l.kind || 'meet') === k ? ' on' : '') + '" data-lk="' + k + '">' +
       KLBL[k] + '</button>').join('');
   return '<div class="shbg" data-shx="1"></div><div class="sheet">' +
-    '<div class="shh">' + esc(l.company || '기록 수정') +
+    '<div class="shh">' + esc(l.company || (l.id ? logLabel(l) : '기록 수정')) +
       (plan ? ' <span class="pl n">예정</span>' : '') + '</div>' +
     '<div class="fr"><label>상대 <em style="font-style:normal;color:var(--dim)">엔티티에서 고르면 Cadence 가 한 곳으로 묶입니다</em></label>' +
       '<div class="combo" data-combo="lg-c"><input id="lg-c" value="' + esc(l.company || '') + '" placeholder="회사·기관 이름" autocomplete="off"><ul id="lg-c-l"></ul></div></div>' +
@@ -2291,31 +2291,55 @@ const defWk = () => (CAD.__default && CAD.__default.target_wk) || DEF_WK;
 const cadOf = c => CAD[cadKey(c)] || {};
 const targetWk = c => { const o = cadOf(c); return o.target_wk || defWk(); };
 
+/* 기록 하나가 닿는 조직들. 상대 칸의 회사(주최, 있으면) + 참석자 명함 소속(겹치면 한 번).
+   상대가 비어 있고 사람도 없으면 옛 기록처럼 title 을 쓴다. */
+function logOrgs(l){
+  const ppl = l.people || [];
+  const host = String(l.company || '').trim() || (ppl.length ? '' : String(l.title || '').trim());
+  const out = [], seen = {};
+  if(host){ out.push({c:host, host:true, ppl:ppl}); seen[host] = 1; }
+  const by = {};
+  for(const nm of ppl){ const o = (perOf(perCanon(nm)).org || '').trim(); if(o) (by[o] = by[o] || []).push(nm); }
+  for(const o in by){
+    if(seen[o] || (host && orgLike(o, host))) continue;
+    seen[o] = 1; out.push({c:o, host:false, ppl:by[o]});
+  }
+  return out;
+}
+// 기록 제목 — 상대가 없으면 참석자 소속으로
+function logLabel(l){
+  if(l.company) return l.company;
+  const os = logOrgs(l).map(g => g.c);
+  if(os.length) return os.slice(0, 3).join(' · ') + (os.length > 3 ? ' 외 ' + (os.length - 3) : '');
+  return l.title || ((l.people || []).length ? (l.people || []).slice(0, 3).join(', ') : '—');
+}
 function cadAgg(){
   const m = {};
   const put = c => m[c] || (m[c] = {company:c, last:'', n:0, w:0,
                                     kinds:{}, people:{}, zone:'', hist:[]});
   for(const l of doneLogs()){
-    const c = l.company || l.title; if(!c) continue;
-    const o = put(c);
     const k = l.kind || 'meet';
     const w = (l.weight != null) ? l.weight : (KW[k] || 1);
-    o.n++; o.w += w; o.kinds[k] = (o.kinds[k]||0) + 1;
-    if(l.zone && !o.zone) o.zone = l.zone;
-    if(!o.last || l.date > o.last) o.last = l.date;
-    if(o.hist.length < 8) o.hist.push({d:l.date, k:k,
-        p:(l.people||[]).join(', '), place:l.place||''});
-    for(const nmp of (l.people||[])){
-      const q = o.people[nmp] || (o.people[nmp] = {name:nmp, last:'', n:0});
-      q.n++; if(!q.last || l.date > q.last) q.last = l.date;
+    for(const g of logOrgs(l)){
+      const o = put(g.c);
+      o.n++; o.w += w; o.kinds[k] = (o.kinds[k]||0) + 1;
+      if(l.zone && !o.zone) o.zone = l.zone;
+      if(!o.last || l.date > o.last) o.last = l.date;
+      if(o.hist.length < 8) o.hist.push({d:l.date, k:k,
+          p:g.ppl.join(', '), place:l.place||'', via:(g.host ? '' : (l.company || ''))});
+      for(const nmp of g.ppl){
+        const q = o.people[nmp] || (o.people[nmp] = {name:nmp, last:'', n:0});
+        q.n++; if(!q.last || l.date > q.last) q.last = l.date;
+      }
     }
   }
   for(const k in CAD){ if(k !== '__default' && CAD[k].company) put(CAD[k].company); }
   // 예정이 잡혀 있으면 알려준다 — 컨택 필요는 그대로 두되 중복 연락을 막는다
   for(const l of planLogs()){
-    const c = l.company || l.title; if(!c) continue;
-    const o = put(c);
-    if(!o.next || l.date < o.next) o.next = l.date;
+    for(const g of logOrgs(l)){
+      const o = put(g.c);
+      if(!o.next || l.date < o.next) o.next = l.date;
+    }
   }
   const rows = Object.values(m).map(o => {
     const wk = targetWk(o.company), lim = wk * 7;
@@ -2364,6 +2388,7 @@ function cadRow(r){
       h += '<div class="cdsec">이력</div>';
       for(const e of r.hist)
         h += '<div class="hz">' + esc(e.d) + ' · ' + (KLBL[e.k] || e.k) +
+             (e.via ? ' · ' + esc(e.via) + ' 자리' : '') +
              (e.place ? ' · ' + esc(e.place) : '') + (e.p ? ' · ' + esc(e.p) : '') + '</div>';
     }
     h += '<div style="margin-top:8px">' +
@@ -2980,6 +3005,7 @@ const calById = id => (CAL || []).find(x => x.id === id);
 const calOpen = () => (CAL || []).filter(r => r.status === 'open');
 const calName = p => p.name || p.raw || String(p.t || '').replace(CAL_ROLE, '').replace(CAL_TAIL, '').trim();
 const calSave = r => setDoc(calRef(r.id), {people: r.people, kind: r.kind || 'meet'}, {merge:true});
+const calOrgSet = r => { const s = {}; (r.people || []).forEach(p => { if(!p.drop && p.org) s[p.org] = 1; }); return Object.keys(s); };
 function calDefault(){
   if(calSel) return;
   calSel = {};
@@ -3020,6 +3046,7 @@ function calCard(r){
     (r.mails && r.mails.length ? '<div class="row"><span class="lb">메일</span><span class="cnt" style="margin:0">' + esc(r.mails.join(', ')) + '</span></div>' : '') +
     (r.dup ? '<div class="rvhint">같은 날 기록이 이미 있습니다 — 체크하면 새로 만들지 않고 그 기록에 묶습니다</div>' : '') +
     (r.weak ? '<div class="rvhint">상대·인물을 못 찾았습니다 — 사적 일정이면 건너뛰세요</div>' : '') +
+    (calOrgSet(r).length > 1 ? '<div class="rvhint">인물 소속 ' + calOrgSet(r).length + '곳 — 상대를 비워 두면 각자 소속으로 셉니다</div>' : '') +
     '<div class="row" style="justify-content:flex-end"><button class="btn xs" data-calskip="' + esc(r.id) + '">' + (r.status === 'skip' ? '다시 올리기' : '건너뛰기') + '</button></div>' +
     '</div>';
 }
@@ -3039,9 +3066,10 @@ async function approveCal(){
   const ops = [], chg = [], gids = [], aliasAdd = {};
   for(const r of rows){
     const cid = 'cal-c-' + r.id;
-    const company = (comboVal(cid) || r.company || r.company_raw || r.title).trim();
     const ppl = (r.people || []).filter(p => !p.drop);
     const names = []; ppl.forEach(p => { const n = calName(p); if(n && names.indexOf(n) < 0) names.push(n); });
+    // 상대는 선택. 비우면 참석자 소속으로 센다. 사람도 없는 행만 제목으로 채운다
+    const company = ((COMBO[cid] != null) ? COMBO[cid] : (r.company || (names.length ? '' : (r.company_raw || r.title)))).trim();
     for(const p of ppl){
       if(!p.key || !p.t || /@/.test(p.t)) continue;
       const tk = String(p.t).replace(CAL_ROLE, '').replace(CAL_TAIL, '').trim();
@@ -3059,7 +3087,7 @@ async function approveCal(){
     if(!logId){
       logId = 'gcal_' + r.id;
       const xy = resolveXY(r.loc || '', 'ETC', company), kind = r.kind || 'meet';
-      ops.push({ref: logRef(logId), data:{company:company, title:company, date:r.date, zone:'ETC', zone_etc:'', attendees:names.join(', '),
+      ops.push({ref: logRef(logId), data:{company:company, title:(company || names.slice(0, 3).join(', ')), date:r.date, zone:'ETC', zone_etc:'', attendees:names.join(', '),
         note:'', mode:'text', people:names, kind:kind, weight:(KW[kind] || 1), status:(r.future ? 'planned' : 'done'),
         place:r.loc || '', x:xy[0], y:xy[1], src:xy[2], origin:'gcal', gcal_id:r.id, gcal_title:r.title, at:serverTimestamp()}});
       chg.push({col:'field_notes', id:logId, before:null});
@@ -3834,7 +3862,7 @@ document.addEventListener('click', async e => {
     const briefOnly = e.target.id==='fn-brief';
     const full = e.target.id==='fn-full';
     const c=comboVal('fn-c'), txt=$('fn-t').value.trim();
-    if(!c){ $('fn-msg').textContent='상대를 고르세요'; return; }
+    if(!c && !fnPeople.length){ $('fn-msg').textContent='상대를 고르거나 사람을 넣으세요'; return; }
     if(briefOnly && !txt){ $('fn-msg').textContent='보고 초안은 적은 내용이 있어야 합니다'; return; }
     if(!briefOnly){
       // '둘 다'는 둘 다 강요하는 게 아니라 둘 다 받을 수 있다는 뜻이다.
@@ -3847,12 +3875,12 @@ document.addEventListener('click', async e => {
     e.target.disabled=true; $('fn-msg').textContent='담는 중…';
     try{
       const place=$('fn-l').value.trim();
-      const xy=resolveXY(place, $('fn-z').value, c);
       const att=$('fn-p')?$('fn-p').value.trim():'';
       // 인물 칩이 비어 있으면 참석 칸을 쉼표로 갈라 쓴다 — 추적이 새지 않게
       const ppl = fnPeople.length ? fnPeople.slice()
         : att.split(',').map(x=>x.trim()).filter(Boolean);
-      const rec={company:c,title:c,date:$('fn-d').value,zone:$('fn-z').value,
+      const xy=resolveXY(place, $('fn-z').value, c || ppl.join(','));
+      const rec={company:c,title:(c || ppl.slice(0, 3).join(', ')),date:$('fn-d').value,zone:$('fn-z').value,
         zone_etc:($('fn-z').value==='ETC'&&$('fn-ze'))?$('fn-ze').value.trim():'',
                  attendees:att,note:txt,mode:fnMode,
                  people:ppl, kind:'meet', weight:1,
