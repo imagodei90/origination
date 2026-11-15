@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Work">
 <link rel="manifest" href="manifest.json">
 <title>Work</title>
-<link rel="icon" href="favicon.ico?v=20261115_2037" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_2037">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_2037">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_2037">
+<link rel="icon" href="favicon.ico?v=20261115_2039" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_2039">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_2039">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_2039">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -160,6 +160,8 @@ table.tt thead th:first-child{z-index:3}
 .cdr{background:var(--card);border:1px solid var(--bd);border-radius:9px;
   padding:8px 10px;margin-bottom:5px;cursor:pointer}
 .cdr.op{border-color:var(--acc)}
+.pq{width:100%;padding:9px 12px;margin:0 0 9px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--fg);font-size:13px}
+.pq:focus{outline:none;border-color:var(--acc)}
 .cdr.tk{opacity:.55}
 .cdr .ck{display:inline-block;width:15px;height:15px;border:1px solid var(--dim);border-radius:4px;flex:none;position:relative;top:2px}
 .cdr .ck.on{background:var(--acc);border-color:var(--acc)}
@@ -601,7 +603,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20261115_2037';
+const BUILD = '20261115_2039';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -928,6 +930,12 @@ document.addEventListener('input', e=>{
     if(np !== fnPlan){ fnPlan = np; render(); }
     return;
   }
+  if(e.target.id === 'pq'){ perQ = e.target.value;
+    clearTimeout(window.__pqt);
+    window.__pqt = setTimeout(() => { const v = document.activeElement === $('pq');
+      render(); if(v && $('pq')){ $('pq').focus();
+        $('pq').setSelectionRange(perQ.length, perQ.length); } }, 220);
+    return; }
   if(e.target.id === 'dq'){ dealQ = e.target.value;
     clearTimeout(window.__dqt);
     window.__dqt = setTimeout(() => { const v = document.activeElement === $('dq');
@@ -2505,6 +2513,7 @@ function nameView(nm){
 
 let perOpen = null;
 let perPick = null;
+let perQ = '';                        // 인물 검색어
 /* 인물 일괄 동작. off/on = 추적, del = 휴지통(표시만), restore = 복구, purge = 문서 삭제.
    취소하면 false. Field Notes 기록은 어느 동작도 건드리지 않는다. */
 async function perAct(names, act){
@@ -3464,6 +3473,10 @@ function paneCadPpl(){
   let rows = perAgg(true);
   const offs = rows.filter(r => r.off && !r.del), dels = rows.filter(r => r.del);
   rows = (cadFilt === 'trash') ? dels : (cadFilt === 'off') ? offs : rows.filter(r => !r.off && !r.del);   // 추적 안 함·휴지통은 따로 본다
+  const q = perQ.trim().toLowerCase();
+  if(q) rows = rows.filter(r => { const c = r.card || {};
+    return [r.name, r.org, c.role, c.dept, c.memo, c.tags, c.mail].concat(c.aliases || []).concat(Object.keys(r.orgs || {}))
+      .some(v => v && String(v).toLowerCase().indexOf(q) >= 0); });
   if(cadFilt === 't1')   rows = rows.filter(r => r.t1);
   if(cadFilt === 'none') rows = rows.filter(r => r.st === 'none');
   if(cadFilt === 'recent') rows = rows.slice().sort((a,b) => dnum(b.last) - dnum(a.last));
@@ -3491,6 +3504,7 @@ function paneCadPpl(){
       '적용하면 기록의 이름이 바뀌고 직급은 명함으로 옮겨집니다. ' +
       '옛 명함에 적어 둔 메모·연락처는 새 명함으로 끌어오고, 그 문서는 지우지 않습니다.' +
       '</div></div>' : '') +
+    '<input id="pq" class="pq" placeholder="이름 · 별칭 · 회사 · 직책 · 메모로 찾기" value="' + esc(perQ) + '" autocomplete="off">' +
     '<div class="chips" style="margin-bottom:9px">' +
     CH.map(c => '<div class="chip' + (cadFilt === c[0] ? ' on' : '') +
       '" data-cf="' + c[0] + '">' + c[1] + '</div>').join('') +
@@ -3500,7 +3514,7 @@ function paneCadPpl(){
       rows.length + '명 · 명함 ' + card + '장' +
       '<span class="swlg">경과 <i style="opacity:.3"></i><i style="opacity:.48"></i><i style="opacity:.65"></i><i style="opacity:.83"></i><i style="opacity:1"></i> 초과</span></div>';
   if(!rows.length)
-    return h + '<div class="empty">아직 인물 기록이 없습니다. Field Notes에서 사람 이름을 넣어 담으세요.</div>';
+    return h + '<div class="empty">' + (q ? '"' + esc(perQ.trim()) + '" 에 맞는 사람이 없습니다.' : '아직 인물 기록이 없습니다. Field Notes에서 사람 이름을 넣어 담으세요.') + '</div>';
   if(cadFilt === 'trash'){
     h += '<div class="cdsec">휴지통 <em>' + rows.length + '명 — 복구할 수 있습니다. 기록은 남아 있습니다</em></div>' + rows.map(perRow).join('');
   }else if(cadFilt === 'off'){
