@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Work">
 <link rel="manifest" href="manifest.json">
 <title>Work</title>
-<link rel="icon" href="favicon.ico?v=20261115_1810" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_1810">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_1810">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_1810">
+<link rel="icon" href="favicon.ico?v=20261115_1814" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_1814">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_1814">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_1814">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -575,7 +575,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20261115_1810';
+const BUILD = '20261115_1814';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -2812,8 +2812,9 @@ function rvUpdView(){
     const L = impOpen().find(x => x.kind === 'link' && x.grade === 'B' && x.link_to === R.id);
     let g = '<div class="h"></div><div class="h">지금</div><div class="h">들어올 값</div>';
     for(const f of F){
-      const k = f[0], from = (k === 'url') ? 'linkedin' : 'remember';
-      const v = String(((k === 'url') ? (L || {}) : R)[k] || '').trim();
+      const li = R.src === 'linkedin';
+      const k = f[0], from = (li || k === 'url') ? 'linkedin' : 'remember';
+      const v = String(((k === 'url' && !li) ? (L || {}) : R)[k] || '').trim();
       const have = cur[k];
       if(!v && !have) continue;
       const curFrom = (cur.src && cur.src[k] && cur.src[k].from) || (have ? 'manual' : '');
