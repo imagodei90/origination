@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Work">
 <link rel="manifest" href="manifest.json">
 <title>Work</title>
-<link rel="icon" href="favicon.ico?v=20261115_1841" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_1841">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_1841">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_1841">
+<link rel="icon" href="favicon.ico?v=20261115_1843" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_1843">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_1843">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_1843">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -584,7 +584,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20261115_1841';
+const BUILD = '20261115_1843';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -624,7 +624,7 @@ const KLBL = {meet:'미팅', coffee:'커피', lunch:'점심', dinner:'저녁', g
 // 점심이었는지 저녁이었는지 데이터에 없어 되살릴 수 없다.
 const KSEL = ['meet','coffee','lunch','dinner','golf','call','mail'];
 const DEF_WK = 8;             // 전역 기본 주기
-let TAB = 'scan', SORT = 'ev', FILT = 'all', shown = 0, view = [];
+let TAB = 'idea', SORT = 'ev', FILT = 'all', shown = 0, view = [];   // 첫 화면은 Ideas
 
 const esc = s => String(s == null ? '' : s)
   .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
