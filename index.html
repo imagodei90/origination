@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Work">
 <link rel="manifest" href="manifest.json">
 <title>Work</title>
-<link rel="icon" href="favicon.ico?v=20261115_1825" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_1825">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_1825">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_1825">
+<link rel="icon" href="favicon.ico?v=20261115_1836" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_1836">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_1836">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_1836">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -200,6 +200,12 @@ table.tt thead th:first-child{z-index:3}
 .pp{display:flex;align-items:baseline;gap:6px;font-size:11px;padding:3px 0}
 .pp b{font-weight:500}
 .hz{font-size:10px;color:var(--mut);padding:2px 0;font-variant-numeric:tabular-nums}
+.mglist{max-height:46vh;overflow:auto;margin:0 0 10px;border-top:1px solid var(--hair)}
+.mgrow{display:flex;gap:8px;align-items:baseline;padding:8px 4px;border-bottom:1px solid var(--hair);cursor:pointer}
+.mgrow:active{background:rgba(30,164,157,.06)}
+.mgrow b{font-size:12.5px;font-weight:600;flex:none}
+.mgrow .o{font-size:10.5px;color:var(--mut);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mgrow .n{font:9.5px "JetBrains Mono","SF Mono",monospace;color:var(--dim);flex:none}
 /* 조직 / 인물 축 전환 — 필터 칩 위에 선다 */
 .seg.cv{width:auto;display:inline-flex;margin:0 0 9px}
 .seg.cv div{padding:5px 14px;font:11px "JetBrains Mono","SF Mono",monospace;letter-spacing:.06em}
@@ -578,7 +584,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20261115_1825';
+const BUILD = '20261115_1836';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -1159,7 +1165,7 @@ document.addEventListener('click', async e => {
 
 
   // ── 가져오기 검토 ──
-  if(e.target.closest('[data-shx]')) rvEdit = null;
+  if(e.target.closest('[data-shx]')){ rvEdit = null; mgSheet = null; }
   const rvs = e.target.closest('[data-rvseg]');
   if(rvs){ rvSeg = rvs.dataset.rvseg; rvMore = 150; render(); window.scrollTo(0, 0); return; }
   const rvf = e.target.closest('[data-rvf]');
@@ -1309,16 +1315,34 @@ document.addEventListener('click', async e => {
     try{ await savePer(nm, {tier: off ? null : 'off'}); }catch(x){ alert(x.message); }
     render(); return;
   }
+  const pmg = e.target.closest('[data-pmg]');
+  if(pmg){ mgSheet = {from: pmg.dataset.pmg, q: ''}; render(); return; }
+  const mgto = e.target.closest('[data-mgto]');
+  if(mgto && mgSheet){
+    const from = mgSheet.from, to = mgto.dataset.mgto;
+    if(!confirm(from + ' 을(를) ' + to + ' 에 합칩니다. 남는 이름은 ' + to + ' 입니다.')) return;
+    try{ await doMerge(from, to); }catch(x){ alert('실패 — ' + x.message); return; }
+    mgSheet = null; perOpen = to; render(); return;
+  }
+  const mgs = e.target.closest('[data-mgsplit]');
+  if(mgs){
+    try{ await unmerge(mgs.dataset.mgsplit, mgs.dataset.nm); }catch(x){ alert('실패 — ' + x.message); }
+    render(); return;
+  }
+  const pdl = e.target.closest('[data-pdel]');
+  if(pdl){
+    const nm = pdl.dataset.nm, act = pdl.dataset.pdel;
+    try{ await perAct([nm], act); }catch(x){ alert(x.message); }
+    render(); return;
+  }
   if(e.target.closest('[data-ppick]')){ perPick = perPick ? null : {}; render(); return; }
   if(e.target.id === 'pk-x'){ perPick = null; render(); return; }
-  if(e.target.id === 'pk-go'){
+  const pkgo = e.target.closest('[data-pkgo]');
+  if(pkgo){
     const names = Object.keys(perPick || {}); if(!names.length) return;
-    const on = !!e.target.dataset.on;
-    e.target.disabled = true;
-    try{
-      for(let i = 0; i < names.length; i += 20)
-        await Promise.all(names.slice(i, i + 20).map(nm => savePer(nm, {tier: on ? null : 'off'})));
-    }catch(x){ alert('실패 — ' + x.message); }
+    pkgo.disabled = true;
+    try{ if(!(await perAct(names, pkgo.dataset.pkgo))){ pkgo.disabled = false; return; } }
+    catch(x){ alert('실패 — ' + x.message); }
     perPick = null; render(); return;
   }
   // 인물 행 펼치기 (버튼 클릭이 아닐 때만). 선택 모드면 체크 토글
@@ -2285,10 +2309,11 @@ async function saveCard(qid, nm){
   await updateDoc(doc(db,'users',USER.uid,'orig_inbox',qid), {status:'saved', saved_as:nm});
 }
 
-function perAgg(){
+function perAgg(withDel){
   const m = {};
-  const put = n => m[n] || (m[n] = {name:n, last:'', n:0, w:0,
+  const put0 = n => m[n] || (m[n] = {name:n, last:'', n:0, w:0,
                                     kinds:{}, orgs:{}, hist:[]});
+  const put = n => put0(perCanon(n));     // 합쳐진 명함의 이름은 남은 쪽으로 센다
   for(const l of doneLogs()){
     const c = l.company || l.title;
     for(const nm of (l.people || [])){
@@ -2302,14 +2327,14 @@ function perAgg(){
     }
   }
   // 명함만 만들어 두고 아직 만난 적 없는 사람도 목록에 올린다
-  for(const k in PER){ if(PER[k].name && !PER[k].merged_into) put(PER[k].name); }
+  for(const k in PER){ if(PER[k].name && !PER[k].merged_into && (withDel || !PER[k].deleted)) put(PER[k].name); }
   for(const l of planLogs()){
     for(const nm of (l.people || [])){
       const o = put(nm);
       if(!o.next || l.date < o.next) o.next = l.date;
     }
   }
-  return Object.values(m).map(o => {
+  return Object.values(m).filter(o => withDel || !perOf(o.name).deleted).map(o => {
     const p = perOf(o.name);
     const wk = p.target_wk || defWk(), lim = wk * 7;
     const d = o.last ? daysAgo(o.last) : null;
@@ -2318,7 +2343,7 @@ function perAgg(){
     const byLog = Object.keys(o.orgs).sort((a,b) => o.orgs[b] - o.orgs[a]);
     return Object.assign({}, o, {card:p, org:(p.org || byLog[0] || ''),
       prev:(p.org && byLog[0] && p.org !== byLog[0]) ? byLog[0] : '',
-      wk:wk, lim:lim, days:d, st:(p.tier === 'off' ? 'off' : st), off:(p.tier === 'off'),
+      wk:wk, lim:lim, days:d, st:(p.tier === 'off' ? 'off' : st), off:(p.tier === 'off'), del:!!p.deleted, delAt:p.deleted_at || '',
       over:(d == null ? 9999 : d - lim), t1:(p.tier === 'T1')});
   }).sort((a,b) => (b.t1 - a.t1) || (a.off - b.off) || (b.over - a.over));
 }
@@ -2328,7 +2353,7 @@ function perAgg(){
 const ROLE_WORDS = ['대표이사','전무이사','상무이사','부회장','회장','사장','부사장',
   '전무','상무','본부장','센터장','그룹장','파트장','팀장','실장','부장','차장','과장',
   '대리','주임','사원','이사','파트너','심사역','수석','책임','선임','위원','고문',
-  '교수','변호사','회계사','세무사'];
+  '교수','변호사','회계사','세무사','대표','부대표','소장','원장','총괄','연구원','연구위원','애널리스트','매니저','이사대우','상무보','전무보'];
 
 function splitRole(s){
   const m = String(s || '').trim().match(/^(.+?)\s+(\S+)$/);
@@ -2386,7 +2411,103 @@ function nameView(nm){
 }
 
 let perOpen = null;
-let perPick = null;                   // 선택 모드 {이름:1}. null 이면 꺼짐
+let perPick = null;
+/* 인물 일괄 동작. off/on = 추적, del = 휴지통(표시만), restore = 복구, purge = 문서 삭제.
+   취소하면 false. Field Notes 기록은 어느 동작도 건드리지 않는다. */
+async function perAct(names, act){
+  const who = names.length === 1 ? names[0] : names.length + '명';
+  if(act === 'del' && !confirm(who + ' 을(를) 삭제합니다. 휴지통에서 복구할 수 있습니다.')) return false;
+  if(act === 'purge' && !confirm(who + ' 의 명함 문서를 완전히 지웁니다. 되돌릴 수 없습니다. 기록은 남습니다.')) return false;
+  const one = async nm => {
+    if(act === 'purge'){
+      const k = perKey(nm); if(!k) return;
+      return deleteDoc(doc(db,'users',USER.uid, PCOL === 'person2' ? 'person2' : 'person', k));
+    }
+    const o = act === 'off' ? {tier:'off'} : act === 'on' ? {tier:null}
+          : act === 'del' ? {deleted:true, deleted_at:todayStr()} : {deleted:false, deleted_at:''};
+    return savePer(nm, o);
+  };
+  for(let i = 0; i < names.length; i += 20) await Promise.all(names.slice(i, i + 20).map(one));
+  return true;
+}
+
+/* ── 같은 사람 연결 ── */
+let mgSheet = null;                   // {from:이름, q:검색어}
+document.addEventListener('input', e => {
+  if(e.target.id === 'mg-q' && mgSheet){ mgSheet.q = e.target.value; const l = $('mg-list'); if(l) l.innerHTML = mgList(); }
+});
+// 이름 → 남아 있는 명함의 이름. 합쳐진 명함(merged_into)은 그 끝을 따라간다
+function perCanon(n){
+  let k = perKey(n), p = k && PER[k], hop = 0;
+  while(p && p.merged_into && hop++ < 4){
+    const q = PER[p.merged_into] || PER[perKey(p.merged_into)];
+    if(!q || q === p) break;
+    p = q;
+  }
+  return (p && p.name && !p.merged_into) ? p.name : n;
+}
+function mgList(){
+  if(!mgSheet) return '';
+  const from = mgSheet.from, q = String(mgSheet.q || '').trim().toLowerCase(), me = perOf(from);
+  let rows = perAgg(true).filter(r => r.name !== from && !r.del);
+  if(q) rows = rows.filter(r => (r.name + ' ' + (r.org || '') + ' ' + (r.card.role || '')).toLowerCase().indexOf(q) >= 0);
+  const sameOrg = r => (me.org && r.org && orgLike(me.org, r.org)) ? 1 : 0;
+  rows.sort((a, b) => (sameOrg(b) - sameOrg(a)) || (b.n - a.n) || a.name.localeCompare(b.name));
+  if(!rows.length) return '<div class="empty">없습니다.</div>';
+  return rows.slice(0, 40).map(r => '<div class="mgrow" data-mgto="' + esc(r.name) + '"><b>' + esc(nameView(r.name).base) + '</b>' +
+    '<span class="o">' + esc(r.org || '-') + (r.card.role ? ' · ' + esc(r.card.role) : '') + '</span>' +
+    '<span class="n">' + (sameOrg(r) ? '같은 회사 · ' : '') + '컨택 ' + r.n + '회</span></div>').join('') +
+    (rows.length > 40 ? '<div class="cnt" style="margin:6px 0 0">' + (rows.length - 40) + '명 더 — 검색어로 좁히세요</div>' : '');
+}
+function sheetMerge(){
+  if(!mgSheet) return '';
+  return '<div class="shbg" data-shx="1"></div><div class="sheet">' +
+    '<div class="shh">같은 사람 연결 — ' + esc(mgSheet.from) + '</div>' +
+    '<div class="cnt" style="margin:0 0 8px">고른 사람에게 <b>' + esc(mgSheet.from) + '</b> 의 명함을 합칩니다. 남는 이름은 고른 쪽이고, ' +
+      esc(mgSheet.from) + ' 은(는) 별칭이 됩니다. 빈 칸만 채우고 기록은 건드리지 않습니다. 분리로 되돌릴 수 있습니다.</div>' +
+    '<div class="fr"><input id="mg-q" placeholder="이름·회사로 찾기" value="' + esc(mgSheet.q || '') + '"></div>' +
+    '<div class="mglist" id="mg-list">' + mgList() + '</div>' +
+    '<div style="display:flex;gap:6px"><button class="btn" data-shx="1">닫기</button></div></div>';
+}
+const perColName = () => (PCOL === 'person2' ? 'person2' : 'person');
+const perKeyOrNew = (n, org) => perKey(n) || (PCOL === 'person2' ? mkKey(n, org || '') : cadKey(n));
+async function doMerge(from, to){
+  if(!USER) throw new Error('로그인이 필요합니다');
+  const fk = perKey(from), tk = perKey(to);
+  const A = (fk && PER[fk]) || {name: from}, B = (tk && PER[tk]) || {};
+  const o = {};
+  for(const k of ['org','role','dept','phone','mail','tel','url','target_wk','tier'])
+    if(!B[k] && A[k]) o[k] = A[k];
+  if(A.memo) o.memo = B.memo ? (B.memo + '\n' + A.memo) : A.memo;
+  if(A.tags){
+    const s = {}; String((B.tags || '') + ',' + A.tags).split(',').map(x => x.trim()).filter(Boolean).forEach(x => { s[x] = 1; });
+    o.tags = Object.keys(s).join(', ');
+  }
+  const al = {}; (B.aliases || []).concat(A.aliases || [], [from]).forEach(a => { if(a && a !== to) al[a] = 1; });
+  o.aliases = Object.keys(al);
+  const orgs = (B.orgs || []).slice();
+  (A.orgs || []).concat(A.org ? [{org:A.org, from:'', src:'merge'}] : []).forEach(x => { if(x.org && !orgs.some(y => y.org === x.org)) orgs.push(x); });
+  if(orgs.length) o.orgs = orgs;
+  if(A.cards && A.cards.length) o.cards = (B.cards || []).concat(A.cards);
+  if(A.imports && A.imports.length){ const s = {}; (B.imports || []).concat(A.imports).forEach(x => { s[x] = 1; }); o.imports = Object.keys(s); }
+  o.merged_from = (B.merged_from || []).concat([from]);
+  o.touched = new Date().toISOString();
+  const src = {};
+  for(const k in o) if(A.src && A.src[k] && o[k] === A[k]) src[k] = A.src[k];
+  const key = tk || perKeyOrNew(to, o.org);
+  const body = Object.assign({name: to}, o); if(Object.keys(src).length) body.src = src;
+  const col = perColName();
+  await setDoc(doc(db,'users',USER.uid,col,key), body, {merge:true});
+  await setDoc(doc(db,'users',USER.uid,col, fk || perKeyOrNew(from, '')), {name: from, merged_into: key, touched: o.touched}, {merge:true});
+}
+async function unmerge(from, to){
+  if(!USER) throw new Error('로그인이 필요합니다');
+  const col = perColName(), tk = perKey(to), B = (tk && PER[tk]) || {};
+  const fks = (PCOL === 'person2' ? (PER_IDX[from] || []) : [cadKey(from)]).filter(k => PER[k] && PER[k].merged_into);
+  for(const k of fks) await setDoc(doc(db,'users',USER.uid,col,k), {merged_into: deleteField(), touched: new Date().toISOString()}, {merge:true});
+  if(tk) await setDoc(doc(db,'users',USER.uid,col,tk), {aliases: (B.aliases || []).filter(a => a !== from),
+    merged_from: (B.merged_from || []).filter(a => a !== from), touched: new Date().toISOString()}, {merge:true});
+}                   // 선택 모드 {이름:1}. null 이면 꺼짐
 
 function perRow(r){
   const o = inten(r.days == null ? null : r.days / r.lim, CAD_CUTS);
@@ -2406,7 +2527,9 @@ function perRow(r){
         '</span>' : '') +
       (r.next ? '<span class="pl n">예정 ' + r.next.slice(5).replace('-','.') + '</span>' : '') +
       '<span class="cdm">' + (r.days == null ? '기록 없음' : r.days + '일 전') + '</span></div>' +
-    (r.off
+    (r.del
+      ? '<div class="cdr2">삭제됨 ' + esc(r.delAt) + ' · 컨택 ' + r.n + '회' + (kinds ? ' · ' + kinds : '') + '</div>'
+      : r.off
       ? '<div class="cdr2">추적 안 함 · 컨택 ' + r.n + '회' + (kinds ? ' · ' + kinds : '') + '</div>'
       : '<div class="cdr2">목표 ' + r.wk + '주' + (over ? ' · ' + over + '일 초과' : '') +
       ' · 컨택 ' + r.n + '회' + (kinds ? ' · ' + kinds : '') +
@@ -2435,11 +2558,17 @@ function perRow(r){
       (c.tags ? '<div class="nct">' + String(c.tags).split(',').map(t => t.trim())
           .filter(Boolean).map(t => '<span class="tg">' + esc(t) + '</span>').join('') +
         '</div>' : '') +
-      '<div class="ncf">' +
-        '<button class="chip on" data-pq="' + esc(r.name) + '">컨택 담기</button> ' +
-        '<button class="chip" data-ps="' + esc(r.name) + '">' +
-          (c.name ? '명함 수정' : '명함 채우기') + '</button> ' +
-        '<button class="chip" data-ptk="' + esc(r.name) + '">' + (r.off ? '추적 재개' : '추적 안 함') + '</button></div></div>';
+      '<div class="ncf">' + (r.del
+        ? '<button class="chip on" data-pdel="restore" data-nm="' + esc(r.name) + '">복구</button> ' +
+          '<button class="chip" data-pdel="purge" data-nm="' + esc(r.name) + '">완전 삭제</button>'
+        : '<button class="chip on" data-pq="' + esc(r.name) + '">컨택 담기</button> ' +
+          '<button class="chip" data-ps="' + esc(r.name) + '">' +
+            (c.name ? '명함 수정' : '명함 채우기') + '</button> ' +
+          '<button class="chip" data-ptk="' + esc(r.name) + '">' + (r.off ? '추적 재개' : '추적 안 함') + '</button> ' +
+          '<button class="chip" data-pmg="' + esc(r.name) + '">같은 사람 연결</button> ' +
+          '<button class="chip" data-pdel="del" data-nm="' + esc(r.name) + '">삭제</button>') + '</div></div>' +
+      (c.merged_from || []).map(f => '<div class="hz">합쳐진 명함 · ' + esc(f) +
+        ' <button class="chip" style="padding:2px 8px;font-size:10px" data-mgsplit="' + esc(f) + '" data-nm="' + esc(r.name) + '">분리</button></div>').join('');
     if(r.hist.length){
       h += '<div class="cdsec">이력</div>';
       for(const e of r.hist)
@@ -2568,6 +2697,7 @@ function planPerson(R, L, ops, chg, opt){
     Rs.forEach(r => merge(r, 'remember', FR));
     merge(L, 'linkedin', FL);
   }
+  if(cur.deleted){ o.deleted = false; o.deleted_at = ''; }
   o.touched = new Date().toISOString();
   const before = {};
   if(!isNew) for(const k in o) before[k] = (cur[k] === undefined) ? null : cur[k];
@@ -3007,15 +3137,15 @@ function cardBlock(){
 }
 
 function paneCadPpl(){
-  let rows = perAgg();
-  const offs = rows.filter(r => r.off);
-  rows = (cadFilt === 'off') ? offs : rows.filter(r => !r.off);   // 추적 안 함은 따로 본다
+  let rows = perAgg(true);
+  const offs = rows.filter(r => r.off && !r.del), dels = rows.filter(r => r.del);
+  rows = (cadFilt === 'trash') ? dels : (cadFilt === 'off') ? offs : rows.filter(r => !r.off && !r.del);   // 추적 안 함·휴지통은 따로 본다
   if(cadFilt === 't1')   rows = rows.filter(r => r.t1);
   if(cadFilt === 'none') rows = rows.filter(r => r.st === 'none');
   if(cadFilt === 'recent') rows = rows.slice().sort((a,b) => dnum(b.last) - dnum(a.last));
   const need = rows.filter(r => r.st === 'l').length;
   const card = rows.filter(r => r.card.name).length;
-  const CH = [['over','경과순'],['recent','최근순'],['t1','T-1만'],['none','미컨택'],['off','추적 안 함' + (offs.length ? ' ' + offs.length : '')]];
+  const CH = [['over','경과순'],['recent','최근순'],['t1','T-1만'],['none','미컨택'],['off','추적 안 함' + (offs.length ? ' ' + offs.length : '')],['trash','휴지통' + (dels.length ? ' ' + dels.length : '')]];
   // 이름에 직급이 붙어 있는 것들. 해당이 없으면 이 블록은 안 뜬다.
   const rc = roleCandidates();
   let h = rvEntry() + cardBlock() + (rc.length ? '<div class="card" style="margin-bottom:10px">' +
@@ -3047,7 +3177,9 @@ function paneCadPpl(){
       '<span class="swlg">경과 <i style="opacity:.3"></i><i style="opacity:.48"></i><i style="opacity:.65"></i><i style="opacity:.83"></i><i style="opacity:1"></i> 초과</span></div>';
   if(!rows.length)
     return h + '<div class="empty">아직 인물 기록이 없습니다. Field Notes에서 사람 이름을 넣어 담으세요.</div>';
-  if(cadFilt === 'off'){
+  if(cadFilt === 'trash'){
+    h += '<div class="cdsec">휴지통 <em>' + rows.length + '명 — 복구할 수 있습니다. 기록은 남아 있습니다</em></div>' + rows.map(perRow).join('');
+  }else if(cadFilt === 'off'){
     h += '<div class="cdsec">추적 안 함 <em>' + rows.length + '명 — 주기·경과 계산에서 빠집니다</em></div>' + rows.map(perRow).join('');
   }else{
     const t1 = rows.filter(r => r.t1), rest = rows.filter(r => !r.t1);
@@ -3057,9 +3189,10 @@ function paneCadPpl(){
       rest.map(perRow).join('');
   }
   if(perPick){
-    const n = Object.keys(perPick).length, toOn = (cadFilt === 'off');
+    const n = Object.keys(perPick).length;
+    const acts = (cadFilt === 'trash') ? [['restore','복구']] : (cadFilt === 'off') ? [['on','추적 재개'],['del','삭제']] : [['off','추적 안 함'],['del','삭제']];
     h += '<div class="rvpad"></div>' + rvBar('<b>' + n + '</b>명 선택',
-      (n ? '<button class="btn p" id="pk-go" data-on="' + (toOn ? '1' : '') + '">' + n + '명 ' + (toOn ? '추적 재개' : '추적 안 함') + '</button>' : '') +
+      (n ? acts.map((a, i) => '<button class="btn' + (i ? '' : ' p') + '" data-pkgo="' + a[0] + '">' + n + '명 ' + a[1] + '</button>').join('') : '') +
       '<button class="btn" id="pk-x">취소</button>');
   }
   return h;
@@ -3158,7 +3291,7 @@ function render(){
     ((USER || !AUTH_READY)?'':'<div class="note" style="background:none;border:1px solid var(--bd);'+
       'border-radius:9px;padding:9px 11px;font-size:11px;color:var(--mut);margin-bottom:11px">'+
       '로그인하지 않았습니다 — 폼은 볼 수 있지만 담기는 되지 않습니다.</div>')+
-    (TAB==='idea'?paneIdea():(TAB==='cad'?paneCad():(TAB==='deal'?paneDeal():paneField()))) + sheetCad() + sheetPC() + sheetLog() + sheetPer() + sheetRv();
+    (TAB==='idea'?paneIdea():(TAB==='cad'?paneCad():(TAB==='deal'?paneDeal():paneField()))) + sheetCad() + sheetPC() + sheetLog() + sheetPer() + sheetMerge() + sheetRv();
   putForm(keep);
   if(TAB==='cad'){
     const cf=$('cd-file');
