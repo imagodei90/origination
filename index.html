@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Work">
 <link rel="manifest" href="manifest.json">
 <title>Work</title>
-<link rel="icon" href="favicon.ico?v=20261114_2231" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261114_2231">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261114_2231">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261114_2231">
+<link rel="icon" href="favicon.ico?v=20261115_0924" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_0924">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_0924">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_0924">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -438,6 +438,12 @@ pre.out{background:var(--bg);border:1px solid var(--bd);border-radius:9px;paddin
 .di .pend{margin-top:8px;font-size:11.5px;color:var(--mut)}
 .di-k{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--bd);font-size:13px}
 .di-k:first-child{border-top:0}.di-k span:last-child{color:var(--mut);font-size:11.5px;white-space:nowrap}
+/* DIARCH */
+.dd-s{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;margin-bottom:4px;scrollbar-width:thin}
+.dd{flex:0 0 auto;background:transparent;border:1px solid var(--bd);color:var(--mut);border-radius:8px;
+  padding:5px 10px;font-size:12.5px;cursor:pointer;line-height:1.25;text-align:left}
+.dd small{display:block;font-size:10px;opacity:.8}
+.dd.on{border-color:var(--acc);color:var(--fg)}
 @media(max-width:640px){.di{grid-template-columns:24px 1fr}.di .sc{grid-column:2;text-align:left}}
 </style>
 </head>
@@ -489,7 +495,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20261114_2231';
+const BUILD = '20261115_0924';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -510,7 +516,7 @@ enableIndexedDbPersistence(db).catch(() => {});
 
 let DATA = null, ENT = null, MAP = null, GEO = null, USER = null;
 let AUTH_READY = false;       // onAuthStateChanged 가 한 번이라도 돌았는가
-let STATE = {}, LOGS = [], QUEUE = [], DIDEA = [];
+let STATE = {}, LOGS = [], QUEUE = [], DIDEA = [], DI_DAY = null;
 let CAD = {};                 // company -> {tier, target_wk, memo}
 let PER = {};                 // 이름 -> 명함 {name, org, role, phone, mail, memo, tags, tier, target_wk}
 let cadOpen = null, cadSheet = null, fnKind = 'meet', fnPeople = [], fnQuick = true;
@@ -589,7 +595,7 @@ function subscribe(uid){
   });
   onSnapshot(query(collection(db,'users',uid,'orig_inbox'),orderBy('at','desc'),limit(40)),
     s => { QUEUE = s.docs.map(d=>({id:d.id,...d.data()})); if(TAB==='idea'||TAB==='word'||TAB==='field') render(); });
-  onSnapshot(query(collection(db,'users',uid,'deal_ideas'),orderBy('date','desc'),limit(60)),
+  onSnapshot(query(collection(db,'users',uid,'deal_ideas'),orderBy('date','desc'),limit(500)),
     s => { DIDEA = s.docs.map(d=>({id:d.id,...d.data()})); if(TAB==='idea') render(); });
   onSnapshot(query(collection(db,'users',uid,'field_notes'),orderBy('date','desc'),limit(400)),
     s => { LOGS = s.docs.map(d=>({id:d.id,...d.data()})); if(TAB==='field'||TAB==='cad') render(); });
@@ -1175,9 +1181,18 @@ function paneDealIdea(){
   if(!DIDEA.length) return '<div class="card"><div class="di-h"><b>Today\'s Deal Idea</b>'+
     '<span>AUTO · DAILY 06:00</span></div><div style="font-size:12.5px;color:var(--mut)">'+
     (USER?'아직 생성된 아이디어가 없습니다. 내일 06:00 브리핑 뒤에 채워집니다.':'로그인하면 오늘의 아이디어가 보입니다.')+'</div></div>';
-  const day = DIDEA[0].date;
+  // 날짜별 아카이브 — 최신이 기본, 칩으로 지난 날짜를 연다
+  const days = [...new Set(DIDEA.map(x=>x.date))].sort().reverse();
+  if(!DI_DAY || !days.includes(DI_DAY)) DI_DAY = days[0];
+  const day = DI_DAY, latest = day===days[0];
   const today = DIDEA.filter(x=>x.date===day).sort((a,b)=>(b.fit||0)-(a.fit||0));
-  const kept = DIDEA.filter(x=>x.date!==day && (x.status==='saved'||x.status==='kept'));
+  const kept = DIDEA.filter(x=>x.date!==day && (x.status==='saved'||x.status==='kept'))
+    .sort((a,b)=>a.date<b.date?1:-1);
+  const strip = days.length<2 ? '' : '<div class="dd-s">'+days.map(d=>{
+      const xs = DIDEA.filter(x=>x.date===d), sv = xs.filter(x=>x.status==='saved'||x.status==='kept').length;
+      return '<button class="dd'+(d===day?' on':'')+'" data-day="'+esc(d)+'">'+esc(d.slice(5).replace('-','.'))+
+        '<small>'+xs.length+(sv?' · 저장 '+sv:'')+'</small></button>';
+    }).join('')+'</div>';
   const row = x => {
     const on = x.status==='kept'||x.status==='saved';
     const src = (x.sources||[]).map(s=>'<a href="'+esc(s.url)+'" target="_blank" rel="noopener">'+esc(s.title)+'</a>').join(' · ');
@@ -1201,11 +1216,12 @@ function paneDealIdea(){
       '<div class="src">근거 '+src+'</div>'+foot+'</div>'+
       '<div class="sc">'+(x.fit==null?'—':x.fit)+'<small>FIT</small></div></div>';
   };
-  return '<div class="card"><div class="di-h"><b>Today\'s Deal Idea <span style="font-weight:400;color:var(--mut);letter-spacing:0">— '+
+  return strip+'<div class="card"><div class="di-h"><b>'+(latest?'Today\'s Deal Idea':'Deal Idea Archive')+
+    ' <span style="font-weight:400;color:var(--mut);letter-spacing:0">— '+
     esc(day)+' · 기사 '+(today[0].n_articles||'?')+'건 기준</span></b><span>체크하면 vault 연결을 찾아 저장</span></div>'+
     today.map(row).join('')+'</div>'+
-    (kept.length?'<div class="lbl">지난 아이디어 중 저장한 것</div><div class="card">'+
-      kept.slice(0,12).map(x=>'<div class="di-k"><span><span class="ang" style="font-size:10px;color:#c9a14a;border:1px solid #4a3d22;padding:1px 6px;border-radius:4px;margin-right:6px">'+
+    (kept.length?'<div class="lbl">다른 날짜에서 저장한 것</div><div class="card">'+
+      kept.slice(0,30).map(x=>'<div class="di-k" data-day="'+esc(x.date)+'" style="cursor:pointer"><span><span class="ang" style="font-size:10px;color:#c9a14a;border:1px solid #4a3d22;padding:1px 6px;border-radius:4px;margin-right:6px">'+
         esc(x.angle)+'</span>'+esc(x.title||x.target)+'</span><span>'+esc(x.date)+'</span></div>').join('')+'</div>':'')+
     '<div class="lbl">직접 담기</div>';
 }
@@ -2516,6 +2532,8 @@ function kpi(){
 
 /* ── 이벤트 ───────────────────────────────────── */
 document.addEventListener('click', async e => {
+  const dd=e.target.closest('[data-day]');
+  if(dd && !e.target.closest('a')){ DI_DAY=dd.dataset.day; render(); return; }
   const dk=e.target.closest('.ck[data-di]');
   if(dk){ if(!USER) return needLogin();
     const x=DIDEA.find(z=>z.id===dk.dataset.di); if(!x) return;
