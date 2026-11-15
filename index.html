@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Work">
 <link rel="manifest" href="manifest.json">
 <title>Work</title>
-<link rel="icon" href="favicon.ico?v=20261115_1836" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_1836">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_1836">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_1836">
+<link rel="icon" href="favicon.ico?v=20261115_1841" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_1841">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_1841">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_1841">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -200,7 +200,7 @@ table.tt thead th:first-child{z-index:3}
 .pp{display:flex;align-items:baseline;gap:6px;font-size:11px;padding:3px 0}
 .pp b{font-weight:500}
 .hz{font-size:10px;color:var(--mut);padding:2px 0;font-variant-numeric:tabular-nums}
-.mglist{max-height:46vh;overflow:auto;margin:0 0 10px;border-top:1px solid var(--hair)}
+.mglist{max-height:38vh;overflow:auto;margin:0 0 10px;border-top:1px solid var(--hair)}
 .mgrow{display:flex;gap:8px;align-items:baseline;padding:8px 4px;border-bottom:1px solid var(--hair);cursor:pointer}
 .mgrow:active{background:rgba(30,164,157,.06)}
 .mgrow b{font-size:12.5px;font-weight:600;flex:none}
@@ -317,7 +317,7 @@ table.tt thead th:first-child{z-index:3}
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:60;background:var(--card);
   border-top:1px solid var(--bd);border-radius:14px 14px 0 0;padding:14px 15px
   calc(18px + env(safe-area-inset-bottom));box-shadow:0 -8px 28px rgba(0,0,0,.18);
-  max-width:880px;margin:0 auto}
+  max-width:880px;margin:0 auto;max-height:92vh;overflow:auto}
 .shbg{position:fixed;inset:0;z-index:59;background:rgba(0,0,0,.32)}
 .shh{font-size:13px;font-weight:600;margin-bottom:10px}
 .zrow{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:9px}
@@ -584,7 +584,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20261115_1836';
+const BUILD = '20261115_1841';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -2462,12 +2462,13 @@ function mgList(){
 function sheetMerge(){
   if(!mgSheet) return '';
   return '<div class="shbg" data-shx="1"></div><div class="sheet">' +
-    '<div class="shh">같은 사람 연결 — ' + esc(mgSheet.from) + '</div>' +
+    '<div class="shh" style="display:flex;align-items:center;gap:8px">같은 사람 연결 — ' + esc(mgSheet.from) +
+      '<button class="btn xs" data-shx="1" style="margin-left:auto">닫기</button></div>' +
     '<div class="cnt" style="margin:0 0 8px">고른 사람에게 <b>' + esc(mgSheet.from) + '</b> 의 명함을 합칩니다. 남는 이름은 고른 쪽이고, ' +
       esc(mgSheet.from) + ' 은(는) 별칭이 됩니다. 빈 칸만 채우고 기록은 건드리지 않습니다. 분리로 되돌릴 수 있습니다.</div>' +
     '<div class="fr"><input id="mg-q" placeholder="이름·회사로 찾기" value="' + esc(mgSheet.q || '') + '"></div>' +
     '<div class="mglist" id="mg-list">' + mgList() + '</div>' +
-    '<div style="display:flex;gap:6px"><button class="btn" data-shx="1">닫기</button></div></div>';
+    '<button class="btn" data-shx="1" style="width:100%">닫기</button></div>';
 }
 const perColName = () => (PCOL === 'person2' ? 'person2' : 'person');
 const perKeyOrNew = (n, org) => perKey(n) || (PCOL === 'person2' ? mkKey(n, org || '') : cadKey(n));
