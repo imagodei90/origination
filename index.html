@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Work">
 <link rel="manifest" href="manifest.json">
 <title>Work</title>
-<link rel="icon" href="favicon.ico?v=20261115_1553" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_1553">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_1553">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_1553">
+<link rel="icon" href="favicon.ico?v=20261115_1810" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_1810">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_1810">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_1810">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -472,6 +472,8 @@ a.btn{display:inline-block;text-decoration:none;color:var(--fg);line-height:1.2}
 .side{background:var(--bg);border:1px solid var(--bd);border-radius:9px;padding:9px 10px;min-width:0}
 .side.pk{cursor:pointer}
 .side.pk:active{border-color:var(--acc);background:rgba(30,164,157,.06)}
+.side.pk.on{border-color:var(--acc);box-shadow:inset 0 0 0 1px var(--acc)}
+.side.pk.on .s span:first-child{color:var(--acc)}
 .side .s{font:9px "JetBrains Mono","SF Mono",monospace;letter-spacing:.1em;color:var(--dim);margin-bottom:5px;display:flex;justify-content:space-between}
 .side .nm{font-size:13px;font-weight:600;line-height:1.3;word-break:break-word}
 .side .o{font-size:11px;color:var(--mut);margin-top:3px;line-height:1.5;word-break:break-word}
@@ -480,7 +482,7 @@ a.btn{display:inline-block;text-decoration:none;color:var(--fg);line-height:1.2}
   word-break:break-all;line-height:1.6}
 .side .dt a{color:var(--acc);text-decoration:none}
 .cmp .act .btn{flex:1;text-align:center}
-.rvrow{display:flex;align-items:center;gap:9px;padding:8px 9px;border:1px solid var(--bd);border-radius:9px;background:var(--card2);margin-bottom:5px}
+.rvrow{display:flex;flex-wrap:wrap;align-items:center;gap:9px;padding:8px 9px;border:1px solid var(--bd);border-radius:9px;background:var(--card2);margin-bottom:5px}
 .rvrow .ck{width:16px;height:16px;border:1px solid var(--dim);border-radius:4px;flex:0 0 auto;cursor:pointer}
 .rvrow .ck.on{background:var(--acc);border-color:var(--acc)}
 .rvrow .b{flex:1;min-width:0;cursor:pointer}
@@ -489,6 +491,12 @@ a.btn{display:inline-block;text-decoration:none;color:var(--fg);line-height:1.2}
 .rvrow .d{font:9.5px "JetBrains Mono","SF Mono",monospace;color:var(--dim);text-align:right;line-height:1.5;white-space:nowrap}
 .rvrow .ent{font:8.5px "JetBrains Mono","SF Mono",monospace;color:var(--acc);letter-spacing:.06em}
 .rvrow.off{opacity:.45}
+.rvdet{flex:0 0 100%;margin-top:2px;padding-top:8px;border-top:1px solid var(--bd)}
+.rvdet .kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:11px}
+.rvdet .k{font:9.5px "JetBrains Mono","SF Mono",monospace;color:var(--dim);letter-spacing:.06em;padding-top:2px;white-space:nowrap}
+.rvdet .v{color:var(--mut);word-break:break-all;line-height:1.5}
+.rvdet .v a{color:var(--acc);text-decoration:none}
+.rvdet .act{display:flex;gap:5px;margin-top:9px}
 .srcx{font:9px "JetBrains Mono","SF Mono",monospace;letter-spacing:.08em;padding:1px 5px;border-radius:4px;border:1px solid var(--bd);color:var(--dim)}
 .srcx.rm{color:var(--acc);border-color:var(--acc);background:rgba(30,164,157,.06)}
 .srcx.li{color:var(--acc);border-color:transparent;background:rgba(30,164,157,.2)}
@@ -567,7 +575,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20261115_1553';
+const BUILD = '20261115_1810';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -1161,6 +1169,14 @@ document.addEventListener('click', async e => {
     else rvOff[r.id] = !rvOff[r.id];
     render(); return;
   }
+  const rvx = e.target.closest('[data-rvx]');
+  if(rvx){ rvOpen = (rvOpen === rvx.dataset.rvx) ? null : rvx.dataset.rvx; render(); return; }
+  const rvuh = e.target.closest('[data-rvunhold]');
+  if(rvuh){
+    const r = impById(rvuh.dataset.rvunhold); if(!r) return;
+    try{ await setImp(r, {status:'open', hold_why:''}); }catch(x){ alert(x.message); }
+    render(); return;
+  }
   const rved = e.target.closest('[data-rved]');
   if(rved){ rvEdit = rved.dataset.rved; render(); return; }
   if(e.target.id === 'rv-ed-save' || e.target.id === 'rv-ed-hold' || e.target.id === 'rv-ed-unhold'){
@@ -1175,23 +1191,24 @@ document.addEventListener('click', async e => {
   }
   const rvok = e.target.closest('[data-rvok]');
   if(rvok){
-    const L = impById(rvok.dataset.rvok), R = L && rvCands(L)[0]; if(!L || !R) return;
+    const L = impById(rvok.dataset.rvok), Rs = L ? rvPicked(L) : []; if(!L || !Rs.length) return;
+    const mode = rvok.dataset.mode || 'same';
     rvBusy = '연결 중…'; rvok.disabled = true;
-    try{ await approveLink(L, R); }catch(x){ alert('실패 — ' + x.message); }
+    try{ await approveLink(L, Rs, mode); }catch(x){ alert('실패 — ' + x.message); }
     rvBusy = ''; render(); return;
   }
   const rvpk = e.target.closest('[data-rvpick]');
   if(rvpk){
+    if(e.target.closest('a')) return;
     const ids = rvpk.dataset.rvpick.split('|');
-    const L = impById(ids[0]), R = impById(ids[1]); if(!L || !R) return;
-    if(!confirm(L.name + ' 을(를) ' + R.name + ' (' + (R.org || '-') + ') 에 연결합니다.')) return;
-    rvBusy = '연결 중…';
-    try{ await approveLink(L, R); }catch(x){ alert('실패 — ' + x.message); }
-    rvBusy = ''; render(); return;
+    const s = rvSel[ids[0]] || (rvSel[ids[0]] = {});
+    if(s[ids[1]]) delete s[ids[1]]; else s[ids[1]] = 1;
+    render(); return;
   }
   const rvno = e.target.closest('[data-rvno]');
   if(rvno){
     const L = impById(rvno.dataset.rvno); if(!L) return;
+    delete rvSel[L.id];
     try{ await unlinkRow(L); }catch(x){ alert(x.message); }
     render(); return;
   }
@@ -2408,7 +2425,12 @@ function perRow(r){
    승인 한 번 = person_batch 한 건. 그 단위로 되돌린다.
    거절·보류·체크 해제는 표시일 뿐이다 — 행을 지우지 않는다. */
 let IMP = null, IMP_BUSY = false, BATCH = [];
+let rvSel = {};                       // 비교 카드에서 고른 리멤버 후보 {Lid:{Rid:1}}
+// LinkedIn 내보내기의 회사·직책은 내보낸 날 기준이다. 다음 내보내기 때 이 날짜를 올린다.
+const LI_ASOF = '2026-11-04';
+const asofOf = r => ymd(r.asof || (r.src === 'linkedin' ? LI_ASOF : r.date)) || '';
 let rvSeg = '', rvFilt = 'all', rvOff = {}, rvMore = 150, rvEdit = null, rvMsg = '', rvBusy = '';
+let rvOpen = null;                    // 신규 목록에서 펼친 행
 const RANK = {manual:4, card:3, remember:2, linkedin:1};
 const impRef = id => doc(db,'users',USER.uid,'person_import',id);
 const ymd = s => String(s || '').slice(0, 10);
@@ -2438,6 +2460,9 @@ const rvHolds = () => (IMP || []).filter(x => x.status === 'hold');
 const rvCands = L => (L.cands && L.cands.length ? L.cands : [L.link_to]).map(impById).filter(x => x && x.status !== 'approved');
 const rvB = () => rvLinks().filter(L => L.grade === 'B' && rvCands(L).length === 1);
 const rvC = () => rvLinks().filter(L => !(L.grade === 'B' && rvCands(L).length === 1));
+const rvPicked = L => { const cs = rvCands(L); return cs.length === 1 ? cs : cs.filter(R => rvSel[L.id] && rvSel[L.id][R.id]); };
+// 표기만 다른 같은 회사인지 — 한쪽 슬러그가 다른 쪽을 품으면 같다고 본다
+const orgLike = (a, b) => { const x = orgSlug(a), y = orgSlug(b); return !!x && !!y && (x.indexOf(y) >= 0 || y.indexOf(x) >= 0); };
 async function setImp(r, o){ Object.assign(r, o); await setDoc(impRef(r.id), o, {merge:true}); }
 
 // person2 안에서 이름(별칭 포함)으로 키 찾기. 스위치가 아직 person 이어도 쓰기는 person2 로 간다.
@@ -2449,15 +2474,18 @@ function per2Key(n){
 }
 
 /* 빈 칸만 채운다. 값이 있으면 출처 순위가 낮을 때만 덮는다 — 직접 입력은 아무도 못 덮는다. */
-function fillFrom(cur, row, from, fields){
+function fillFrom(cur, row, from, fields, newer){
   const o = {}, s = {};
   for(const k of fields){
     const v = String(row[k] == null ? '' : row[k]).trim();
     if(!v) continue;
     const have = cur[k];
     const curFrom = (cur.src && cur.src[k] && cur.src[k].from) || (have ? 'manual' : '');
-    if(have && (RANK[curFrom] || 4) >= RANK[from]) continue;
-    o[k] = v; s[k] = {v:v, from:from, at:ymd(row.date) || todayStr()};
+    if(have){
+      if(curFrom === 'manual' || !RANK[curFrom]) continue;          // 직접 입력은 아무도 못 덮는다
+      if(!newer && RANK[curFrom] >= RANK[from]) continue;          // 이직이 아니면 출처 순위
+    }
+    o[k] = v; s[k] = {v:v, from:from, at:asofOf(row) || todayStr()};
   }
   if(Object.keys(s).length) o.src = s;
   return o;
@@ -2465,10 +2493,15 @@ function fillFrom(cur, row, from, fields){
 
 /* 한 사람 반영 계획. R=리멤버 행, L=LinkedIn 행 — 하나는 있어야 한다.
    쓰기는 ops 에 쌓고, 바뀌는 칸의 옛값은 chg 에 남겨 되돌릴 수 있게 한다. */
-function planPerson(R, L, ops, chg){
-  const base = R || L;
+function planPerson(R, L, ops, chg, opt){
+  opt = opt || {};
+  const move = opt.mode === 'move';
+  // 리멤버 행은 최신 명함이 앞. 같은 회사 모드에선 앞 행이 소속·직책을 정한다
+  const Rs = [R].concat(opt.more || []).filter(Boolean).sort((x, y) => asofOf(x) > asofOf(y) ? -1 : 1);
+  const all = Rs.concat(L ? [L] : []);
+  const base = Rs[0] || L;
   const nm = String(base.name || '').trim();
-  let key = base.person_key || (R && R.target) || (L && L.target) || per2Key(nm);
+  let key = all.map(r => r.person_key || r.target).filter(Boolean)[0] || per2Key(nm);
   if(key && !PER2[key]) key = null;
   const isNew = !key;
   if(isNew) key = mkKey(nm, base.org || '');
@@ -2477,7 +2510,7 @@ function planPerson(R, L, ops, chg){
   const view = () => Object.assign({}, cur, o, {src: Object.assign({}, cur.src || {}, o.src || {})});
   const merge = (row, from, fields) => {
     if(!row) return;
-    const f = fillFrom(view(), row, from, fields);
+    const f = fillFrom(view(), row, from, fields, move);
     const src = Object.assign({}, o.src || {}, f.src || {});
     Object.assign(o, f);
     if(Object.keys(src).length) o.src = src;
@@ -2486,15 +2519,23 @@ function planPerson(R, L, ops, chg){
     if(row.name && row.name !== nm) al[row.name] = 1;
     o.aliases = Object.keys(al);
     const orgs = (o.orgs || cur.orgs || []).slice();
-    if(row.org && !orgs.some(x => x.org === row.org)) orgs.push({org:row.org, from:ymd(row.date), src:from});
+    if(row.org && !orgs.some(x => x.org === row.org))
+      orgs.push({org:row.org, from: from === 'linkedin' ? '' : ymd(row.date), seen: asofOf(row), src:from});
     o.orgs = orgs;
     const im = {};
     (cur.imports || []).concat(o.imports || [], [row.id]).forEach(x => { im[x] = 1; });
     o.imports = Object.keys(im);
     row.person_key = key;
   };
-  merge(R, 'remember', ['org','role','dept','phone','mail','tel']);
-  merge(L, 'linkedin', ['org','role','url']);
+  const FR = ['org','role','dept','phone','mail','tel'], FL = ['org','role','url'];
+  const fieldsOf = r => (r.src === 'linkedin' ? FL : FR), fromOf = r => (r.src === 'linkedin' ? 'linkedin' : 'remember');
+  if(move){
+    // 이직: 날짜 오름차순으로 넣어 가장 최신 출처가 소속·직책을 정한다. 옛 소속은 orgs[] 에 남는다
+    all.slice().sort((x, y) => asofOf(x) < asofOf(y) ? -1 : 1).forEach(r => merge(r, fromOf(r), fieldsOf(r)));
+  }else{
+    Rs.forEach(r => merge(r, 'remember', FR));
+    merge(L, 'linkedin', FL);
+  }
   o.touched = new Date().toISOString();
   const before = {};
   if(!isNew) for(const k in o) before[k] = (cur[k] === undefined) ? null : cur[k];
@@ -2545,16 +2586,20 @@ async function unlinkRow(L){
   ops.push({ref: impRef(L.id), data:{kind:'new', link_to:'', cands:[], unlinked:true}, merge:true});
   await flushOps(ops);
 }
-function releaseOthers(L, R, ops){
+function releaseOthers(L, keep, ops){
   for(const x of rvCands(L))
-    if(x !== R && x.kind === 'linked'){ x.kind = 'new'; ops.push({ref: impRef(x.id), data:{kind:'new'}, merge:true}); }
+    if(keep.indexOf(x) < 0 && x.kind === 'linked'){ x.kind = 'new'; ops.push({ref: impRef(x.id), data:{kind:'new'}, merge:true}); }
 }
-async function approveLink(L, R){
+// Rs: 고른 리멤버 행들. mode 'same' = 표기만 다른 같은 회사(별칭 학습), 'move' = 이직(학습 없음, 최신이 현재 소속)
+async function approveLink(L, Rs, mode){
+  Rs = [].concat(Rs); mode = mode || 'same';
   const ops = [], chg = [];
-  planPerson(R, L, ops, chg);
-  releaseOthers(L, R, ops);
-  ops.push(...orgAliasOp(L, R));
-  await commitBatch('link', L.name + ' = ' + R.name, [L, R], ops, chg);
+  planPerson(Rs[0], L, ops, chg, {mode:mode, more:Rs.slice(1)});
+  releaseOthers(L, Rs, ops);
+  if(mode === 'same') for(const R of Rs) ops.push(...orgAliasOp(L, R));
+  const names = Rs.map(r => r.name + ' (' + (r.org || '-') + ')').join(', ');
+  await commitBatch('link', L.name + ' = ' + names + (mode === 'move' ? ' · 이직' : ''), [L].concat(Rs), ops, chg);
+  delete rvSel[L.id];
 }
 async function approveLinkAll(){
   const ops = [], chg = [], rows = [];
@@ -2632,9 +2677,9 @@ const rvBar = (s, btn) => '<div class="rvbar"><div class="s">' + s + '</div>' +
   (rvBusy ? '<span class="cnt" style="margin:0">' + esc(rvBusy) + '</span>' : btn) + '</div>';
 const lkMeta = x => '<b>' + esc(x.org || '-') + '</b> · ' + esc(x.role || '-') + ' · ' + esc(ymd(x.date) || '-');
 
-function sideBox(x, lbl, pick){
+function sideBox(x, lbl, pick, on){
   const li = x.src === 'linkedin';
-  return '<div class="side' + (pick ? ' pk' : '') + '"' + (pick ? ' data-rvpick="' + esc(pick) + '"' : '') + '>' +
+  return '<div class="side' + (pick ? ' pk' : '') + (on ? ' on' : '') + '"' + (pick ? ' data-rvpick="' + esc(pick) + '"' : '') + '>' +
     '<div class="s"><span>' + lbl + '</span><span>' + esc(ymd(x.date)) + '</span></div>' +
     '<div class="nm">' + esc(x.name) + '</div>' +
     '<div class="o">' + esc(x.org || '-') + (x.dept ? ' · ' + esc(x.dept) : '') + '</div>' +
@@ -2664,18 +2709,26 @@ function rvLinkView(){
   if(C.length){
     h += '<div class="cdsec">이름만 같음 <em>' + C.length + '쌍 — 나란히 보고 고릅니다</em></div>';
     C.forEach((L, i) => {
-      const cs = rvCands(L);
+      const cs = rvCands(L), pk = rvPicked(L), sel = rvSel[L.id] || {}, multi = cs.length > 1;
+      const orgsAll = [L].concat(pk).map(r => r.org).filter(Boolean);
+      const diff = orgsAll.some(o => orgsAll.some(p => !orgLike(o, p)));
+      let act, hint = '';
+      if(!pk.length) act = '<span class="rvhint" style="flex:1;margin:0;align-self:center">리멤버 카드를 눌러 고르세요</span>';
+      else if(diff) act = '<button class="btn xs p" data-rvok="' + esc(L.id) + '" data-mode="same">같은 사람 · 같은 회사</button>' +
+                          '<button class="btn xs p" data-rvok="' + esc(L.id) + '" data-mode="move">같은 사람 · 이직</button>';
+      else act = '<button class="btn xs p" data-rvok="' + esc(L.id) + '">같은 사람' + (pk.length > 1 ? ' (' + pk.length + '장)' : '') + '</button>';
+      if(pk.length && diff){
+        const seq = [L].concat(pk).sort((x, y) => asofOf(x) < asofOf(y) ? -1 : 1);
+        hint = '<div class="rvhint">같은 회사 → 학습: <b>' + esc(pk.map(R => R.org || '-').concat([L.org || '-']).join(' = ')) + '</b><br>' +
+               '이직 → 이력: <b>' + seq.map(r => esc(r.org || '-') + '(' + (r.src === 'linkedin' ? '현재' : ymd(r.date).slice(0, 7)) + ')').join(' → ') + '</b></div>';
+      }
       h += '<div class="cmp"><div class="hd">같은 사람입니까?<span class="n">' + (i + 1) + ' / ' + C.length + '</span></div>' +
         '<div class="two">' + sideBox(L, 'LINKEDIN', '') +
-        cs.map((R, j) => sideBox(R, cs.length > 1 ? '리멤버 ' + (j + 1) + ' — 눌러서 선택' : '리멤버',
-                                 cs.length > 1 ? L.id + '|' + R.id : '')).join('') + '</div>' +
-        '<div class="act">' +
-        (cs.length === 1 ? '<button class="btn xs p" data-rvok="' + esc(L.id) + '">같은 사람</button>' : '') +
+        cs.map((R, j) => sideBox(R, multi ? '리멤버 ' + (j + 1) + (sel[R.id] ? ' — 선택됨' : ' — 눌러서 선택') : '리멤버',
+                                 multi ? L.id + '|' + R.id : '', !!sel[R.id])).join('') + '</div>' +
+        '<div class="act">' + act +
         '<button class="btn xs" data-rvno="' + esc(L.id) + '">다른 사람</button>' +
-        '<button class="btn xs" data-rvhold="' + esc(L.id) + '">보류</button></div>' +
-        (cs.length === 1 && L.org && cs[0].org && L.org !== cs[0].org
-          ? '<div class="rvhint">승인 시 학습: <b>' + esc(cs[0].org) + ' = ' + esc(L.org) + '</b></div>' : '') +
-        '</div>';
+        '<button class="btn xs" data-rvhold="' + esc(L.id) + '">보류</button></div>' + hint + '</div>';
     });
   }
   return h + rvBar('<b>' + B.length + '쌍</b> 근거 있음 · 이름만 ' + C.length + '쌍',
@@ -2700,23 +2753,51 @@ function rvNewView(){
   const sel = rows.filter(r => r.status === 'open' && !rvOff[r.id]);
   let h = '<div class="chips" style="margin-bottom:9px">' + CH.map(c => '<div class="chip' + (rvFilt === c[0] ? ' on' : '') +
       '" data-rvf="' + c[0] + '">' + c[1] + ' ' + c[2].toLocaleString() + '</div>').join('') + '</div>' +
-    '<div class="cnt" style="margin:0 0 8px">체크된 사람만 등록됩니다. 행을 누르면 이름·회사·직책을 고칠 수 있습니다. ' +
+    '<div class="cnt" style="margin:0 0 8px">체크된 사람만 등록됩니다. 행을 누르면 상세가 펼쳐지고, 그 안에서 고칠 수 있습니다. ' +
     '체크 해제는 보류 — 지우지 않습니다.</div>';
   if(!rows.length) return h + '<div class="empty">없습니다.</div>';
   h += '<div class="rvgrid">' + rows.slice(0, rvMore).map(r => {
     const on = r.status === 'open' && !rvOff[r.id];
     return '<div class="rvrow' + (on ? '' : ' off') + '">' +
       '<div class="ck' + (on ? ' on' : '') + '" data-rvck="' + esc(r.id) + '"></div>' +
-      '<div class="b" data-rved="' + esc(r.id) + '"><div class="nm">' + esc(r.name) + ' ' + srcTag(r.src) +
+      '<div class="b" data-rvx="' + esc(r.id) + '"><div class="nm">' + esc(r.name) + ' ' + srcTag(r.src) +
       (r.fn ? '<span class="srcx">기록 ' + r.fn + '</span>' : '') +
       (r.status === 'hold' ? '<span class="srcx">' + esc(r.hold_why || '보류') + '</span>' : '') + '</div>' +
       '<div class="o">' + esc(r.org || '-') + (r.dept ? ' · ' + esc(r.dept) : '') + ' · ' + esc(r.role || '-') + '</div></div>' +
-      '<div class="d">' + (r.ent ? '<span class="ent">상대조직</span><br>' : '') + esc(ymd(r.date)) + '</div></div>';
+      '<div class="d">' + (r.ent ? '<span class="ent">상대조직</span><br>' : '') + esc(ymd(r.date)) + '</div>' +
+      (rvOpen === r.id ? rvDetail(r) : '') + '</div>';
   }).join('') + '</div>';
   if(rows.length > rvMore)
     h += '<button class="btn" id="rv-more" style="width:100%;margin-top:4px">더 보기 (' + (rows.length - rvMore).toLocaleString() + ')</button>';
   return h + rvBar('<b>' + sel.length.toLocaleString() + '</b> 선택 · ' + (rows.length - sel.length) + ' 보류',
     sel.length ? '<button class="btn p" id="rv-new-ok">선택 승인</button>' : '');
+}
+
+// 신규 행 상세 — 체크할지 판단할 근거를 다 보여 준다
+function rvDetail(r){
+  const li = r.src === 'linkedin';
+  const kv = (k, v) => v ? '<div class="k">' + k + '</div><div class="v">' + v + '</div>' : '';
+  const same = Object.keys(PER2).filter(k => !PER2[k].merged_into && PER2[k].org && r.org && orgLike(PER2[k].org, r.org))
+    .map(k => PER2[k].name + (PER2[k].role ? ' ' + PER2[k].role : ''));
+  let g = '';
+  if(li){
+    g += kv('회사', esc(r.org)) + kv('직함', esc(r.role)) + kv('메일', esc(r.mail)) + kv('연결일', esc(ymd(r.date))) +
+         kv('프로필', r.url ? '<a href="' + esc(r.url) + '" target="_blank" rel="noopener">' +
+                             esc(String(r.url).replace(/^https?:\/\/(www\.)?/, '')) + '</a>' : '');
+  }else{
+    g += kv('회사', esc(r.org)) + kv('부서', esc(r.dept)) +
+         kv('직책', esc([r.role].concat(r.role_extra || []).filter(Boolean).join(' · '))) +
+         kv('휴대폰', esc(r.phone ? fmtPhone(r.phone) : '')) + kv('직통', esc(r.tel)) + kv('팩스', esc(r.fax)) +
+         kv('메일', esc(r.mail)) + kv('주소', esc(r.addr)) + kv('메모', esc(r.note)) + kv('명함 등록', esc(ymd(r.date))) +
+         kv('원본 이름', (r.name_raw && r.name_raw !== r.name) ? esc(r.name_raw) : '');
+  }
+  g += kv('별칭', esc((r.aliases || []).join(', ')));
+  g += kv('같은 회사 등록', same.length ? esc(same.slice(0, 4).join(', ')) + (same.length > 4 ? ' 외 ' + (same.length - 4) + '명' : '') : '');
+  if(r.fn) g += kv('Field Notes', '기록 ' + r.fn + '건' + (r.fn_org ? ' · ' + esc(r.fn_org) : ''));
+  return '<div class="rvdet"><div class="kv">' + g + '</div>' +
+    '<div class="act"><button class="btn xs" data-rved="' + esc(r.id) + '">고치기</button>' +
+    (r.status === 'hold' ? '<button class="btn xs" data-rvunhold="' + esc(r.id) + '">보류 해제</button>'
+                         : '<button class="btn xs" data-rvhold="' + esc(r.id) + '">보류</button>') + '</div></div>';
 }
 
 function rvUpdView(){
