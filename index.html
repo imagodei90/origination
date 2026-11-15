@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Work">
 <link rel="manifest" href="manifest.json">
 <title>Work</title>
-<link rel="icon" href="favicon.ico?v=20261115_1843" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_1843">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_1843">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_1843">
+<link rel="icon" href="favicon.ico?v=20261115_1850" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_1850">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_1850">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_1850">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -541,10 +541,10 @@ a.btn{display:inline-block;text-decoration:none;color:var(--fg);line-height:1.2}
   <h1>Work</h1>
   <div class="rgt">
     <div class="tabs" id="tabs">
-    <div class="tb" data-t="idea">Ideas</div>
+    <div class="tb on" data-t="idea">Ideas</div>
     <div class="tb" data-t="field">Field Notes</div>
     <div class="tb" data-t="cad">Cadence</div>
-    <div class="tb on" data-t="scan">Screening</div>
+    <div class="tb" data-t="scan">Screening</div>
     <div class="tb" data-t="watch">Watchlist</div>
     <div class="tb" data-t="deal">Deals</div>
     </div>
@@ -584,7 +584,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20261115_1843';
+const BUILD = '20261115_1850';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
