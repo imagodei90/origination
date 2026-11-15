@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Work">
 <link rel="manifest" href="manifest.json">
 <title>Work</title>
-<link rel="icon" href="favicon.ico?v=20261115_2014" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_2014">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_2014">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_2014">
+<link rel="icon" href="favicon.ico?v=20261115_2017" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261115_2017">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261115_2017">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261115_2017">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -601,7 +601,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20261115_2014';
+const BUILD = '20261115_2017';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -1068,7 +1068,7 @@ document.addEventListener('click', async e => {
     return;
   }
   const ed = e.target.closest('[data-edit]');
-  if(ed){ logSheet = ed.dataset.edit; render(); return; }
+  if(ed){ logSheet = ed.dataset.edit; delete COMBO['lg-c']; render(); return; }
   const dl = e.target.closest('[data-del]');
   if(dl){
     if(!confirm('이 기록을 지웁니다. vault 노트는 남습니다.')) return;
@@ -1107,6 +1107,13 @@ document.addEventListener('click', async e => {
                status: status};
     const txt = sh.querySelector('#lg-a').value.trim();
     if(status === 'planned') o.agenda = txt; else o.note = txt;
+    const l0 = LOGS.find(x => x.id === logSheet) || {}, nc = comboVal('lg-c');
+    if(nc && nc !== (l0.company || '')){
+      o.company = nc; if(!l0.title || l0.title === l0.company) o.title = nc;
+      if(l0.company) o.company_raw = l0.company;
+      if(l0.company && ENT && ENT.items.some(x => x.n === nc) && !ENT.items.some(x => x.n === l0.company))
+        addDoc(collection(db,'users',USER.uid,'org_alias'), {a:l0.company, b:nc, at:todayStr(), by:'edit'}).catch(() => {});
+    }
     try{ await updLog(logSheet, o); }catch(x){ alert(x.message); return; }
     logSheet = null; render(); return;
   }
@@ -1182,7 +1189,7 @@ document.addEventListener('click', async e => {
 
 
   // ── 가져오기 검토 ──
-  if(e.target.closest('[data-shx]')){ rvEdit = null; mgSheet = null; pkSheet = null; }
+  if(e.target.closest('[data-shx]')){ rvEdit = null; mgSheet = null; pkSheet = null; crSheet = null; }
   // ── 캘린더 ──
   const calck = e.target.closest('[data-calck]');
   if(calck){ const id = calck.dataset.calck; calDefault(); if(calSel[id]) delete calSel[id]; else calSel[id] = 1; render(); return; }
@@ -1216,6 +1223,19 @@ document.addEventListener('click', async e => {
     rvBusy = '기록 중… ' + n + '건'; render();
     try{ await approveCal(); }catch(x){ alert('실패 — ' + x.message); }
     rvBusy = ''; render(); return;
+  }
+  // ── 상대 이름 수정 ──
+  const cr = e.target.closest('[data-cr]');
+  if(cr){ crSheet = {from: cr.dataset.cr}; delete COMBO['cr-c']; render(); return; }
+  const crsug = e.target.closest('[data-crsug]');
+  if(crsug){ COMBO['cr-c'] = crsug.dataset.crsug; if($('cr-c')) $('cr-c').value = crsug.dataset.crsug; render(); return; }
+  if(e.target.id === 'cr-ok' && crSheet){
+    const from = crSheet.from, to = comboVal('cr-c');
+    if(!to){ alert('이름을 넣으세요'); return; }
+    if(to === from){ crSheet = null; render(); return; }
+    e.target.disabled = true;
+    try{ await renameCompany(from, to); }catch(x){ alert('실패 — ' + x.message); e.target.disabled = false; return; }
+    crSheet = null; render(); return;
   }
   // ── 기록 확인 ──
   const fixsug = e.target.closest('[data-fixsug]');
@@ -2168,6 +2188,8 @@ function sheetLog(){
   return '<div class="shbg" data-shx="1"></div><div class="sheet">' +
     '<div class="shh">' + esc(l.company || '기록 수정') +
       (plan ? ' <span class="pl n">예정</span>' : '') + '</div>' +
+    '<div class="fr"><label>상대 <em style="font-style:normal;color:var(--dim)">엔티티에서 고르면 Cadence 가 한 곳으로 묶입니다</em></label>' +
+      '<div class="combo" data-combo="lg-c"><input id="lg-c" value="' + esc(l.company || '') + '" placeholder="회사·기관 이름" autocomplete="off"><ul id="lg-c-l"></ul></div></div>' +
     '<div class="fr"><label>일자</label>' +
       '<input id="lg-d" type="date" value="' + esc(l.date || '') + '"></div>' +
     '<div class="fr"><label>컨택 종류</label><div class="kinds" id="lg-kinds">' + ks + '</div></div>' +
@@ -2294,7 +2316,8 @@ function cadRow(r){
     }
     h += '<div style="margin-top:8px">' +
       '<button class="chip on" data-cq="' + esc(r.company) + '">컨택 담기</button> ' +
-      '<button class="chip" data-cs="' + esc(r.company) + '">팔로업 설정</button></div></div>';
+      '<button class="chip" data-cs="' + esc(r.company) + '">팔로업 설정</button> ' +
+      '<button class="chip" data-cr="' + esc(r.company) + '">이름 수정</button></div></div>';
   }
   return h + '</div>';
 }
@@ -3055,23 +3078,55 @@ function rvFixView(){
   }
   return h;
 }
-async function fixApply(raw, canon){
-  const row = fixRows().find(r => r.raw === raw); if(!row) return;
+/* 상대 이름 바꾸기 — 그 이름의 기록 전부 + 팔로업 설정. 옛 표기는 별칭으로 남긴다(정식 이름일 때).
+   canon === from 이면 '그대로 둠' 표시만(별칭 a=b). 이력에서 되돌릴 수 있다. */
+async function renameCompany(from, canon){
+  const ids = LOGS.filter(l => (l.company || '') === from).map(l => l.id);
   const ops = [], chg = [];
-  if(canon !== raw) for(const id of row.ids){
-    const l = LOGS.find(x => x.id === id) || {};
-    ops.push({ref: logRef(id), data:{company:canon, title:(l.title === raw || !l.title) ? canon : l.title, company_raw:raw}, merge:true});
-    chg.push({col:'field_notes', id:id, before:{company:raw, title:(l.title || raw), company_raw:null}});
+  const isEnt = n => !!(ENT && ENT.items.some(x => x.n === n));
+  if(canon !== from){
+    for(const id of ids){
+      const l = LOGS.find(x => x.id === id) || {};
+      ops.push({ref: logRef(id), data:{company:canon, title:(l.title === from || !l.title) ? canon : l.title, company_raw:from}, merge:true});
+      chg.push({col:'field_notes', id:id, before:{company:from, title:(l.title || from), company_raw:(l.company_raw === undefined ? null : l.company_raw)}});
+    }
+    const ok = cadKey(from), nk = cadKey(canon), oc = CAD[ok];
+    if(oc && !CAD[nk]){
+      const cp = Object.assign({}, oc, {company:canon, renamed_from:from});
+      ops.push({ref: doc(db,'users',USER.uid,'cadence',nk), data:cp, merge:true});
+      chg.push({col:'cadence', id:nk, before:null});
+    }
   }
-  const ar = doc(collection(db,'users',USER.uid,'org_alias'));
-  ops.push({ref: ar, data:{a:raw, b:canon, at:todayStr(), by:'fix'}});
-  chg.push({col:'org_alias', id:ar.id, before:null});
+  let aliasId = '';
+  if(canon === from || isEnt(canon)){
+    const ar = doc(collection(db,'users',USER.uid,'org_alias'));
+    ops.push({ref: ar, data:{a:from, b:canon, at:todayStr(), by:(canon === from ? 'keep' : 'rename')}});
+    chg.push({col:'org_alias', id:ar.id, before:null});
+    aliasId = ar.id;
+  }
   const bid = 'b' + Date.now(), at = new Date().toISOString();
-  const rec = {at:at, kind:'fix', label:'기록 상대 ' + raw + (canon === raw ? ' 그대로' : ' → ' + canon), n:row.ids.length, imports:[], alias:ar.id, changes:chg};
+  const rec = {at:at, kind:'fix', label:'상대 ' + from + (canon === from ? ' 그대로' : ' → ' + canon), n:ids.length, imports:[], alias:aliasId, changes:chg};
   ops.push({ref: doc(db,'users',USER.uid,'person_batch',bid), data:rec});
   await flushOps(ops);
-  OAL.push({id:ar.id, a:raw, b:canon});
+  if(aliasId) OAL.push({id:aliasId, a:from, b:canon});
   BATCH.unshift(Object.assign({id:bid}, rec));
+}
+const fixApply = (raw, canon) => renameCompany(raw, canon);
+let crSheet = null;
+function sheetRename(){
+  if(!crSheet) return '';
+  const from = crSheet.from, isEnt = !!(ENT && ENT.items.some(x => x.n === from));
+  const sug = isEnt ? [] : fixSug(from).filter(s => s !== from);
+  const cval = (COMBO['cr-c'] != null) ? COMBO['cr-c'] : from;
+  const n = LOGS.filter(l => (l.company || '') === from).length;
+  return '<div class="shbg" data-shx="1"></div><div class="sheet">' +
+    '<div class="shh" style="display:flex;align-items:center;gap:8px">이름 수정 — ' + esc(from) + '<button class="btn xs" data-shx="1" style="margin-left:auto">닫기</button></div>' +
+    '<div class="cnt" style="margin:0 0 8px">이 상대의 기록 ' + n + '건과 팔로업 설정이 새 이름으로 옮겨갑니다. 옛 표기는 별칭으로 남아 다음부터 자동으로 묶입니다. 이력에서 되돌릴 수 있습니다.' +
+      (isEnt ? '' : ' 지금 이름은 엔티티 정식 이름이 아닙니다.') + '</div>' +
+    (sug.length ? '<div class="fr"><label>추정</label><div>' + sug.map(s => '<span class="pp' + (s === cval ? ' ok' : '') + '" style="cursor:pointer;margin:0 4px 4px 0" data-crsug="' + esc(s) + '">' + esc(s) + '</span>').join('') + '</div></div>' : '') +
+    '<div class="fr"><label>새 이름 <em style="font-style:normal;color:var(--dim)">엔티티에서 고르거나 그대로 적기</em></label>' +
+      '<div class="combo" data-combo="cr-c"><input id="cr-c" value="' + esc(cval) + '" autocomplete="off"><ul id="cr-c-l"></ul></div></div>' +
+    '<div style="display:flex;gap:6px;margin-top:11px"><button class="btn p" id="cr-ok">적용</button><button class="btn" data-shx="1">닫기</button></div></div>';
 }
 
 /* ── 화면 ── */
@@ -3559,7 +3614,7 @@ function render(){
     ((USER || !AUTH_READY)?'':'<div class="note" style="background:none;border:1px solid var(--bd);'+
       'border-radius:9px;padding:9px 11px;font-size:11px;color:var(--mut);margin-bottom:11px">'+
       '로그인하지 않았습니다 — 폼은 볼 수 있지만 담기는 되지 않습니다.</div>')+
-    (TAB==='idea'?paneIdea():(TAB==='cad'?paneCad():(TAB==='deal'?paneDeal():paneField()))) + sheetCad() + sheetPC() + sheetLog() + sheetPer() + sheetMerge() + sheetPick() + sheetRv();
+    (TAB==='idea'?paneIdea():(TAB==='cad'?paneCad():(TAB==='deal'?paneDeal():paneField()))) + sheetCad() + sheetPC() + sheetLog() + sheetPer() + sheetMerge() + sheetPick() + sheetRename() + sheetRv();
   putForm(keep);
   if(TAB==='cad'){
     const cf=$('cd-file');
