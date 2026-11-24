@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Work">
 <link rel="manifest" href="manifest.json">
 <title>Work</title>
-<link rel="icon" href="favicon.ico?v=20261124_1910" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261124_1910">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261124_1910">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261124_1910">
+<link rel="icon" href="favicon.ico?v=20261124_1915" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261124_1915">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261124_1915">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261124_1915">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -603,7 +603,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20261124_1910';
+const BUILD = '20261124_1915';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -2012,7 +2012,8 @@ function sheetPC(){
 /* -- Deals -- GP 기준 딜 원장 -----------------------
    상장 딜은 DART 공시 10년, 비상장은 홈페이지·vault 에서 왔다.
    deals.json 은 탭을 처음 열 때만 받는다(367KB). */
-const OCL = {closed:['성사','bg-o'], dropped:['드랍','bg-l'], open:['진행·보유','bg-s']};
+const OCL = {closed:['성사','bg-o'], dropped:['드랍','bg-l'], open:['진행·보유','bg-s'],
+             unknown:['미확인','bg-l']};
 
 async function loadDeals(){
   if(DEALS) return DEALS;
@@ -2027,7 +2028,9 @@ function dealLine(d, full){
   const per = d[1] ? (d[1].slice(2,4)+'.'+d[1].slice(4,6) +
       (d[2] && d[2] !== d[1] ? '~'+d[2].slice(2,4)+'.'+d[2].slice(4,6) : '')) : '';
   const hy = d[10];
-  const oc = d[3] === 'closed' ? '회수' : (d[3] === 'dropped' ? '무산' : '보유');
+  // 홈페이지 트랙레코드처럼 보유·회수를 밝히지 않은 행은 '보유'라고 적지 않는다
+  const oc = d[3] === 'closed' ? '회수' : (d[3] === 'dropped' ? '무산' :
+             (d[3] === 'unknown' ? '미확인' : '보유'));
   const pc = d[12] || null, did = d[13] || '';
   const ask = did && PCM[did] ? PCM[did] : null;
   let h = '<div class="hz" style="display:flex;gap:6px;align-items:baseline">' +
