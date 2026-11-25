@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Work">
 <link rel="manifest" href="manifest.json">
 <title>Work</title>
-<link rel="icon" href="favicon.ico?v=20261124_1917" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261124_1917">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261124_1917">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261124_1917">
+<link rel="icon" href="favicon.ico?v=20261125_1557" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261125_1557">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261125_1557">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261125_1557">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -202,6 +202,60 @@ table.tt thead th:first-child{z-index:3}
 .pp{display:flex;align-items:baseline;gap:6px;font-size:11px;padding:3px 0}
 .pp b{font-weight:500}
 .hz{font-size:10px;color:var(--mut);padding:2px 0;font-variant-numeric:tabular-nums}
+/* Deals — 자산 행. 폰은 세로 쌓기, 700px 이상은 표 (2026-11-25 시안) */
+.cdr1 b{font-size:15px}
+.cdr2{font-size:12px}
+.cdr .cdm{font-size:11px}
+.dsec{border-top:1px solid var(--hair);margin-top:10px;padding-top:4px}
+.dsec>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:8px 0;
+  font:11px "JetBrains Mono","SF Mono",monospace;letter-spacing:.1em;color:var(--dim);text-transform:uppercase}
+.dsec>summary::-webkit-details-marker{display:none}
+.dsec>summary::before{content:'\25B8';font-size:11px;transition:transform .15s}
+.dsec[open]>summary::before{transform:rotate(90deg)}
+.dsec>summary i{font-style:normal;color:var(--fg);font:600 13px "Inter",-apple-system,"Pretendard",sans-serif;text-transform:none}
+.dsec>summary em{font-style:normal;margin-left:auto;letter-spacing:0}
+.dsec .swlg{font-size:10.5px;margin:0 0 6px}
+.drow{display:grid;grid-template-columns:16px 1fr auto;gap:5px 10px;align-items:center;
+  padding:10px 0;border-top:1px solid var(--hair);cursor:default}
+.drows>.drow:first-child{border-top:none}
+.drow .sw{width:13px;height:13px;border-radius:3px;top:0}
+.dnm{font-size:14.5px;font-weight:600;line-height:1.3;min-width:0;overflow-wrap:anywhere}
+.dnm small{font-weight:400;color:var(--dim);font-size:11.5px;margin-left:6px;white-space:nowrap}
+.dhold{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.dhold b{font-size:14px;font-weight:600}
+.dhold small{display:block;font-size:11px;color:var(--dim)}
+.dchips{grid-column:2/4;display:flex;flex-wrap:wrap;gap:4px}
+.dch{font-size:11px;padding:2px 7px;border-radius:5px;background:var(--card2);color:var(--mut);border:1px solid var(--hair)}
+.dch.k{color:var(--fg);border-color:var(--bd)}
+.dch.src{font-family:"JetBrains Mono","SF Mono",monospace;font-size:10px;letter-spacing:.04em}
+.ddesc{grid-column:2/4;font-size:12.5px;color:var(--fg);opacity:.72;line-height:1.5;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ddesc a{color:var(--acc);text-decoration:none}
+.drow.open .ddesc{display:block;-webkit-line-clamp:unset}
+.dacts{grid-column:2/4;display:flex;gap:6px;flex-wrap:wrap}
+.dacts .ab{font-size:12px;padding:7px 12px;color:var(--fg);min-height:32px}
+.ab.p{background:var(--acc);color:var(--acc-fg);border-color:var(--acc);font-weight:600}
+.dhead{display:none}
+.dmore>summary{list-style:none;cursor:pointer;font-size:12px;color:var(--acc);padding:8px 0 4px}
+.dmore>summary::-webkit-details-marker{display:none}
+.dfund{display:flex;gap:10px;align-items:baseline;padding:6px 0;border-top:1px solid var(--hair);font-size:13px}
+.dfunds>.dfund:first-child{border-top:none}
+.dfund .y{color:var(--dim);min-width:36px;font-size:12px;font-variant-numeric:tabular-nums}
+.dfund .a{margin-left:auto;color:var(--mut);white-space:nowrap;font-variant-numeric:tabular-nums}
+@media(min-width:700px){
+  .drow,.dhead{grid-template-columns:16px minmax(170px,1.2fr) 100px 130px 2fr 150px;gap:3px 14px}
+  .dhold{grid-column:3;text-align:left}
+  .dhold b{font-size:15px}
+  .dhold small{display:inline;margin-left:4px}
+  .dchips{grid-column:4;flex-direction:column;align-items:flex-start;gap:3px}
+  .ddesc{grid-column:5}
+  .dacts{grid-column:6;justify-content:flex-end;margin:0}
+  .dacts .ab{padding:6px 10px}
+  .dhead{display:grid;font:10.5px "JetBrains Mono","SF Mono",monospace;color:var(--dim);letter-spacing:.1em;
+    text-transform:uppercase;padding:4px 0 6px}
+  .dfunds{display:grid;grid-template-columns:1fr 1fr;column-gap:28px}
+  .dfunds>.dfund:nth-child(2){border-top:none}
+}
 .mglist{max-height:38vh;overflow:auto;margin:0 0 10px;border-top:1px solid var(--hair)}
 .mgrow{display:flex;gap:8px;align-items:baseline;padding:8px 4px;border-bottom:1px solid var(--hair);cursor:pointer}
 .mgrow:active{background:rgba(30,164,157,.06)}
@@ -603,7 +657,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20261124_1917';
+const BUILD = '20261125_1557';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -1188,13 +1242,28 @@ document.addEventListener('click', async e => {
     pcSheet = null; render(); return;
   }
 
+  // Deals 자산 행 — 탭하면 설명 전체가 펼쳐진다. 버튼·링크는 제외
+  const dr = e.target.closest('[data-drow]');
+  if(dr && !e.target.closest('button,a')){ dr.classList.toggle('open'); return; }
+
+  // 각 담기 — Ideas 탭으로 넘기고 대상·각을 미리 채운다 (PEF 포트폴리오 자산도 파이프라인에 넣는 길)
+  const i2 = e.target.closest('[data-idea2]');
+  if(i2){
+    ideaPrefill = i2.dataset.idea2; ideaAngle = i2.dataset.ang || ''; TAB = 'idea';
+    document.querySelectorAll('.tb').forEach(x => x.classList.toggle('on', x.dataset.t === 'idea'));
+    render();
+    if($('id-t')) $('id-t').value = ideaPrefill;
+    if($('id-a')) $('id-a').value = ideaAngle;
+    window.scrollTo(0, 0); return;
+  }
+
   // Deals 모드 칩
   const dm = e.target.closest('[data-dm]');
   if(dm){ dealMode = dm.dataset.dm; dealOpen = null; render(); return; }
 
   // Deals GP 카드 펼치기
   const dc = e.target.closest('[data-deal]');
-  if(dc && !e.target.closest('a')){
+  if(dc && !e.target.closest('a') && !e.target.closest('.cdx')){   // 펼친 본문 안은 카드를 닫지 않는다
     const k = dc.dataset.deal;
     dealOpen = (dealOpen === k) ? null : k;
     render(); return;
@@ -1642,7 +1711,7 @@ function paneDealIdea(){
     '<div class="lbl">직접 담기</div>';
 }
 /* ── Ideas 탭 ─────────────────────────────────── */
-let ideaPrefill = '';
+let ideaPrefill = '', ideaAngle = '';
 function paneIdea(){
   if(ideaPrefill){ COMBO['id-t']=ideaPrefill; }
   return paneDealIdea()+'<div class="card">'+
@@ -1650,7 +1719,7 @@ function paneIdea(){
       (ENT?ENT.items.length.toLocaleString():'—')+'곳에서 걸러집니다</em></label>'+
       comboHTML('id-t','회사·기관 이름')+'</div>'+
     '<div class="fr"><label>각 · 아이디어 <em>메모 수준이어도 됩니다 — PC가 다듬습니다</em></label>'+
-      '<textarea id="id-a" placeholder="왜 지금 이 회사인가"></textarea></div>'+
+      '<textarea id="id-a" placeholder="왜 지금 이 회사인가">'+esc(ideaAngle||'')+'</textarea></div>'+
     '<div class="row2">'+
       '<div class="fr"><label>stage</label><select id="id-s">'+
         ['idea','contacted','meeting','proposal','dropped']
@@ -2024,91 +2093,120 @@ async function loadDeals(){
   return DEALS;
 }
 
-function dealLine(d, full){
-  const per = d[1] ? (d[1].slice(2,4)+'.'+d[1].slice(4,6) +
-      (d[2] && d[2] !== d[1] ? '~'+d[2].slice(2,4)+'.'+d[2].slice(4,6) : '')) : '';
+/* 자산 행 — 폰은 세로 쌓기, 700px 이상은 표. 같은 HTML 이다 (2026-11-25 시안).
+   d[14] 는 build_deals 가 출처별 JSON 을 풀어 놓은 구조 필드 {stake,val,asof,fund,typ,st,n} */
+const GEN_FUND = {'현재 포트폴리오':1,'회수 이력':1,'기타':1,'포트폴리오':1};
+const isStakeOnly = x => String(x[4]||'') === '5%보고';
+function dealLine(d, o){
+  o = o || {};
+  const inf = d[14] || {};
+  // 월을 모르는 연도는 YYYY00 으로 온다 — 01월로 꾸미지 않고 연도만 쓴다
+  const fp = x => x.slice(4,6) === '00' ? x.slice(0,4) : x.slice(2,4)+'.'+x.slice(4,6);
+  const per = d[1] ? fp(d[1]) : '';
+  const per2 = (d[2] && d[2] !== d[1]) ? fp(d[2]) : '';
+  const closed = d[3] === 'closed';
   const hy = d[10];
-  // 홈페이지 트랙레코드처럼 보유·회수를 밝히지 않은 행은 '보유'라고 적지 않는다
-  const oc = d[3] === 'closed' ? '회수' : (d[3] === 'dropped' ? '무산' :
-             (d[3] === 'unknown' ? '미확인' : '보유'));
+  const oc = closed ? '회수' : (d[3] === 'dropped' ? '무산' : (d[3] === 'unknown' ? '미확인' : '보유'));
   const pc = d[12] || null, did = d[13] || '';
   const ask = did && PCM[did] ? PCM[did] : null;
-  let h = '<div class="hz" style="display:flex;gap:6px;align-items:baseline">' +
-    swatch(d[3] === 'closed' ? null : inten(hy, HOLD_CUTS)) +
-    '<span style="color:var(--dim);min-width:64px">' + per + '</span>' +
-    '<b style="font-weight:600;font-size:11px">' + esc(d[0]) + '</b>' +
-    (hy != null ? '<span class="cdm">' + hy + '년 ' + oc + '</span>'
-                : '<span class="cdm">' + oc + '</span>') + '</div>';
-  // 사업 한 줄
+  const srcs = String(d[4]||'').split('·').filter(Boolean);
+  const val = d[6] || inf.val;
+  const chips = [];
+  if(inf.stake != null) chips.push(['k', '지분 ' + (Math.round(inf.stake*10)/10) + '%']);
+  if(val) chips.push(['k', Number(val).toLocaleString() + '억']);
+  if(ask && ask.ask) chips.push(['k', '매각희망 ' + Number(ask.ask).toLocaleString() + '억']);
+  if(inf.fund && !GEN_FUND[inf.fund]) chips.push(['', inf.fund]);
+  if(inf.typ) chips.push(['', inf.typ]);
+  if(d[5]) chips.push(['', d[5]]);
+  for(const sname of srcs)
+    chips.push(['src', sname + (sname === 'PE시트' && inf.asof ? ' ' + inf.asof : '')]);
+  if(d[11]) chips.push(['src', '보유확인']);
+  if(pc && pc[2]) chips.push(['k', '주관 ' + pc[2]]);
   const biz = (ask && ask.biz) || (pc && pc[0]) || '';
-  if(biz) h += '<div style="font-size:10px;color:var(--mut);margin:0 0 2px 80px">' +
-    esc(biz) + ' <span style="color:var(--dim);font-size:9px">' +
-    esc((ask && ask.biz) ? '내 메모' : (pc ? pc[1] : '')) + '</span></div>';
-  h += '<div style="font-size:9.5px;color:var(--dim);margin:0 0 2px 80px">' +
-    esc(d[4]) + (d[5] ? ' · ' + esc(d[5]) : '') +
-    (d[6] ? ' · 양수도 ' + d[6].toLocaleString() + '억' : '') +
-    (ask && ask.ask ? ' · 매각희망 ' + Number(ask.ask).toLocaleString() + '억' : '') +
-    (d[7] ? ' · ' + esc(d[7]) : '') + (d[9] ? ' · ' + esc(d[9]) : '') +
-    (d[11] ? ' · 보유확인' : '') + '</div>';
-  // 자문사
-  if(pc && pc[2]) h += '<div style="font-size:9.5px;margin:0 0 4px 80px">' +
-    '<span class="bg">주관 ' + esc(pc[2]) + '</span>' +
-    (pc[5] ? ' <span style="color:var(--dim)">' + esc(pc[5]) + '</span>' : '') +
-    (pc[4] ? ' <a href="' + esc(pc[4]) + '" target="_blank" rel="noopener" ' +
-      'style="color:var(--acc);text-decoration:none">출처 →</a>' : '') + '</div>';
-  else if(full && pc) h += '<div style="font-size:9.5px;color:var(--dim);margin:0 0 4px 80px">' +
-    '주관사 보도 없음</div>';
-  if(full && did) h += '<div style="margin:0 0 6px 80px">' +
-    '<button class="chip" data-pc="' + esc(did) + '" data-pcn="' + esc(d[0]) + '">' +
-    (ask ? '메모 수정' : '매각희망가·메모') + '</button></div>';
-  return h;
+  const desc = [biz, inf.st].filter(Boolean).join(' — ');
+  const hold = hy != null
+    ? '<b>' + hy + '년</b><small>' + oc + '</small>'
+    : '<b>' + oc + '</b>' + (per2 ? '<small>' + per2 + '</small>' : '');
+  let h = '<div class="drow" data-drow="1">' +
+    swatch(closed ? null : inten(hy, HOLD_CUTS)) +
+    '<div class="dnm">' + esc(d[0]) +
+      (per ? '<small>' + per + (closed && per2 ? '~' + per2 : '') + (closed ? '' : ' 진입') + '</small>' : '') +
+    '</div>' +
+    '<div class="dhold">' + hold + '</div>' +
+    '<div class="dchips">' + chips.map(c => '<span class="dch ' + c[0] + '">' + esc(c[1]) + '</span>').join('') + '</div>' +
+    '<div class="ddesc">' + (desc ? esc(desc) : '<span style="opacity:.5">설명 없음</span>') +
+      (pc && pc[4] ? ' <a href="' + esc(pc[4]) + '" target="_blank" rel="noopener">출처 →</a>' : '') +
+    '</div>';
+  if(o.act){
+    const ang = [o.gp || '', hy != null ? '보유 ' + hy + '년' : '',
+                 inf.fund && !GEN_FUND[inf.fund] ? '펀드 ' + inf.fund : '',
+                 inf.stake != null ? '지분 ' + inf.stake + '%' : '',
+                 val ? '금액 ' + Number(val).toLocaleString() + '억' : ''].filter(Boolean).join(' · ');
+    const btns =
+      (!closed ? '<button class="ab p" data-idea2="' + esc(d[0]) + '" data-ang="' + esc(ang) + '">각 담기</button>' : '') +
+      (did ? '<button class="ab" data-pc="' + esc(did) + '" data-pcn="' + esc(d[0]) + '">' +
+             (ask ? '메모 수정' : '매각희망가 · 메모') + '</button>' : '');
+    if(btns) h += '<div class="dacts">' + btns + '</div>';
+  }
+  return h + '</div>';
+}
+
+// 섹션 하나. 8행을 넘으면 나머지는 '더 보기' 안으로 접는다.
+const DHEAD = '<div class="dhead"><span></span><span>자산</span><span>보유</span>' +
+              '<span>지분 · 금액</span><span>상태</span><span></span></div>';
+function dsec(title, sub, rows, open, gp, lead){
+  if(!rows.length) return '';
+  const line = d => dealLine(d, {act:true, gp});
+  const head = rows.slice(0, 8).map(line).join('');
+  const more = rows.length > 8
+    ? '<details class="dmore"><summary>외 ' + (rows.length-8) + '곳 더 보기</summary>' +
+      '<div class="drows">' + rows.slice(8).map(line).join('') + '</div></details>' : '';
+  return '<details class="dsec"' + (open ? ' open' : '') + '><summary><i>' + title + '</i>' +
+    (sub ? sub : '') + '<em>' + rows.length + '곳</em></summary>' + (lead || '') +
+    DHEAD + '<div class="drows">' + head + '</div>' + more + '</details>';
 }
 
 function gpCard(g){
   const open = dealOpen === g.i;
-  const need = g.need || [], ex = g.exit || [];
+  const all = g.d || [];
+  const byHy = (a, b) => (b[10]||0) - (a[10]||0);
+  // 엑싯 필요 = 보유 중 · 5년 이상 · 5%보고 단독 제외. 서버(need)와 같은 규칙
+  const need = all.filter(x => x[3] === 'open' && (x[10]||0) >= 5 && !isStakeOnly(x)).sort(byHy);
+  const held = all.filter(x => x[3] === 'open' && (x[10]||0) < 5 && !isStakeOnly(x)).sort(byHy);
+  const ex   = all.filter(x => x[3] === 'closed').sort((a, b) => String(b[2]||'').localeCompare(String(a[2]||'')));
+  const unk  = all.filter(x => x[3] === 'unknown' && !isStakeOnly(x));
+  const stk  = all.filter(x => isStakeOnly(x) && x[3] !== 'closed');
+  const drp  = all.filter(x => x[3] === 'dropped');
+  const mx = need.length ? need[0][10] : null;
   let h = '<div class="cdr' + (open ? ' op' : '') + '" data-deal="' + esc(g.i) + '">' +
     '<div class="cdr1">' +
       (need.length ? '<span class="due">EXIT DUE ' + need.length + '</span>' : '') +
       '<b>' + esc(g.n) + '</b>' +
       (g.off ? '<span class="bg">등록부 밖</span>' : '') +
-      '<span class="cdm">' + (g.mx ? '최장 ' + g.mx + 'Y · ' : '') +
-        '딜 ' + g.d.length + '</span></div>' +
+      '<span class="cdm">' + (mx ? '최장 ' + mx + 'Y · ' : '') + '딜 ' + all.length + '</span></div>' +
     '<div class="cdr2">' + (g.e ? esc(g.e) + ' · ' : '') +
       (g.pc ? '펀드 ' + g.pc + '개' + (g.amt ? ' · 약정 ' +
         (g.amt >= 10000 ? (g.amt/10000).toFixed(1) + '조' : g.amt.toLocaleString() + '억') : '')
         : '등록 펀드 없음') +
+      (ex.length ? ' · 회수 ' + ex.length + '건' : '') +
       (g.med ? ' · 회수 중앙값 ' + g.med + '년' : '') + '</div>';
   if(open){
-    h += '<div class="cdx">';
-    if(need.length){
-      h += '<div class="cdsec">엑싯 필요 <em>보유 5년 이상 ' + need.length + '곳</em></div>' +
-           holdLegend();
-      for(const d of need) h += dealLine(d, true);
-    }
-    if(ex.length){
-      h += '<div class="cdsec">회수 완료 <em>벤치마크' +
-           (g.med ? ' · 중앙값 ' + g.med + '년' : '') + '</em></div>';
-      for(const d of ex) h += dealLine(d);
-    }
+    h += '<div class="cdx">' +
+      dsec('엑싯 필요', ' 보유 5년 이상', need, true, g.n, holdLegend()) +
+      dsec('보유 중', ' 5년 미만', held, true, g.n) +
+      dsec('회수 완료', ' 벤치마크' + (g.med ? ' · 중앙값 ' + g.med + '년' : ''), ex, false, g.n) +
+      dsec('미확인', ' 홈페이지 트랙레코드', unk, false, g.n) +
+      dsec('5% 보고', ' 소수지분 가능', stk, false, g.n) +
+      dsec('무산', '', drp, false, g.n);
     if(g.f.length){
-      h += '<div class="cdsec">펀드 <em>' + g.pc + '개</em></div>';
-      for(const f of g.f.slice(0,12))
-        h += '<div class="hz">' + esc(f[0]) + (f[1] ? ' · ' + f[1] : '') +
-             (f[2] ? ' · ' + Number(f[2]).toLocaleString() + '억' : '') + '</div>';
-      if(g.f.length > 12) h += '<div class="hz" style="color:var(--dim)">외 ' +
-        (g.f.length-12) + '개</div>';
+      h += '<details class="dsec"><summary><i>펀드</i><em>' + g.pc + '개' +
+        (g.amt ? ' · 약정 ' + (g.amt >= 10000 ? (g.amt/10000).toFixed(1) + '조' : g.amt.toLocaleString() + '억') : '') +
+        '</em></summary><div class="dfunds">' +
+        g.f.map(f => '<div class="dfund"><span class="y">' + esc(f[1] || '') + '</span>' + esc(f[0]) +
+          '<span class="a">' + (f[2] ? Number(f[2]).toLocaleString() + '억' : '') + '</span></div>').join('') +
+        '</div></details>';
     }
-    // JSON 파싱 후에는 need/exit 와 d 가 서로 다른 객체다. 키로 비교한다.
-    const kk = x => x[0] + '|' + x[1] + '|' + x[4];
-    const seen = new Set(need.map(kk).concat(ex.map(kk)));
-    const rest = g.d.filter(x => !seen.has(kk(x)));
-    if(rest.length){
-      h += '<div class="cdsec">그 외 <em>' + rest.length + '건</em></div>';
-      for(const d of rest) h += dealLine(d);
-    }
-    if(g.vn) h += '<div style="margin-top:8px"><a class="ab" href="' + obs(g.vn) +
-      '">vault 노트 →</a></div>';
+    if(g.vn) h += '<div style="margin-top:12px"><a class="ab" href="' + obs(g.vn) + '">vault 노트 →</a></div>';
     h += '</div>';
   }
   return h + '</div>';
@@ -2142,10 +2240,10 @@ function paneDeal(){
   }else if(dealMode === 'deal'){
     let rows = DEALS.all;
     if(q) rows = rows.filter(d => (d[0] + ' ' + d[5]).toLowerCase().includes(q));
-    body = '<div class="card">' + rows.slice(0, 200).map(d =>
-      dealLine([d[0], d[1], d[2], d[3], d[4], '', d[6], d[7],
-                '', d[5] || '', d[8], 0]))
-      .join('') + '</div>';
+    body = '<div class="card"><div class="drows">' + rows.slice(0, 200).map(d =>
+      dealLine([d[0], d[1], d[2], d[3], d[4], '', d[6], d[7], '', '', d[8], 0, null, '',
+                {st: (d[5] ? 'GP ' + d[5] : '') + (d[7] ? (d[5] ? ' · ' : '') + d[7] : '')}]))
+      .join('') + '</div></div>';
     if(rows.length > 200) body += '<div class="cnt">외 ' + (rows.length-200) + '건 — 더 적어보세요</div>';
   }else{
     let rows = DEALS.drops;
@@ -3748,7 +3846,9 @@ function kpi(){
 
   // 고정 4칸 — 내가 만든 상태 둘, 데이터가 알려주는 것 둘
   let fixed =
-    cell(n.live, 'Pipeline', '쿠킹 중', true) +
+    (DATA.orig && DATA.orig.n != null
+      ? cell(DATA.orig.n, 'Pipeline', '영업 각' + (DATA.orig.late ? ' · 기한 경과 ' + DATA.orig.late : ''), true)
+      : cell(n.live, 'Pipeline', '쿠킹 중', true)) +
     cell(n.watch, 'Watchlist', '관심 등록') +
     cell((D.exit || 0).toLocaleString(), 'Exit Due', '보유 5년+') +
     cell(cdue, 'Contact Due', '목표 주기 초과');
@@ -3853,7 +3953,7 @@ document.addEventListener('click', async e => {
         STATE[hit.c] = Object.assign({}, STATE[hit.c], {st:'watch'});
         saveState(); kpi();
       }
-      $('id-a').value=''; $('id-msg').textContent='담았습니다'; }
+      $('id-a').value=''; ideaAngle=''; $('id-msg').textContent='담았습니다'; }
     catch(x){ $('id-msg').textContent='실패 — '+x.message; }
     $('id-go').disabled=false; return;
   }
