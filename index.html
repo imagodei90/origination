@@ -10,10 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Work">
 <link rel="manifest" href="manifest.json">
 <title>Work</title>
-<link rel="icon" href="favicon.ico?v=20261125_1557" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261125_1557">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261125_1557">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261125_1557">
+<link rel="icon" href="favicon.ico?v=20261127_1054" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261127_1054">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261127_1054">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20261127_1054">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -113,6 +113,10 @@ html[data-m="light"] .tb.on{box-shadow:0 1px 2px rgba(0,0,0,.08)}
   background:var(--card2);color:var(--mut);cursor:pointer;white-space:nowrap;
   font:11px "JetBrains Mono","SF Mono",monospace;letter-spacing:.06em}
 .chip.on{background:var(--acc);color:var(--acc-fg);border-color:var(--acc)}
+.chips.srt{align-items:center;margin:8px 0 9px}
+.chips.srt .chip{padding:5px 10px;font-size:11.5px}
+.chips.srt>span{flex:0 0 auto;font:500 10.5px "JetBrains Mono","SF Mono",monospace;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--dim);margin-right:3px}
 .cnt{font-size:11.5px;color:var(--mut);margin:11px 0 8px;
   font-family:"JetBrains Mono","SF Mono",ui-monospace,monospace}
 .row{background:var(--card);border:1px solid var(--bd);border-radius:12px;margin-bottom:8px}
@@ -242,6 +246,41 @@ table.tt thead th:first-child{z-index:3}
 .dfunds>.dfund:first-child{border-top:none}
 .dfund .y{color:var(--dim);min-width:36px;font-size:12px;font-variant-numeric:tabular-nums}
 .dfund .a{margin-left:auto;color:var(--mut);white-space:nowrap;font-variant-numeric:tabular-nums}
+/* Pipeline 시트 — PIPELINE 칸을 누르면 93. Origination 의 각 목록 */
+.kpi div.tap{cursor:pointer;position:relative}
+.kpi div.tap::after{content:'\25B8';position:absolute;right:13px;top:12px;font-size:12px;color:var(--dim)}
+.psh{display:flex;align-items:baseline;gap:10px;margin-bottom:4px}
+.psh b{font-size:16px;font-weight:600}
+.psh em{font-style:normal;font-size:11px;color:var(--dim);font-family:"JetBrains Mono","SF Mono",monospace}
+.psh .btn{margin-left:auto}
+.pgh{display:flex;align-items:center;gap:8px;margin:14px 0 2px;font:500 10.5px "JetBrains Mono","SF Mono",monospace;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.pgh i{font-style:normal;color:var(--fg);font:600 13px "Inter",-apple-system,"Pretendard",sans-serif;letter-spacing:0;text-transform:none}
+.pgh.late i{color:var(--acc)}
+.prow{display:grid;grid-template-columns:1fr auto;gap:4px 10px;padding:11px 0;border-top:1px solid var(--hair);cursor:pointer}
+.prow:first-of-type{border-top:none}
+.pnm{font-size:14.5px;font-weight:600;line-height:1.3;min-width:0;overflow-wrap:anywhere}
+.pdue{font-family:"JetBrains Mono","SF Mono",monospace;font-size:11.5px;color:var(--mut);white-space:nowrap;
+  font-variant-numeric:tabular-nums;text-align:right;line-height:1.3}
+.pdue small{display:block;font-size:10px;color:var(--dim)}
+.pdue.late,.pdue.late small{color:var(--acc)}
+.pchips{grid-column:1/3;display:flex;flex-wrap:wrap;gap:4px}
+.pnext{grid-column:1/3;font-size:12.5px;color:var(--fg);opacity:.72;line-height:1.5;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pnext b{font-weight:600;opacity:1}
+.prow.open .pnext{display:block;-webkit-line-clamp:unset}
+.pmore{grid-column:1/3;display:none;font-size:12.5px;line-height:1.5;color:var(--fg);opacity:.72;
+  border-left:2px solid var(--hair);padding-left:9px;margin-top:2px}
+.pmore a{color:var(--acc);text-decoration:none;font-size:11.5px}
+.prow.open .pmore{display:block}
+.pempty{font-size:12px;color:var(--dim);padding:8px 0}
+@media(min-width:700px){
+  .prow{grid-template-columns:minmax(180px,1.1fr) 95px minmax(160px,.9fr) 2fr;align-items:start;gap:4px 14px}
+  .pdue{text-align:left;grid-row:1;grid-column:2}
+  .pchips{grid-column:3;grid-row:1}
+  .pnext{grid-column:4;grid-row:1}
+  .pmore{grid-column:1/5}
+}
 @media(min-width:700px){
   .drow,.dhead{grid-template-columns:16px minmax(170px,1.2fr) 100px 130px 2fr 150px;gap:3px 14px}
   .dhold{grid-column:3;text-align:left}
@@ -629,6 +668,7 @@ a.btn{display:inline-block;text-decoration:none;color:var(--fg);line-height:1.2}
 
 <div class="kpi" id="kpi"></div>
 <div class="kpi kpi2" id="kpi2" style="display:none"></div>
+<div id="pipesh"></div>
 
 <div class="stick">
   <div id="scanctl">
@@ -657,7 +697,7 @@ import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
 import { getStorage, ref as sref, uploadBytes, getDownloadURL }
   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
-const BUILD = '20261125_1557';
+const BUILD = '20261127_1054';
 const PAGE = 80;
 
 // Workout 과 같은 프로젝트. 계정이 하나라 큐도 하나로 둔다.
@@ -686,6 +726,8 @@ let PER1 = {}, PER2 = {}, PCOL = 'person', CFG = {}, PER_IDX = {};
 let cadOpen = null, cadSheet = null, fnKind = 'meet', fnPeople = [], fnQuick = true;
 let fnPlan = false, fnDate = '';        // 예정 모드 · 선택한 일자
 let DEALS = null, dealOpen = null, dealQ = '', dealMode = 'gp';
+// GP 목록 정렬 — 기기마다 기억한다. 기본은 서버 순서(최장 보유)와 같다.
+let dealSort = (() => { try{ return localStorage.getItem('dealSort') || 'mx'; }catch(x){ return 'mx'; } })();
 // 저녁·미팅·골프는 같은 무게다 — 반나절을 통째로 쓰고 사적 대화가 섞인다.
 // 점심은 업무 시간 안이라 한 단계 아래. 숫자는 여기만 고치면 전부 따라온다.
 // 커피는 점심보다 짧고 가볍지만 직접 만나는 자리다 — 점심 아래, 통화 위에 둔다.
@@ -840,6 +882,10 @@ const enqueue = (kind, payload) => USER
   : Promise.reject(new Error('로그인이 필요합니다'));
 
 const stOf = c => (STATE[c] && STATE[c].st) || 'new';
+// PE 포트폴리오 자산은 상장 코드가 없다. STATE 안에 'pe|GP|자산' 키로 따로 산다.
+const peKey = (gp, nm) => 'pe|' + (gp || '') + '|' + (nm || '');
+const peWatch = () => Object.keys(STATE).filter(k => k.indexOf('pe|') === 0 && STATE[k] && STATE[k].st === 'watch')
+  .map(k => Object.assign({k}, STATE[k])).sort((a, b) => (b.hy || 0) - (a.hy || 0));
 const SLBL = {new:'신규',live:'PIPELINE',watch:'WATCHLIST',seen:'검토',drop:'제외'};
 const SORD = ['new','live','watch','seen','drop'];   // 상태 버튼 순서
 
@@ -864,8 +910,34 @@ function rebuild(){
   if (q) rows = rows.filter(r=>r.n.toLowerCase().includes(q)||(r.s||'').includes(q));
   view = rows.slice().sort(SORTS.find(s=>s[0]===SORT)[2]);
   shown = 0; $('list').innerHTML='';
-  $('cnt').textContent = view.length.toLocaleString()+'사'+(q?' · "'+q+'"':'');
+  let pe = [];
+  if (TAB==='watch'){
+    pe = peWatch();
+    if (q) pe = pe.filter(x => ((x.n||'') + ' ' + (x.gp||'')).toLowerCase().includes(q));
+  }
+  $('cnt').textContent = view.length.toLocaleString()+'사'+(pe.length?' · PE 자산 '+pe.length+'건':'')+(q?' · "'+q+'"':'');
   page();
+  if (pe.length) $('list').insertAdjacentHTML('afterbegin', peBlock(pe));
+  else if (TAB==='watch' && !view.length) $('list').innerHTML =
+    '<div class="empty">관심 등록이 없습니다. Screening 에서 WATCHLIST 를, Deals 의 자산 행에서 Watchlist 를 누르세요.</div>';
+}
+function peBlock(pe){
+  const row = x => {
+    const ch = [];
+    if(x.fund) ch.push(x.fund);
+    if(x.stake != null && x.stake !== '') ch.push('지분 ' + x.stake + '%');
+    if(x.val) ch.push(Number(x.val).toLocaleString() + '억');
+    if(x.at) ch.push('등록 ' + x.at);
+    return '<div class="drow" data-drow="1" style="grid-template-columns:1fr auto">' +
+      '<div class="dnm">' + esc(x.n) + (x.gp ? '<small>' + esc(x.gp) + '</small>' : '') + '</div>' +
+      '<div class="dhold">' + (x.hy != null ? '<b>' + x.hy + '년</b><small>보유</small>' : '') + '</div>' +
+      '<div class="dchips" style="grid-column:1/3">' + ch.map(c => '<span class="dch">' + esc(c) + '</span>').join('') + '</div>' +
+      '<div class="dacts" style="grid-column:1/3">' +
+        '<button class="ab p" data-idea2="' + esc(x.n) + '" data-ang="' + esc(x.ang || '') + '">+ Idea</button>' +
+        '<button class="ab" data-pex="' + esc(x.k) + '">Watchlist 해제</button></div></div>';
+  };
+  return '<div class="card" style="margin-bottom:10px"><div class="lbl" style="margin:0 0 4px">PE 포트폴리오 <em>' +
+    pe.length + '건 · Deals 에서 올린 자산</em></div><div class="drows">' + pe.map(row).join('') + '</div></div>';
 }
 function page(){
   const frag=document.createDocumentFragment(), end=Math.min(shown+PAGE,view.length);
@@ -1062,7 +1134,27 @@ async function saveContact(company, kind, people, extra){
 document.addEventListener('click', async e => {
   // 시트 닫기
   // 시트는 여러 종류다. 하나라도 남겨 두면 닫기를 눌러도 그대로 다시 그려진다.
-  if(e.target.closest('[data-shx]')){ cadSheet = null; pcSheet = null; logSheet = null; rvEdit = null; mgSheet = null; pkSheet = null; crSheet = null; render(); return; }
+  if(e.target.closest('[data-shx]')){ cadSheet = null; pcSheet = null; logSheet = null; rvEdit = null; mgSheet = null; pkSheet = null; crSheet = null;
+    if(pipeSheet){ pipeSheet = false; drawPipe(); return; }   // 스캔 탭에서는 render() 가 panes 를 비우므로 따로 닫는다
+    render(); return; }
+
+  // PIPELINE 칸 → 영업 각 목록 시트
+  if(e.target.closest('[data-kpi="pipe"]')){ pipeSheet = true; drawPipe(); return; }
+  const prow = e.target.closest('[data-prow]');
+  if(prow){ if(!e.target.closest('a')) prow.classList.toggle('open'); return; }
+
+  // 담은 항목 지움 — 큐 문서만 지운다. vault 에 이미 만들어진 노트는 손대지 않는다.
+  const qd = e.target.closest('[data-qdel]');
+  if(qd){ if(!USER) return needLogin();
+    const st = qd.dataset.qst;
+    const msg = st === 'pending' || st === 'running'
+      ? '아직 처리 전인 항목입니다. 담기를 취소할까요?'
+      : '목록에서만 지웁니다. 이미 만들어진 vault 노트는 그대로 남습니다. 지울까요?';
+    if(!confirm(msg)) return;
+    qd.disabled = true;
+    try{ await deleteDoc(doc(db,'users',USER.uid,'orig_inbox',qd.dataset.qdel)); }
+    catch(err){ alert('실패 — ' + err.message); qd.disabled = false; }
+    return; }
 
   // 명함 촬영 — input 을 대신 눌러 준다
   if(e.target.id === 'cd-shoot'){ const f = $('cd-file'); if(f) f.click(); return; }
@@ -1257,9 +1349,31 @@ document.addEventListener('click', async e => {
     window.scrollTo(0, 0); return;
   }
 
+  // Deals 자산 행 → Watchlist 토글. 다시 그리지 않고 버튼만 바꾼다 (펼친 카드가 닫히지 않게).
+  const pw = e.target.closest('[data-pew]');
+  if(pw){ if(!USER) return needLogin();
+    const k = peKey(pw.dataset.gp, pw.dataset.pew);
+    if(STATE[k] && STATE[k].st === 'watch'){ delete STATE[k]; pw.classList.remove('on'); pw.classList.add('p'); pw.textContent = 'Watchlist'; }
+    else{
+      STATE[k] = {st:'watch', n: pw.dataset.pew, gp: pw.dataset.gp || '', at: todayStr(), ang: pw.dataset.ang || ''};
+      if(pw.dataset.hy !== '') STATE[k].hy = Number(pw.dataset.hy);
+      if(pw.dataset.fund) STATE[k].fund = pw.dataset.fund;
+      if(pw.dataset.stake !== '') STATE[k].stake = Number(pw.dataset.stake);
+      if(pw.dataset.val !== '') STATE[k].val = Number(pw.dataset.val);
+      pw.classList.add('on'); pw.classList.remove('p'); pw.textContent = 'Watchlist 등록됨';
+    }
+    saveState(); kpi(); return; }
+  // Watchlist 탭의 PE 자산 해제
+  const px = e.target.closest('[data-pex]');
+  if(px){ if(!USER) return needLogin();
+    delete STATE[px.dataset.pex]; saveState(); kpi(); if(DATA) rebuild(); return; }
+
   // Deals 모드 칩
   const dm = e.target.closest('[data-dm]');
   if(dm){ dealMode = dm.dataset.dm; dealOpen = null; render(); return; }
+  const ds = e.target.closest('[data-ds]');
+  if(ds){ dealSort = ds.dataset.ds; try{ localStorage.setItem('dealSort', dealSort); }catch(x){}
+    render(); window.scrollTo(0, 0); return; }
 
   // Deals GP 카드 펼치기
   const dc = e.target.closest('[data-deal]');
@@ -1652,6 +1766,7 @@ function queueRows(kind){
       '<span style="flex:1;min-width:120px">'+esc(q.title||q.target||q.company||'—')+'</span>'+
       '<span class="qs '+cls+'">'+lb+'</span>'+
       (q.result_path?'<a class="ab" style="padding:3px 9px" href="'+obs(q.result_path)+'">노트 →</a>':'')+
+      '<button class="ab" style="padding:3px 9px;opacity:.6" data-qdel="'+esc(q.id)+'" data-qst="'+esc(q.status||'')+'">지움</button>'+
       (q.error?'<span style="color:#9b2c2c;font-size:10px;width:100%">'+esc(q.error)+'</span>':'')+
       '</div>';
   }).join('');
@@ -1712,6 +1827,73 @@ function paneDealIdea(){
 }
 /* ── Ideas 탭 ─────────────────────────────────── */
 let ideaPrefill = '', ideaAngle = '';
+let pipeSheet = false;   // PIPELINE 칸 시트. 스캔 탭에서도 열려야 해서 render() 밖에서 그린다.
+
+/* -- Pipeline 시트 -- 7. Work/93. Origination 의 살아 있는 영업 각 ---------- */
+const PANG = {'sell-side':'매각주관', 'buy-side':'인수자문', financing:'인수금융', valuation:'밸류에이션', other:'기타'};
+const PSTG = {idea:'아이디어', contacted:'컨택', meeting:'미팅', proposal:'제안', mandate:'수임', parked:'보류', dead:'종료'};
+const PCNF = {high:'확신 상', mid:'확신 중', low:'확신 하'};
+const VAULT_NAME = 'Obsidian BU - Shawn';
+
+function pipeRow(x, today){
+  const late = x.due && x.due < today;
+  const dd = x.due ? Math.round((new Date(x.due) - new Date(today)) / 864e5) : null;
+  const dl = dd == null ? '' : (dd < 0 ? 'D+' + (-dd) : (dd === 0 ? 'D-day' : 'D-' + dd));
+  const ch = [];
+  if(x.an) ch.push('<span class="dch k">' + esc(PANG[x.an] || x.an) + '</span>');
+  ch.push('<span class="dch">' + esc(PSTG[x.st] || x.st) + '</span>');
+  if(x.cp) ch.push('<span class="dch">' + esc(x.cp) + '</span>');
+  if(x.sec) ch.push('<span class="dch">' + esc(x.sec) + '</span>');
+  if(x.cf) ch.push('<span class="dch">' + esc(PCNF[x.cf] || x.cf) + '</span>');
+  const uri = 'obsidian://open?vault=' + encodeURIComponent(VAULT_NAME) +
+    '&file=' + encodeURIComponent('7. Work/93. Origination/' + x.t);
+  return '<div class="prow" data-prow="1">' +
+    '<div class="pnm">' + esc(x.tg || x.t) + '</div>' +
+    '<div class="pdue' + (late ? ' late' : '') + '">' + (x.due ? esc(x.due.slice(2)) : '기한 없음') +
+      (dl ? '<small>' + dl + '</small>' : '') + '</div>' +
+    '<div class="pchips">' + ch.join('') + '</div>' +
+    (x.na ? '<div class="pnext"><b>다음</b> ' + esc(x.na) + '</div>' : '<div class="pnext" style="opacity:.45">다음 행동 미기재</div>') +
+    '<div class="pmore">' + (x.tr ? '<div><b>왜 지금</b> ' + esc(x.tr) + '</div>' : '') +
+      '<div style="margin-top:4px;display:flex;gap:12px;flex-wrap:wrap">' +
+        (x.cr ? '<span style="font-size:11px;color:var(--dim)">등록 ' + esc(x.cr) + '</span>' : '') +
+        '<a href="' + uri + '">노트 열기 (Obsidian)</a></div></div>' +
+    '</div>';
+}
+
+function sheetPipe(){
+  if(!pipeSheet || !DATA || !DATA.orig) return '';
+  const o = DATA.orig, items = o.items || [], today = todayStr();
+  const d7 = new Date(new Date(today).getTime() + 7 * 864e5).toISOString().slice(0, 10);
+  const g = {late:[], week:[], later:[], none:[]};
+  for(const x of items){
+    if(!x.due) g.none.push(x);
+    else if(x.due < today) g.late.push(x);
+    else if(x.due <= d7) g.week.push(x);
+    else g.later.push(x);
+  }
+  const grp = (k, t, sub) => g[k].length
+    ? '<div class="pgh' + (k === 'late' ? ' late' : '') + '"><i>' + t + '</i>' + g[k].length +
+      (sub ? '<em style="font-style:normal;margin-left:auto;letter-spacing:0">' + sub + '</em>' : '') + '</div>' +
+      g[k].map(x => pipeRow(x, today)).join('')
+    : '';
+  return '<div class="shbg" data-shx="1"></div><div class="sheet">' +
+    '<div class="psh"><b>Pipeline</b><em>7. Work / 93. Origination</em>' +
+      '<button class="btn xs" data-shx="1">닫기</button></div>' +
+    '<div style="font-size:11.5px;color:var(--mut);margin-bottom:4px">살아 있는 영업 각 ' + o.n +
+      (o.late ? ' · 기한 경과 ' + o.late : '') + ' · 행을 누르면 근거와 노트 링크</div>' +
+    (items.length ? '' : '<div class="pempty">93. Origination 에 살아 있는 각이 없습니다.</div>') +
+    grp('late', '기한 경과', '기한이 없으면 죽는다') +
+    grp('week', '7일 내', '') +
+    grp('later', '이후', '') +
+    grp('none', '기한 없음', '') +
+    '</div>';
+}
+
+function drawPipe(){
+  const m = $('pipesh'); if(!m) return;
+  m.innerHTML = sheetPipe();
+  document.body.style.overflow = pipeSheet ? 'hidden' : '';
+}
 function paneIdea(){
   if(ideaPrefill){ COMBO['id-t']=ideaPrefill; }
   return paneDealIdea()+'<div class="card">'+
@@ -2142,8 +2324,12 @@ function dealLine(d, o){
                  inf.fund && !GEN_FUND[inf.fund] ? '펀드 ' + inf.fund : '',
                  inf.stake != null ? '지분 ' + inf.stake + '%' : '',
                  val ? '금액 ' + Number(val).toLocaleString() + '억' : ''].filter(Boolean).join(' · ');
+    const wk = peKey(o.gp, d[0]), won = !!(STATE[wk] && STATE[wk].st === 'watch');
     const btns =
-      (!closed ? '<button class="ab p" data-idea2="' + esc(d[0]) + '" data-ang="' + esc(ang) + '">각 담기</button>' : '') +
+      (!closed ? '<button class="ab' + (won ? ' on' : ' p') + '" data-pew="' + esc(d[0]) + '" data-gp="' + esc(o.gp || '') +
+        '" data-hy="' + (hy != null ? hy : '') + '" data-fund="' + esc(inf.fund && !GEN_FUND[inf.fund] ? inf.fund : '') +
+        '" data-stake="' + (inf.stake != null ? inf.stake : '') + '" data-val="' + (val || '') +
+        '" data-ang="' + esc(ang) + '">' + (won ? 'Watchlist 등록됨' : 'Watchlist') + '</button>' : '') +
       (did ? '<button class="ab" data-pc="' + esc(did) + '" data-pcn="' + esc(d[0]) + '">' +
              (ask ? '메모 수정' : '매각희망가 · 메모') + '</button>' : '');
     if(btns) h += '<div class="dacts">' + btns + '</div>';
@@ -2234,7 +2420,25 @@ function paneDeal(){
   if(dealMode === 'gp'){
     let rows = DEALS.gp;
     if(q) rows = rows.filter(g => (g.n + ' ' + (g.e||'')).toLowerCase().includes(q));
-    body = rows.slice(0, 80).map(gpCard).join('') ||
+    // 정렬 — 서버 기본(최장 보유)을 포함해 사용자가 고른다
+    const nd = g => (g.need || []).length, dn = g => (g.d || []).length;
+    const SRT = {
+      mx:   (a, b) => ((b.mx||0) - (a.mx||0)) || (nd(b) - nd(a)) || (dn(b) - dn(a)),
+      need: (a, b) => (nd(b) - nd(a)) || ((b.mx||0) - (a.mx||0)) || (dn(b) - dn(a)),
+      n:    (a, b) => (dn(b) - dn(a)) || (nd(b) - nd(a)),
+      amt:  (a, b) => ((b.amt||0) - (a.amt||0)) || ((b.pc||0) - (a.pc||0)),
+      pc:   (a, b) => ((b.pc||0) - (a.pc||0)) || ((b.amt||0) - (a.amt||0)),
+      med:  (a, b) => ((b.med||0) - (a.med||0)) || (nd(b) - nd(a)),
+      ex:   (a, b) => ((b.exit||[]).length - (a.exit||[]).length) || (nd(b) - nd(a)),
+      name: (a, b) => a.n.localeCompare(b.n, 'ko')
+    };
+    rows = rows.slice().sort(SRT[dealSort] || SRT.mx);
+    const SL = [['mx','최장 보유'],['need','엑싯 필요'],['n','딜 수'],['amt','약정'],['pc','펀드 수'],
+                ['ex','회수 건'],['med','회수 중앙값'],['name','이름']];
+    body = '<div class="chips srt"><span>정렬</span>' +
+      SL.map(x => '<div class="chip' + (dealSort === x[0] ? ' on' : '') + '" data-ds="' + x[0] + '">' + x[1] + '</div>').join('') +
+      '</div>';
+    body += rows.slice(0, 80).map(gpCard).join('') ||
       '<div class="empty">해당하는 GP가 없습니다</div>';
     if(rows.length > 80) body += '<div class="cnt">외 ' + (rows.length-80) + '곳</div>';
   }else if(dealMode === 'deal'){
@@ -3832,6 +4036,7 @@ function kpi(){
   const D = DATA.dsum || {};
   const n = {new:0, live:0, watch:0, seen:0, drop:0};
   for(const r of DATA.companies) n[stOf(r.c)] = (n[stOf(r.c)]||0) + 1;
+  n.watch += peWatch().length;   // Deals 에서 올린 PE 자산도 관심 등록이다
 
   // 컨택 필요 — Cadence 와 같은 규칙
   let cdue = 0;
@@ -3840,14 +4045,15 @@ function kpi(){
       cdue = cadAgg().filter(x => x.st === 'l').length;
   }catch(x){}
 
-  const cell = (v, lb, sub, hi) =>
-    '<div' + (hi ? ' class="hi"' : '') + '><b>' + v + '</b><i>' + lb + '</i>' +
+  const cell = (v, lb, sub, hi, attr) =>
+    '<div' + (hi ? ' class="hi' + (attr ? ' tap' : '') + '"' : '') + (attr ? ' ' + attr : '') +
+    '><b>' + v + '</b><i>' + lb + '</i>' +
     (sub ? '<em>' + sub + '</em>' : '') + '</div>';
 
   // 고정 4칸 — 내가 만든 상태 둘, 데이터가 알려주는 것 둘
   let fixed =
     (DATA.orig && DATA.orig.n != null
-      ? cell(DATA.orig.n, 'Pipeline', '영업 각' + (DATA.orig.late ? ' · 기한 경과 ' + DATA.orig.late : ''), true)
+      ? cell(DATA.orig.n, 'Pipeline', '영업 각' + (DATA.orig.late ? ' · 기한 경과 ' + DATA.orig.late : ''), true, 'data-kpi="pipe"')
       : cell(n.live, 'Pipeline', '쿠킹 중', true)) +
     cell(n.watch, 'Watchlist', '관심 등록') +
     cell((D.exit || 0).toLocaleString(), 'Exit Due', '보유 5년+') +
@@ -3893,6 +4099,7 @@ function kpi(){
             cell((D.mand || 0).toLocaleString(), 'Mandated', '주관사 확인');
   }
   $('kpi').innerHTML = fixed;
+  if(pipeSheet) drawPipe();
   const ex = $('kpi2');
   if(ex){
     ex.innerHTML = extra; ex.style.display = extra ? '' : 'none';
